@@ -8,16 +8,12 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-;
-
-
 
 public class MainActivity extends AppCompatActivity {
 
     private EditText username;
     private EditText password;
     private Button loginbutton;
-    private Button registerbutton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //Theresa's
          username = (EditText) findViewById(R.id.editUsername);
          password = (EditText)findViewById(R.id.editPassword);
          loginbutton = (Button) findViewById(R.id.btLogin);
@@ -46,14 +41,6 @@ public class MainActivity extends AppCompatActivity {
                  validate(inputUser,inputPass);
              }
          });
-
-        // registerbutton.setOnClickListener(new Button.OnClickListener(){
-        //     public void onClick(View view) {
-        //         Intent registerPage = new Intent(MainActivity.this, Register.class);
-        //         startActivity(registerPage);
-        //     }
-        // });
-
     }
 
     private void launchRegisterActivity(){
@@ -61,20 +48,20 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-     private void validate(String userName,String userPassword) {
-         //get username and password
-         String matchUser = "admin";
-         String matchPass = "123";
-         //If match go to next page
-         if (userName.equals(matchUser) && userPassword.equals(matchPass)) {
-             Intent dashboardPage = new Intent(this, MainDashboard.class);
-             startActivity(dashboardPage);
-         }
-         else{
-             //Can create limited attempts at login
-
-         }
+    private void validate(String userName,String userPassword) {
+     //get username and password
+     String matchUser = "admin";
+     String matchPass = "123";
+     //If match go to next page
+     if (userName.equals(matchUser) && userPassword.equals(matchPass)) {
+         Intent dashboardPage = new Intent(this, MainDashboard.class);
+         startActivity(dashboardPage);
      }
+     else{
+         //Can create limited attempts at login
+
+     }
+    }
 
 
 }
