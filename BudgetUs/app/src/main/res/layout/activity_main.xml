@@ -7,7 +7,7 @@
     android:background = "@drawable/background"
     tools:context=".MainActivity">
 
-    <TextView
+    <EditText
         android:id="@+id/editUsername"
         android:layout_width="213dp"
         android:layout_height="41dp"
