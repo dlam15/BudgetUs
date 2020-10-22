@@ -1,10 +1,13 @@
 package com.example.budgetus;
 
+import android.util.JsonReader;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,29 +20,20 @@ import javax.mail.internet.*;
 import javax.activation.*;
 
 
-class User{
-
-    public String username;
-
-
-    public String getUsername() {
-        return null;
-    }
-    public String getEmail() {
-        return null;
-    }
-    public String getPassword() {
-        return null;
-    }
-    public String getRandomID() {
-        return null;
-    }
-
-};
 
 public class UserRecord {
 
-    private HashMap<String, User> hashmap = new HashMap<String, User>(1000);
+    private Map<String, User> hashmap = new HashMap<String, User>(1000);
+
+    public UserRecord (){
+        try {
+            FileProcessor fp = new FileProcessor();
+            hashmap = fp.getUserMap();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+    }
 
     //TODO
     //some tests

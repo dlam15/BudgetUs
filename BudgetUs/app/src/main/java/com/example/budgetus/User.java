@@ -1,15 +1,17 @@
+package com.example.budgetus;
+
 //Class User
 import java.util.*; 
 import java.io.*;
 
 public class User
 {
-	String name;
-	String email;
-	String school;
-	String username;
-	String password;
-	ArrayList<Map.Entry<Integer, String>> groups; 
+	private String name;
+	private String email;
+	private String school;
+	private String username;
+	private String password;
+	private Map<Integer, String> groups;
 
 	public User(String name, String email, String school, String username, String password)
 	{
@@ -18,10 +20,10 @@ public class User
 		this.school = school;
 		this.username = username;
 		this.password = password;
-		groups = new ArrayList<Map.Entry<Integer, String>> ();
+		groups = new HashMap<Integer, String>();
 	}
 	
-	public void updateName(Sring name){
+	public void updateName(String name){
 		this.name = name;
 	}
 
@@ -38,7 +40,14 @@ public class User
 	}
 
 	public boolean updateStatus(int groupID, String status){
-		for(int i = 0; i < groups.size(); i++){
+		groups.put(groupID,status);
+
+		if(groups.get(groupID)!= status){
+			return false;
+		}
+		return true;
+
+		/*for(int i = 0; i < groups.size(); i++){
 			Map.Entry<Integer,String> tmp = groups.get(i);
 
 		    if(tmp.getKey() == groupID){
@@ -46,7 +55,15 @@ public class User
 				return true;
 			}
 		}
-		return false;
+		return false;*/
+	}
+
+	public String getUsername() {
+		return this.username;
+	}
+
+	public String getPassword() {
+		return this.password;
 	}
 
 	public String getName(){
@@ -61,19 +78,26 @@ public class User
 		return this.school;
 	}
 
+	public String getRandomID() {
+		return null;
+	}
+
+
 	public String getStatus(int groupID){
-		for(int i = 0; i < groups.size(); i++){
+		return groups.get(groupID);
+
+		/*for(int i = 0; i < groups.size(); i++){
 			Map.Entry<Integer,String> tmp = groups.get(i);
 
 		    if(tmp.getKey() == groupID){
 				return tmp.getValue(groupID);
 			}
 		}
-		return null;
+		return null;*/
 	}
 
 	public boolean updateGroups(int groupID, String status){
-		if(groups.isEmpty()){
+		/*if(groups.isEmpty()){
 			Map.Entry<Integer, String> tmp = new Map.Entry<Integer, String>(groupID, status);
 			return groups.add(tmp);
 		}
@@ -90,7 +114,8 @@ public class User
 				}
 			}
 		}
-		return false;
+		return false;*/
+		return true;
 	}
 
 	public void forgotPassword() {

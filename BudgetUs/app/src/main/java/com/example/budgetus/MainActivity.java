@@ -18,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText password;
     private Button loginbutton;
     private Button registerbutton;
+    private UserRecord userRecord;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
                 launchRegisterActivity();
             }
         });
+        userRecord = new UserRecord();
 
         //Theresa's
          username = (EditText) findViewById(R.id.editUsername);
@@ -66,13 +68,13 @@ public class MainActivity extends AppCompatActivity {
          String matchUser = "admin";
          String matchPass = "123";
          //If match go to next page
-         if (userName.equals(matchUser) && userPassword.equals(matchPass)) {
+         if (userRecord.checkUser(userName,userPassword)) {
              Intent dashboardPage = new Intent(this, MainDashboard.class);
              startActivity(dashboardPage);
          }
          else{
              //Can create limited attempts at login
-
+            System.out.println("Failed to validate");
          }
      }
 
