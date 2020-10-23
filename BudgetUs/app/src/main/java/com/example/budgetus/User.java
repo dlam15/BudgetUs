@@ -1,6 +1,4 @@
 package com.example.budgetus;
-
-//Class User
 import java.util.*; 
 import java.io.*;
 
@@ -13,6 +11,7 @@ public class User
 	private String password;
 	private Map<Integer, String> groups;
 
+
 	public User(String name, String email, String school, String username, String password)
 	{
 		this.name = name;
@@ -20,50 +19,39 @@ public class User
 		this.school = school;
 		this.username = username;
 		this.password = password;
-		groups = new HashMap<Integer, String>();
-	}
+    groups = new Hashmap<>();
+  }
 	
-	public void updateName(String name){
+	public boolean updateName(String name){
 		this.name = name;
+		return true;
 	}
 
-	public void updateEmail(String email){
+	public boolean updateEmail(String email){
 		this.email = email;
+		return true;
 	}
 
-	public void updatePassword(String password){
+	public boolean updatePassword(String password){
 		this.password = password;
+		return true;
 	}
 
-	public void updateSchool(String school){
+	public boolean updateSchool(String school){
 		this.school = school;
+		return true;
 	}
 
 	public boolean updateStatus(int groupID, String status){
-		groups.put(groupID,status);
-
-		if(groups.get(groupID)!= status){
-			return false;
-		}
-		return true;
-
-		/*for(int i = 0; i < groups.size(); i++){
-			Map.Entry<Integer,String> tmp = groups.get(i);
-
-		    if(tmp.getKey() == groupID){
-				tmp.setValue(status);
-				return true;
+		if(groups.containsKey(groupID)){
+			for (Map.Entry<Integer, String> tmp : groups.entrySet()){
+				if(tmp.getKey() == groupID){
+					tmp.setValue(status);
+					return true;
+				}
 			}
 		}
-		return false;*/
-	}
-
-	public String getUsername() {
-		return this.username;
-	}
-
-	public String getPassword() {
-		return this.password;
+		return false;
 	}
 
 	public String getName(){
@@ -78,44 +66,37 @@ public class User
 		return this.school;
 	}
 
-	public String getRandomID() {
+	public String getUsername(){
+		return this.username;
+	}
+
+	public String getPassword(){
+		return this.password;
+	}
+
+	public String getStatus(int groupID){
+		if(groups.containsKey(groupID)){
+			for (Map.Entry<Integer, String> tmp : groups.entrySet()){
+				if(tmp.getKey() == groupID){
+					return tmp.getValue();
+				}
+			}
+		}
 		return null;
 	}
 
-
-	public String getStatus(int groupID){
-		return groups.get(groupID);
-
-		/*for(int i = 0; i < groups.size(); i++){
-			Map.Entry<Integer,String> tmp = groups.get(i);
-
-		    if(tmp.getKey() == groupID){
-				return tmp.getValue(groupID);
-			}
-		}
-		return null;*/
-	}
-
 	public boolean updateGroups(int groupID, String status){
-		/*if(groups.isEmpty()){
-			Map.Entry<Integer, String> tmp = new Map.Entry<Integer, String>(groupID, status);
-			return groups.add(tmp);
+		if(groups.isEmpty()){
+			groups.put(groupID, status);
+			return true;
 		}
 		else{
-			for(int i = 0; i < groups.size(); i++){
-			Map.Entry<Integer,String> tmp = groups.get(i);
-
-		    if(tmp.getKey() == groupID){
-				if(tmp.getValue(groupID).equals(status){
-					return true;
-				}
-				else{
-					return false;
-				}
+			if(!(groups.containsKey(groupID))) {
+				groups.put(groupID, status);
+				return true;
 			}
 		}
-		return false;*/
-		return true;
+		return false;
 	}
 
 	public void forgotPassword() {
