@@ -1,5 +1,6 @@
 package com.example.budgetus;
 
+import android.util.JsonReader;
 import android.util.Log;
 
 import java.util.Random;
@@ -12,10 +13,37 @@ import java.util.Arrays;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import java.io.BufferedInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.Set;
+import javax.mail.*;
+import javax.mail.internet.*;
+import javax.activation.*;
+
+
 
 public class UserRecord {
 
-    private HashMap<String, User> hashmap = new HashMap<String, User>(1000);
+    private Map<String, User> hashmap = new HashMap<String, User>(1000);
+
+    public UserRecord (){
+        try {
+            FileProcessor fp = new FileProcessor();
+            hashmap = fp.getUserMap();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+    }
 
     //TODO
     //some tests

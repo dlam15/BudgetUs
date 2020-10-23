@@ -29,6 +29,9 @@ dependencies {
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.navigation:navigation-fragment:2.3.0'
     implementation 'androidx.navigation:navigation-ui:2.3.0'
+    implementation files('..\\build\\libs\\activation.jar')
+    implementation files('..\\build\\libs\\additionnal.jar')
+    implementation files('..\\build\\libs\\mail.jar')
     implementation files('../build/libs/activation.jar')
     implementation files('../build/libs/additionnal.jar')
     implementation files('../build/libs/mail.jar')
