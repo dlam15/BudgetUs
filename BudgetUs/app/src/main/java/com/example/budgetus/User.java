@@ -19,7 +19,7 @@ public class User
 		this.school = school;
 		this.username = username;
 		this.password = password;
-    groups = new Hashmap<>();
+    		groups = new HashMap<>();
   }
 	
 	public boolean updateName(String name){
