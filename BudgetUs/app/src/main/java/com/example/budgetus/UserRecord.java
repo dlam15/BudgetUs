@@ -3,6 +3,16 @@ package com.example.budgetus;
 import android.util.JsonReader;
 import android.util.Log;
 
+import java.util.Random;
+
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.util.Arrays;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -37,10 +47,9 @@ public class UserRecord {
 
     //TODO
     //some tests
-    //new functions not on the sheet
+    //additional functions
     //correct communication between events firing, driver class, user class
-    //---anything modifying user variables will be done in user
-    //collision resolution vs username unavailable
+    //collision resolution vs username unavailable (see how many collisions from testing)
 
 
     /*
@@ -52,8 +61,8 @@ public class UserRecord {
      * be available, it must not hash to an index that is already in use.
      *
      * Currently, if there is a collision (even if the username is not in use), we tell the user it
-     * is unavailable anyway. We could implement collision resolution instead, but I will save
-     * this for a later time.
+     * is unavailable anyway. We could implement collision resolution instead (which is probably done by
+     * Java's hashmap already), but I will save that for a later time.
      *
      * If this username is available, we can then populate a new entry of our hashmap with the user object.
      *
@@ -86,7 +95,7 @@ public class UserRecord {
     }
 
 
-    /*  NEW
+    /*
      * Get a user from the hashmap. Considering that all of the user objects are stored in the hashmap,
      * we will need this function to actually obtain the object and work with it. Requires a username to
      * access the object.
@@ -99,7 +108,7 @@ public class UserRecord {
     }
 
 
-    /*  NEW
+    /*
      * Get a user from the hashmap by their email. Will be used when the user forgets their username and during
      * registration to make sure this email is not already in use. Needed as without username we cannot index, and need to O(N) search instead.
      *
@@ -132,6 +141,8 @@ public class UserRecord {
     }
 
 
+
+
     /*
      * Called when the user tries to log in. For a successful login, the username and password must match what was provided.
      * As mentioned in my notes, passwords should not be stored as plaintext. So, we will probably be calling a function in User
@@ -154,21 +165,10 @@ public class UserRecord {
                 System.out.println("Successful login");
                 return true;
             }
-            /*
-             * As I said before, we shouldn't store plaintext passwords. This doesn't really matter right now
-             * because this would be on a server and this login stuff isn't functional for now, but later it
-             * might look something like this
-             */
-            /*
-             User accessedUser = hashmap.get(username);
-             if(accessedUser.checkPassword(password)) //successful login
-
-             checkPassword(String password){
-                int salt = this.getSalt();//salts are randomly generated at user creation
-                String saltedPassword = salt ^ password; //or something
-                String saltedHash = hash(saltedPassword);
-                return (saltedHash == password);
-             }
+            /* to use the encryption code,
+               byte[] salt = accessedUser.getSalt();
+               byte[] actualPassword = accessedUser.getPassword();
+               return authenticate(password, salt, actualPassword);
              */
             else{
                 System.out.println("Incorrect password");
@@ -180,85 +180,189 @@ public class UserRecord {
 
 
 
+
+    //Everything below this point can be moved to the User class. Some parameters may change to make more sense in that context.
+
+
     /*
-     * Can do in User class?
+     * As I said before, we shouldn't store plaintext passwords. One common way to implement a safer system is with a salted hash.
+     * We generate some random string, called a salt, and mix this with the password in some way. We then feed this salted password
+     * to a hash function, and save the result as the user's "password." We also save the salt. When the user wants to login, repeat the
+     * process and check the saltedHashedPassword. By doing so, we are storing the password in a safe way with little overhead.
+     */
+
+    //the next 3 functions are a simple implementation of securely storing passwords I found at
+    //https://www.javacodegeeks.com/2012/05/secure-password-storage-donts-dos-and.html
+    //it could probably be improved or use a better hash function or replaced with the ability to sign in with another service (Google)
+    //but I will leave it for now as a first attempt
+    //I will also explain as I go through these functions
+
+    /* Move to User class?
      *
-     * 1st function fired when the user forgets their password. This emails the user
+     * First step in storing a user's password securely. We generate a salt, which is a random string.
+     * We use SecureRandom to ensure that this value is actually random and cannot be predicted in any way.
+     * This salt will be combined with the user's password. This means that 2 exact passwords will not hash
+     * to the same value, as the random salt will make them different. We store this salt in plaintext - it does
+     * not need to be secret.
+     *
+     * @return a string (byte array) that is our 64 bit random salt
+     */
+    public byte[] generateSalt() throws NoSuchAlgorithmException {
+        // VERY important to use SecureRandom instead of just Random
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+
+        // Generate a 8 byte (64 bit) salt as recommended by RSA PKCS5
+        byte[] salt = new byte[8];
+        random.nextBytes(salt);
+
+        return salt;
+    }
+
+
+
+    /* This can stay here or move - maybe its own class
+     *
+     * This will be called after generating the salt. This will be the only time
+     * that part of our code touches the plaintext password. The result of this function
+     * is what we will store as the User's password.
+     *
+     * This function is also called to check a provided password for a match. All we do is
+     * salt and hash what's provided, so we can use this to compare in the next function.
+     *
+     * This password isn't really encrypted, but hashed. The reasoning for this is that
+     * we don't need to unencrypt the password, and we actually want to avoid providing
+     * a way for that to be done. So, this is a one-way operation.
+     *
+     * @param password the user's plaintext password to encrypt
+     * @param salt the random string used to make it harder to figure out what the password is
+     * @return the salted, hashed, password which we can safely store
+     */
+    public byte[] getEncryptedPassword(String password, byte[] salt)
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        // PBKDF2 with SHA-1 as the hashing algorithm. Note that the NIST
+        // specifically names SHA-1 as an acceptable hashing algorithm for PBKDF2
+        String algorithm = "PBKDF2WithHmacSHA1";
+        // SHA-1 generates 160 bit hashes, so that's what makes sense here
+        int derivedKeyLength = 160;
+        // Pick an iteration count that works for you. The NIST recommends at
+        // least 1,000 iterations:
+        // http://csrc.nist.gov/publications/nistpubs/800-132/nist-sp800-132.pdf
+        // iOS 4.x reportedly uses 10,000:
+        // http://blog.crackpassword.com/2010/09/smartphone-forensics-cracking-blackberry-backup-passwords/
+        int iterations = 20000;
+
+        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, iterations, derivedKeyLength);
+
+        SecretKeyFactory f = SecretKeyFactory.getInstance(algorithm);
+
+        return f.generateSecret(spec).getEncoded();
+    }
+
+
+
+    /* This can stay here or move
+     *
+     * This function checks the provided password against the password we have on record for the user.
+     * We are not storing the actual password. Instead, we store the result from getEncryptedPassword. So,
+     * to check a possible password against the stored one, we need to salt and hash the provided password
+     * and compare the 2.
+     *
+     */
+    public boolean authenticate(String attemptedPassword, byte[] encryptedPassword, byte[] salt)
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        // Encrypt the clear-text password using the same salt that was used to
+        // encrypt the original password
+        byte[] encryptedAttemptedPassword = getEncryptedPassword(attemptedPassword, salt);
+
+        // Authentication succeeds if encrypted password that the user entered
+        // is equal to the stored hash
+        return Arrays.equals(encryptedPassword, encryptedAttemptedPassword);
+    }
+
+    /* How can we use these with our User class?
+        -when the user creates their account, we call generateSalt, and store the salt with their info
+        -we then call getEncryptedPassword with what they provided as a password, and the salt. THIS IS WHAT WE STORE AS THE PASSWORD
+        -when the user logs in, we call authenticate() with what they provided as a password, as well as the password and salt stored for the account
+        -they are trying to access
+     */
+
+
+
+
+
+
+
+    /*
+     * Move to User class
+     *
+     * 1st function fired when the user forgets their credentials. This emails the user
      * object the forgotID field for the user.
      *
      * I am assuming that the random ID is set in the user class, and that I can access it here.
      *
      * I am also assuming that the user can forget their username OR password. Forgetting a password means that we can still
-     * use the normal getUser, as we have the username, to pass as a parameter here. However,  on forgetting their username, we
-     * can ask for their email and do an O(n) search of the hashmap to figure out what their username is, then send that in the email.
-     * We'll do this in searchUsers(), and another function sendUsername().
-     *
-     * Note: this takes in a user object as the parameter. To do so, whoever calls this function will need to first call the
-     * getUser() function in this class. We can change this to just the username to remove this step if needed.
+     * use the normal getUser, as we have the username, to pass as a parameter here. However, on forgetting their username, we
+     * can ask for their email and call getUserFromEmail() to get the user object. In either case, we'll call this function next.
      *
      * @param user User object to obtain email and randomID from
      * @return true on successful email sent, false otherwise
      */
-    public boolean sendRandomID(final User user){
-
-        final String randomID = "1234567";//user.getRandomID();
-
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    String body = "Hi Derrick This is an email from BudgetUs, sent because you forgot your password. Enter this ID:";
-                    body+=randomID;
-                    GmailSender sender = new GmailSender("budgetusemail@gmail.com", "budgetus123!");
-                    sender.sendMail("Forgot Password", body , "budgetusemail@gmail.com", "dlam15@binghamton.edu");
-                } catch (Exception e) {
-                    Log.e("SendMail", e.getMessage(), e);
-                }
-            }
-
-        }).start();
-
-
-
-        return false;
+    public boolean sendRandomID(User user){
+        String email = user.getEmail();//email address of user
+        String randomID = user.getRandomID();
+        String body = "Hello, this is an email from BudgetUs, sent because you forgot your login info. Enter this code to regain access: " + randomID;
+        return sendEmail(body, "Forgot Credentials", email);
     }
-
 
 
     /*
-     * Can do in User class?
-     *
-     * 1st function fired when the user forgets their username. This emails the user
-     * object the username field for the user.
-     *
-     *
-     * Note: this takes in a user object as the parameter. To do so, whoever calls this function will need to first call the
-     * getUser() function in this class. We can change this to just the username to remove this step if needed.
-     *
-     * @param user User object to obtain email and randomID from
-     * @return true on successful email sent, false otherwise
-     */
-    public boolean sendUsername(User user){
-        String email = user.getEmail();//email address of user
-        String randomID = user.getRandomID();//random id to email
-        return false;
+    * Move to User class
+    *
+    * This function sends the message in an email to the reciever. Majority of the code is done in 3 other files
+    * (Gmailsender.java, ByteArrayDataSource.java, and JSSEProvider.java), and I found most of this code on the internet
+    * so I will cite my sources as well. It also requires a few jar files, stored under app/build/libs. You may have to right-click
+    * and click "Add as library" in your AndroidStudio project.
+    *
+    * Network operations also require a few extra permissions, defined in AndroidManifest, and need to run on a secondary
+    * thread.
+    * @param message body of the email
+    * @param subject subject line of the email
+    * @param receiver recipient of the email
+    * @return true on success, false on any errors
+    */
+    public boolean sendEmail(final String message, final String subject, final String receiver){
+        final boolean[] ret = {true};//nested functions are weird
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    //NOTE - email login info is here, really this code should run on a server or something, where user cannot see the source code
+                    GmailSender sender = new GmailSender("budgetusemail@gmail.com", "budgetus123!");//sender of email - credentials
+                    sender.sendMail(subject, message, "budgetusemail@gmail.com", receiver);//subject, body, sender, receiver
+                } catch (Exception e) {
+                    Log.e("SendMail", e.getMessage(), e);
+                    ret[0] = false;
+                }
+            }
+        }).start();
+        return ret[0];
     }
 
-    /* Can do in User Class?
+    /* Move to User class
 
      * 2nd function fired when the user forgets their username or password. This checks if
-     * the forgotID provided by the user matches the forgotID.
+     * the forgotID provided by the user matches the forgotID. We will also update the user's
+     * random id after this attempted match.
      *
-     * @param user User object to obtain email from
-     * @return true on successful email sent, false otherwise
+     * @param id the id provided by the user attempting to login
+     * @param user User object to obtain real ID from
+     * @return true on successful match, false otherwise
      */
-    //public boolean matchForgotID(9 digit id,user object){
+    public boolean matchForgotID(String id, User user){
+        boolean ret = false;
+        if(id == user.getRandomID()) ret = true;
+        user.setRandomID(Random());//in either case, we should generate a new random ID
+        return ret;
+    }
 
-    //}
-
-    /* REMOVED
-     * I don't think we need this: I can just call user.forgotPassword from matchForgotID
-     */
-    //public boolean forgotPassword(new password){}
 }
