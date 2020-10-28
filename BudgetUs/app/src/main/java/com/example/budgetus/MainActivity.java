@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
                 launchRegisterActivity();
             }
         });
-        userRecord = new UserRecord();
+        UserRecord userRecord = new UserRecord(MainActivity.this);
 
         //Theresa's
          username = (EditText) findViewById(R.id.editUsername);

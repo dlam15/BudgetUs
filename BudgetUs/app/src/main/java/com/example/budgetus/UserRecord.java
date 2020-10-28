@@ -1,8 +1,12 @@
 package com.example.budgetus;
 
+import android.content.Context;
 import android.util.JsonReader;
 import android.util.Log;
 
+import java.io.BufferedReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import java.security.NoSuchAlgorithmException;
@@ -33,18 +37,34 @@ import javax.activation.*;
 
 public class UserRecord {
 
+    private Context mContext;
     private Map<String, User> hashmap = new HashMap<String, User>(1000);
 
-    public UserRecord (){
+    public UserRecord (Context context){
+        this.mContext = context;
         try {
-            FileProcessor fp = new FileProcessor();
-            hashmap = fp.getUserMap();
+            //FileProcessor fp = new FileProcessor();
+            //hashmap = fp.getUserMap();
+
+            //this code opens database.json, now stored at app/src/main/assets
+            //info from https://stackoverflow.com/questions/30417810/reading-from-a-text-file-in-android-studio-java
+            List<String> mLines = new ArrayList<>();
+            //don't understand what this context thing is
+            InputStream is = mContext.getAssets().open("database.json");
+            //takes it in as input stream and uses a buffered reader but I'm sure there's a way to change that
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            //print just to show it works
+            String line;
+            while ((line = reader.readLine()) != null)
+                mLines.add(line);
+            System.out.println("\n\n\n\n\n\nSUCCESS READING\n\n\n\n\n\n");
+            for (String string : mLines)
+                System.out.println(string);
         }catch(Exception e){
             e.printStackTrace();
         }
 
     }
-
     //TODO
     //some tests
     //additional functions
@@ -293,7 +313,7 @@ public class UserRecord {
 
 
     /*
-     * Move to User class
+     * Move to User class and uncomment lines when functions exist.
      *
      * 1st function fired when the user forgets their credentials. This emails the user
      * object the forgotID field for the user.
@@ -309,7 +329,8 @@ public class UserRecord {
      */
     public boolean sendRandomID(User user){
         String email = user.getEmail();//email address of user
-        String randomID = user.getRandomID();
+        //String randomID = user.getRandomID();
+        String randomID = "randomID placeholder";
         String body = "Hello, this is an email from BudgetUs, sent because you forgot your login info. Enter this code to regain access: " + randomID;
         return sendEmail(body, "Forgot Credentials", email);
     }
@@ -348,7 +369,7 @@ public class UserRecord {
         return ret[0];
     }
 
-    /* Move to User class
+    /* Move to User class and uncomment lines once functions exist.
 
      * 2nd function fired when the user forgets their username or password. This checks if
      * the forgotID provided by the user matches the forgotID. We will also update the user's
@@ -358,11 +379,19 @@ public class UserRecord {
      * @param user User object to obtain real ID from
      * @return true on successful match, false otherwise
      */
-    public boolean matchForgotID(String id, User user){
+    public boolean matchForgotID(byte[] id, User user) throws NoSuchAlgorithmException {
         boolean ret = false;
-        if(id == user.getRandomID()) ret = true;
-        user.setRandomID(Random());//in either case, we should generate a new random ID
+        //if(Arrays.equals(id, user.getRandomID)) ret = true;
+        //user.setRandomID();//in either case, we should generate a new random ID
         return ret;
     }
+
+    //This code requires the following functions to be created in the User class
+    //I did not make them so that we did not have any merge conflicts
+    //Firstly, we need a char[] randomID field - this will store the random ID
+    //using char[] so that I can reuse the secure random salt generator - I figured this should be secure too
+    //char[] getRandomID() //returns randomID
+    //void setRandomID() //will call generateHash and use this random value to set randomID field
+
 
 }
