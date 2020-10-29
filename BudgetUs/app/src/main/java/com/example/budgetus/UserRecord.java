@@ -1,10 +1,12 @@
 package com.example.budgetus;
 
 import android.content.Context;
+import android.util.JsonReader;
 import android.util.Log;
 import java.io.BufferedReader;
+import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.List;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -20,17 +22,19 @@ public class UserRecord {
     public UserRecord (Context context){
         this.mContext = context;
         try {
-            //FileProcessor fp = new FileProcessor();
-            //hashmap = fp.getUserMap();
-
             //this code opens database.json, now stored at app/src/main/assets
             //info from https://stackoverflow.com/questions/30417810/reading-from-a-text-file-in-android-studio-java
-            List<String> mLines = new ArrayList<>();
-            //don't understand what this context thing is
             InputStream is = mContext.getAssets().open("database.json");
-            //takes it in as input stream and uses a buffered reader but I'm sure there's a way to change that
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+
+            //to use with FileProcessor:
+            //-change FileReader reader to Reader reader, and continue as normal
+            //like this:
+            Reader read = new InputStreamReader(is);
+            JsonReader jr = new JsonReader(read);
+
             //print just to show it works
+            List<String> mLines = new ArrayList<>();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
             String line;
             while ((line = reader.readLine()) != null)
                 mLines.add(line);
@@ -42,40 +46,26 @@ public class UserRecord {
         }
 
     }
-    //TODO
-    //some tests
-    //additional functions
-    //correct communication between events firing, driver class, user class
 
     /*
      * A function for some simple tests of hashmap, adding users, reading info, etc
      * What I've learned:
      *  -hashmap handles pretty much everything (hash function, collisions, expanding, etc)
      *  -reading from a null object will crash the entire app, so we might want some checks or catches?
-     *  -
+     *  -security stuff works
      */
-    public void test(){
-        System.out.println("Begin testing");
-        User matt = new User("Matthew Kyea", "mkyea1@binghamton.edu", "SUNY Bing", "mattkyea", "password");
-        //System.out.println(checkEmail("mkyea1@binghamton.edu"));
-        //System.out.println(checkUsername("mattkyea"));
-        //addUser(matt);
-        User notmatt = new User("not Matthew Kyea", "not mkyea1@binghamton.edu", "not SUNY Bing", "mattkyea", "password");
-        //System.out.println(checkUsername("mattkyea"));
-        //addUser(notmatt);
-        //System.out.println(getUser("mattkyea").getName());
-        String entry = "";
-        for(int i=0; i<5000; i++) {
-            entry = Integer.toString(i);
-            User u = new User(entry, entry, entry, entry, entry);
-            addUser(u);
+    public void test()  {
+        try{
+            byte[] salt = PasswordEncryptionService.generateSalt();
+            System.out.println("salt: " + Arrays.toString(salt));
+            byte[] pw = PasswordEncryptionService.getEncryptedPassword("2e8u13189rh12d1f3dcx]1[dq3", salt);
+            System.out.println("password: " + Arrays.toString(pw));
+            System.out.println(PasswordEncryptionService.authenticate("2e8u13189rh12d1f3dcx]1[dq3", pw, salt));
+            System.out.println(PasswordEncryptionService.authenticate("notpassword", pw, salt));
         }
-
-        //email search broken, fix tomorrow
-        System.out.println(getUser("2348").getEmail());
-        System.out.println(getUserFromEmail("2348").getName());
-        System.out.println(removeUser("2348"));
-        System.out.println(removeUser("xyz"));
+        catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
 
@@ -152,21 +142,11 @@ public class UserRecord {
      * @return user the user object accessed from the hashmap with the email. null if user does not exist/cannot find email
      */
     public User getUserFromEmail(String email){
-        User ret = null;
-        String key = "";
-        Iterator<Map.Entry<String, User>> it = hashmap.entrySet().iterator();
-        // iterating every set of entry in the HashMap.
-        while (it.hasNext()) {
-            Map.Entry<String, User> set = it.next();
-            //System.out.println(set.getKey() + " = " + set.getValue());
-            if(set.getValue().getEmail() == email){
-                System.out.println("found email");
-                key = set.getKey();
-            }
+        for(User userElement : hashmap.values()){
+            User currUser = userElement;
+            if(userElement.getEmail() == email) return userElement;
         }
-        System.out.println("\n\nthis is the key: " + key);
-        if(key!="") ret = getUser(key);
-        return ret;
+        return null;
     }
 
 
@@ -208,7 +188,7 @@ public class UserRecord {
             }
 
                /*
-               //to use the encryption code,
+               //to use the encryption code, wrap this in try catch
                byte[] salt = accessedUser.getSalt();
                byte[] actualPassword = accessedUser.getPassword();
                return PasswordEncryptionService.authenticate(password, salt, actualPassword);
@@ -334,6 +314,7 @@ public class UserRecord {
     //I did not make them so that we did not have any merge conflicts
     //Firstly, we need a char[] randomID field - this will store the random ID
     //using char[] so that I can reuse the secure random salt generator - I figured this should be securely random too
+    //password field needs to changed to char[] as well
     //char[] getRandomID() //returns randomID
     //void setRandomID() //will call generateHash and use this random value to set randomID field
 
