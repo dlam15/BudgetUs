@@ -97,8 +97,4 @@ public class User
 		}
 		return false;
 	}
-
-	public void forgotPassword() {
-
-	}
 }
