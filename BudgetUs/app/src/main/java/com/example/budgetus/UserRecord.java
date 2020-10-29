@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.JsonReader;
 import android.util.Log;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +31,11 @@ public class UserRecord {
             //-change FileReader reader to Reader reader, and continue as normal
             //like this:
             Reader read = new InputStreamReader(is);
-            JsonReader jr = new JsonReader(read);
+            //FileProcessor fp = new FileProcessor(read);
+            //hashmap = fp.getUserMap();
+            //JsonReader jr = new JsonReader(read);
+
+
 
             //print just to show it works
             List<String> mLines = new ArrayList<>();
@@ -53,6 +58,7 @@ public class UserRecord {
      *  -hashmap handles pretty much everything (hash function, collisions, expanding, etc)
      *  -reading from a null object will crash the entire app, so we might want some checks or catches?
      *  -security stuff works
+     *  -Derrick's database stuff works
      */
     public void test()  {
         try{
@@ -66,6 +72,8 @@ public class UserRecord {
         catch(Exception e){
             e.printStackTrace();
         }
+        System.out.println(getUser("dlam15").getSchool());
+        System.out.println(getUser("admin").getName());
     }
 
 
