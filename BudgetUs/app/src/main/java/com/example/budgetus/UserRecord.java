@@ -1,44 +1,21 @@
 package com.example.budgetus;
 
 import android.content.Context;
-import android.util.JsonReader;
 import android.util.Log;
-
 import java.io.BufferedReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
-
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.util.Arrays;
-
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import java.io.BufferedInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.Set;
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.activation.*;
-
 
 
 public class UserRecord {
 
     private Context mContext;
-    private Map<String, User> hashmap = new HashMap<String, User>(1000);
+    private Map<String, User> hashmap = new HashMap<String, User>(1000);//will expand if necessary, so don't worry about that
 
     public UserRecord (Context context){
         this.mContext = context;
@@ -69,20 +46,73 @@ public class UserRecord {
     //some tests
     //additional functions
     //correct communication between events firing, driver class, user class
-    //collision resolution vs username unavailable (see how many collisions from testing)
-
 
     /*
-     * Add a new user to the hashmap. This is triggered when the user registers.
+     * A function for some simple tests of hashmap, adding users, reading info, etc
+     * What I've learned:
+     *  -hashmap handles pretty much everything (hash function, collisions, expanding, etc)
+     *  -reading from a null object will crash the entire app, so we might want some checks or catches?
+     *  -
+     */
+    public void test(){
+        System.out.println("Begin testing");
+        User matt = new User("Matthew Kyea", "mkyea1@binghamton.edu", "SUNY Bing", "mattkyea", "password");
+        //System.out.println(checkEmail("mkyea1@binghamton.edu"));
+        //System.out.println(checkUsername("mattkyea"));
+        //addUser(matt);
+        User notmatt = new User("not Matthew Kyea", "not mkyea1@binghamton.edu", "not SUNY Bing", "mattkyea", "password");
+        //System.out.println(checkUsername("mattkyea"));
+        //addUser(notmatt);
+        //System.out.println(getUser("mattkyea").getName());
+        String entry = "";
+        for(int i=0; i<5000; i++) {
+            entry = Integer.toString(i);
+            User u = new User(entry, entry, entry, entry, entry);
+            addUser(u);
+        }
+
+        //email search broken, fix tomorrow
+        System.out.println(getUser("2348").getEmail());
+        System.out.println(getUserFromEmail("2348").getName());
+        System.out.println(removeUser("2348"));
+        System.out.println(removeUser("xyz"));
+    }
+
+
+    /* We use this function to check if a username a new user is trying to use is valid. For
+     * it to be valid, it must not be in use by someone else. So, we just check the hashmap for the name.
      *
-     * To add a user, we first check that the email is not in use. This requires us to check all users.
+     * @param username the username the registering user wants to use and we need to check for
+     * @return true if the username is not in use, false if it is
+     */
+    public boolean checkUsername(String username){
+        return !hashmap.containsKey(username);
+    }
+
+
+    /* We use this function to check if a email a new user is trying to use is valid. For
+     * it to be valid, it must not be in use by someone else. So, we just check the hashmap for the email.
      *
-     * Then, we must make sure that the username is free as well. For a username to
-     * be available, it must not hash to an index that is already in use.
+     * @param email the email the registering user wants to use and we need to check for
+     * @return true if the email is not in use, false if it is
+     */
+    public boolean checkEmail(String email){
+        for(User userElement : hashmap.values()){
+            User currUser = userElement;
+            if(currUser.getEmail() == email) return false;
+        }
+        return true;
+    }
+
+    /* MODIFIED - assumes that the User class has checked that the provided username and email are valid
+     * with checkUsername() and checkEmail. If both of these functions return true, the user can use what they provided.
+     * Then, the User class can create a User object and provide it here. We should do this instead of just providing the
+     * username because I need to store a User object here, which contains fields I don't have access to here.
      *
-     * Currently, if there is a collision (even if the username is not in use), we tell the user it
-     * is unavailable anyway. We could implement collision resolution instead (which is probably done by
-     * Java's hashmap already), but I will save that for a later time.
+     * So, make sure those 2 functions are called first, because I will not check here, and if the username was in use,
+     * the old user will be overwritten without us noticing.
+     *
+     * Java's hashmap handles collisions for us, so even if 2 usernames hash to the same value, both usernames can exist.
      *
      * If this username is available, we can then populate a new entry of our hashmap with the user object.
      *
@@ -93,25 +123,9 @@ public class UserRecord {
      */
     public boolean addUser(User newUser) {
         String username = newUser.getUsername();//obtain key from username hash function
-        if(getUserFromEmail(newUser.getEmail() )!= null){
-            System.out.println("Email already in use.");
-            return false;//this is not a collision, but rather that the email is in use
-        }
-        if (hashmap.containsKey(username)) {//true if mapping for this key already exists - could be either a collision or that this username is taken
-            User existingUser = hashmap.get(username);
-            if(existingUser.getUsername() == username){//username actually in use, otherwise its just a collision
-                System.out.println("User already exists");
-                return false;
-            }else{//could theoretically add user still, but we'd need some collision resolution
-                System.out.println("Collision");
-                //see what java does here if you put anyway - can it retrieve correct one?
-            }
-        }else{
-            hashmap.put(username, newUser);
-            System.out.println("Success");
-            return true;
-        }
-        return false;
+        hashmap.put(username, newUser);
+        System.out.println("Success");
+        return true;
     }
 
 
@@ -138,11 +152,21 @@ public class UserRecord {
      * @return user the user object accessed from the hashmap with the email. null if user does not exist/cannot find email
      */
     public User getUserFromEmail(String email){
-        for(User userElement : hashmap.values()){
-            User currUser = userElement;
-            if(currUser.getEmail() == email) return currUser;
+        User ret = null;
+        String key = "";
+        Iterator<Map.Entry<String, User>> it = hashmap.entrySet().iterator();
+        // iterating every set of entry in the HashMap.
+        while (it.hasNext()) {
+            Map.Entry<String, User> set = it.next();
+            //System.out.println(set.getKey() + " = " + set.getValue());
+            if(set.getValue().getEmail() == email){
+                System.out.println("found email");
+                key = set.getKey();
+            }
         }
-        return null;
+        System.out.println("\n\nthis is the key: " + key);
+        if(key!="") ret = getUser(key);
+        return ret;
     }
 
 
@@ -150,17 +174,14 @@ public class UserRecord {
      * Remove a user from the hashmap. We check if they exist, and if they don't print out a message
      * and return false instead. Again, I'd like a better place to put these messages.
      *
-     * @param user user object to remove
+     * @param user username of object to remove
      * @return true on successful removal, false on unsuccessful removal
      */
-    public boolean removeUser(User newUser){
-        String username = newUser.getUsername();
+    public boolean removeUser(String username){
         if(hashmap.remove(username) != null) return true;
         System.out.println("User does not exist");
         return false;
     }
-
-
 
 
     /*
@@ -185,12 +206,15 @@ public class UserRecord {
                 System.out.println("Successful login");
                 return true;
             }
-            /* to use the encryption code,
+
+               /*
+               //to use the encryption code,
                byte[] salt = accessedUser.getSalt();
                byte[] actualPassword = accessedUser.getPassword();
-               return authenticate(password, salt, actualPassword);
-             */
-            else{
+               return PasswordEncryptionService.authenticate(password, salt, actualPassword);
+                */
+
+             else{
                 System.out.println("Incorrect password");
                 return false;
             }
@@ -201,115 +225,8 @@ public class UserRecord {
 
 
 
-    //Everything below this point can be moved to the User class. Some parameters may change to make more sense in that context.
-
-
-    /*
-     * As I said before, we shouldn't store plaintext passwords. One common way to implement a safer system is with a salted hash.
-     * We generate some random string, called a salt, and mix this with the password in some way. We then feed this salted password
-     * to a hash function, and save the result as the user's "password." We also save the salt. When the user wants to login, repeat the
-     * process and check the saltedHashedPassword. By doing so, we are storing the password in a safe way with little overhead.
-     */
-
-    //the next 3 functions are a simple implementation of securely storing passwords I found at
-    //https://www.javacodegeeks.com/2012/05/secure-password-storage-donts-dos-and.html
-    //it could probably be improved or use a better hash function or replaced with the ability to sign in with another service (Google)
-    //but I will leave it for now as a first attempt
-    //I will also explain as I go through these functions
-
-    /* Move to User class?
-     *
-     * First step in storing a user's password securely. We generate a salt, which is a random string.
-     * We use SecureRandom to ensure that this value is actually random and cannot be predicted in any way.
-     * This salt will be combined with the user's password. This means that 2 exact passwords will not hash
-     * to the same value, as the random salt will make them different. We store this salt in plaintext - it does
-     * not need to be secret.
-     *
-     * @return a string (byte array) that is our 64 bit random salt
-     */
-    public byte[] generateSalt() throws NoSuchAlgorithmException {
-        // VERY important to use SecureRandom instead of just Random
-        SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-
-        // Generate a 8 byte (64 bit) salt as recommended by RSA PKCS5
-        byte[] salt = new byte[8];
-        random.nextBytes(salt);
-
-        return salt;
-    }
-
-
-
-    /* This can stay here or move - maybe its own class
-     *
-     * This will be called after generating the salt. This will be the only time
-     * that part of our code touches the plaintext password. The result of this function
-     * is what we will store as the User's password.
-     *
-     * This function is also called to check a provided password for a match. All we do is
-     * salt and hash what's provided, so we can use this to compare in the next function.
-     *
-     * This password isn't really encrypted, but hashed. The reasoning for this is that
-     * we don't need to unencrypt the password, and we actually want to avoid providing
-     * a way for that to be done. So, this is a one-way operation.
-     *
-     * @param password the user's plaintext password to encrypt
-     * @param salt the random string used to make it harder to figure out what the password is
-     * @return the salted, hashed, password which we can safely store
-     */
-    public byte[] getEncryptedPassword(String password, byte[] salt)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
-        // PBKDF2 with SHA-1 as the hashing algorithm. Note that the NIST
-        // specifically names SHA-1 as an acceptable hashing algorithm for PBKDF2
-        String algorithm = "PBKDF2WithHmacSHA1";
-        // SHA-1 generates 160 bit hashes, so that's what makes sense here
-        int derivedKeyLength = 160;
-        // Pick an iteration count that works for you. The NIST recommends at
-        // least 1,000 iterations:
-        // http://csrc.nist.gov/publications/nistpubs/800-132/nist-sp800-132.pdf
-        // iOS 4.x reportedly uses 10,000:
-        // http://blog.crackpassword.com/2010/09/smartphone-forensics-cracking-blackberry-backup-passwords/
-        int iterations = 20000;
-
-        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, iterations, derivedKeyLength);
-
-        SecretKeyFactory f = SecretKeyFactory.getInstance(algorithm);
-
-        return f.generateSecret(spec).getEncoded();
-    }
-
-
-
-    /* This can stay here or move
-     *
-     * This function checks the provided password against the password we have on record for the user.
-     * We are not storing the actual password. Instead, we store the result from getEncryptedPassword. So,
-     * to check a possible password against the stored one, we need to salt and hash the provided password
-     * and compare the 2.
-     *
-     */
-    public boolean authenticate(String attemptedPassword, byte[] encryptedPassword, byte[] salt)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
-        // Encrypt the clear-text password using the same salt that was used to
-        // encrypt the original password
-        byte[] encryptedAttemptedPassword = getEncryptedPassword(attemptedPassword, salt);
-
-        // Authentication succeeds if encrypted password that the user entered
-        // is equal to the stored hash
-        return Arrays.equals(encryptedPassword, encryptedAttemptedPassword);
-    }
-
-    /* How can we use these with our User class?
-        -when the user creates their account, we call generateSalt, and store the salt with their info
-        -we then call getEncryptedPassword with what they provided as a password, and the salt. THIS IS WHAT WE STORE AS THE PASSWORD
-        -when the user logs in, we call authenticate() with what they provided as a password, as well as the password and salt stored for the account
-        -they are trying to access
-     */
-
-
-
-
-
+    //Everything below this point can be moved to the User class
+    //Some parameters may change to make more sense in that context
 
 
     /*
@@ -359,6 +276,7 @@ public class UserRecord {
                 try {
                     //NOTE - email login info is here, really this code should run on a server or something, where user cannot see the source code
                     GmailSender sender = new GmailSender("budgetusemail@gmail.com", "budgetus123!");//sender of email - credentials
+                    //I have no idea how to hide the credentials, just don't push with password for now
                     sender.sendMail(subject, message, "budgetusemail@gmail.com", receiver);//subject, body, sender, receiver
                 } catch (Exception e) {
                     Log.e("SendMail", e.getMessage(), e);
@@ -379,17 +297,43 @@ public class UserRecord {
      * @param user User object to obtain real ID from
      * @return true on successful match, false otherwise
      */
-    public boolean matchForgotID(byte[] id, User user) throws NoSuchAlgorithmException {
+    public boolean matchForgotID(byte[] id, User user) {
         boolean ret = false;
         //if(Arrays.equals(id, user.getRandomID)) ret = true;
         //user.setRandomID();//in either case, we should generate a new random ID
         return ret;
     }
 
+    /* MOVE TO USER CLASS
+     *
+     * This will be the function called when trying to register a user. We check the username
+     * and email fields they provide to see if they are already in use. If not, we can create the user.
+     * Otherwise, the user will have to provide different info.
+     *
+     * After this function returns true, we make a new user object with what the new user provided, and
+     * then call addUser. We will also print out which of the fields are in use (if any). We could change this to the
+     * return value to pass somewhere to tell the user.
+     *
+     * @param username the new user's desired username
+     * @param email the new user's desired email
+     * @return true if both are available, false otherwise
+     */
+    public boolean attemptRegister(String username, String email){
+        if(!checkUsername(username)){
+            System.out.println("Username in use");
+            return false;
+        }
+        if(!checkEmail(email)){
+            System.out.println("Email in use");
+            return false;
+        }
+        return true;
+    }
+
     //This code requires the following functions to be created in the User class
     //I did not make them so that we did not have any merge conflicts
     //Firstly, we need a char[] randomID field - this will store the random ID
-    //using char[] so that I can reuse the secure random salt generator - I figured this should be secure too
+    //using char[] so that I can reuse the secure random salt generator - I figured this should be securely random too
     //char[] getRandomID() //returns randomID
     //void setRandomID() //will call generateHash and use this random value to set randomID field
 
