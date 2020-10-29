@@ -23,7 +23,7 @@ import javax.activation.*;
 
 public class UserRecord {
 
-    private Map<String, User> hashmap = new HashMap<String, User>(1000);
+    private Map<String, User> hashmap = new HashMap<>(1000);
 
     public UserRecord (){
         try {
@@ -70,7 +70,8 @@ public class UserRecord {
         }
         if (hashmap.containsKey(username)) {//true if mapping for this key already exists - could be either a collision or that this username is taken
             User existingUser = hashmap.get(username);
-            if(existingUser.getUsername() == username){//username actually in use, otherwise its just a collision
+            assert existingUser != null;
+            if(existingUser.getUsername().equalsIgnoreCase (username) ){//username actually in use, otherwise its just a collision
                 System.out.println("User already exists");
                 return false;
             }else{//could theoretically add user still, but we'd need some collision resolution
@@ -110,8 +111,8 @@ public class UserRecord {
      */
     public User getUserFromEmail(String email){
         for(User userElement : hashmap.values()){
-            User currUser = userElement;
-            if(currUser.getEmail() == email) return currUser;
+            //User currUser = userElement;
+            if(userElement.getEmail().equalsIgnoreCase (email)) return userElement;
         }
         return null;
     }
@@ -150,7 +151,8 @@ public class UserRecord {
             return false;
         }else{//username exists
             User accessedUser = hashmap.get(username);
-            if(password == accessedUser.getPassword()){
+            assert accessedUser != null;
+            if(password.equalsIgnoreCase (accessedUser.getPassword()) ){
                 System.out.println("Successful login");
                 return true;
             }
@@ -241,7 +243,7 @@ public class UserRecord {
      */
     public boolean sendUsername(User user){
         String email = user.getEmail();//email address of user
-        String randomID = user.getRandomID();//random id to email
+        String randomID = "123gruwguwecfcrugrb2y4i32t47vtc37";//user.getRandomID();//random id to email
         return false;
     }
 

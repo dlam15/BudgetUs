@@ -1,12 +1,13 @@
 package com.example.budgetus;
 import java.util.*;
+import java.security.*;
 
 public class Group {
     private String groupName;
-    private final int groupID;
+    private final long groupID;
     private Map<Integer, String> members = new HashMap<>();
 
-    public Group(String groupName, int groupID){
+    public Group(String groupName, long groupID){
         this.groupName = groupName;
         this.groupID = groupID;
     }
@@ -40,7 +41,7 @@ public class Group {
         }
         else{
             if(!(members.containsKey (remUser))){
-                members.remove (remUser);
+                members.remove(remUser);
                 return true;
             }
         }
