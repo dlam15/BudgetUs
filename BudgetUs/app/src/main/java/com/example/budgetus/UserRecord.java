@@ -23,29 +23,10 @@ public class UserRecord {
     public UserRecord (Context context){
         this.mContext = context;
         try {
-            //this code opens database.json, now stored at app/src/main/assets
-            //info from https://stackoverflow.com/questions/30417810/reading-from-a-text-file-in-android-studio-java
-            InputStream is = mContext.getAssets().open("database.json");
-
-            //to use with FileProcessor:
-            //-change FileReader reader to Reader reader, and continue as normal
-            //like this:
-            Reader read = new InputStreamReader(is);
-            //FileProcessor fp = new FileProcessor(read);
-            //hashmap = fp.getUserMap();
-            //JsonReader jr = new JsonReader(read);
-
-
-
-            //print just to show it works
-            List<String> mLines = new ArrayList<>();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            String line;
-            while ((line = reader.readLine()) != null)
-                mLines.add(line);
-            System.out.println("\n\n\n\n\n\nSUCCESS READING\n\n\n\n\n\n");
-            for (String string : mLines)
-                System.out.println(string);
+            FileProcessor fp = new FileProcessor(mContext);
+            hashmap = fp.getUserMap();
+            System.out.println(getUser("dlam15").getSchool());//prints Binghamton
+            System.out.println(getUser("admin").getName());//prints John Doe
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -72,8 +53,6 @@ public class UserRecord {
         catch(Exception e){
             e.printStackTrace();
         }
-        System.out.println(getUser("dlam15").getSchool());
-        System.out.println(getUser("admin").getName());
     }
 
 
