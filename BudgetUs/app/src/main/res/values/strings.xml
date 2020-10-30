@@ -2,6 +2,8 @@
     <string name="app_name">BudgetUs</string>
     <string name="title_activity_register">RegisterActivity</string>
     <string name="title_activity_dashboard">MainDashboard</string>
+    <string name="title_activity_forgotLogin">forgotLogin</string>
+    <string name="title_activity_forgotLogin2">forgotLogin2</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>

@@ -17,27 +17,31 @@ public class MainActivity extends AppCompatActivity {
     private EditText username;
     private EditText password;
     private Button loginbutton;
-    private Button registerbutton;
+    private Button toRegBtn;
+    private Button forgotUsernamebutton;
+    private Button forgotPasswordbutton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        Button toRegBtn = (Button) findViewById(R.id.goToRegisterButton);
-        toRegBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                launchRegisterActivity();
-            }
-        });
-
-        //Theresa's
+        //Variables
          username = (EditText) findViewById(R.id.editUsername);
          password = (EditText)findViewById(R.id.editPassword);
          loginbutton = (Button) findViewById(R.id.btLogin);
+         toRegBtn = (Button) findViewById(R.id.goToRegisterButton);
+         forgotUsernamebutton = (Button) findViewById(R.id.btForgotUsername);
+         forgotPasswordbutton = (Button) findViewById(R.id.btForgotPassword);
 
+
+        //Register Button
+        toRegBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) { launchRegisterActivity(); }
+        });
+
+         //Login Button
          loginbutton.setOnClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View view) {
@@ -47,19 +51,41 @@ public class MainActivity extends AppCompatActivity {
              }
          });
 
-        // registerbutton.setOnClickListener(new Button.OnClickListener(){
-        //     public void onClick(View view) {
-        //         Intent registerPage = new Intent(MainActivity.this, Register.class);
-        //         startActivity(registerPage);
-        //     }
-        // });
+         //Forgot Username Button
+        forgotUsernamebutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                launchForgotUsernameActivity();
+            }
+        });
+
+        //Forgot Password Button
+        forgotPasswordbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                launchForgotPasswordActivity();
+            }
+        });
 
     }
 
+    //Functions
     private void launchRegisterActivity(){
         Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
     }
+
+    private void launchForgotUsernameActivity(){
+        Intent intent = new Intent(this, forgotLogin.class);
+        startActivity(intent);
+    }
+
+    private void launchForgotPasswordActivity(){
+        Intent intent = new Intent(this, forgotLogin2.class);
+        startActivity(intent);
+    }
+
+
 
      private void validate(String userName,String userPassword) {
          //get username and password
