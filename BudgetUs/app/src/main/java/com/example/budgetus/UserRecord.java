@@ -66,8 +66,7 @@ public class UserRecord {
         return !hashmap.containsKey(username);
     }
 
-
-    /* We use this function to check if a email a new user is trying to use is valid. For
+     /* We use this function to check if a email a new user is trying to use is valid. For
      * it to be valid, it must not be in use by someone else. So, we just check the hashmap for the email.
      *
      * @param email the email the registering user wants to use and we need to check for
@@ -76,7 +75,7 @@ public class UserRecord {
     public boolean checkEmail(String email){
         for(User userElement : hashmap.values()){
             User currUser = userElement;
-            if(currUser.getEmail() == email) return false;
+            if(currUser.getEmail().equals(email)) return false;
         }
         return true;
     }
@@ -131,7 +130,7 @@ public class UserRecord {
     public User getUserFromEmail(String email){
         for(User userElement : hashmap.values()){
             User currUser = userElement;
-            if(userElement.getEmail() == email) return userElement;
+            if(userElement.getEmail().equals(email)) return userElement;
         }
         return null;
     }
@@ -169,7 +168,7 @@ public class UserRecord {
             return false;
         }else{//username exists
             User accessedUser = hashmap.get(username);
-            if(password == accessedUser.getPassword()){
+            if(accessedUser.getPassword().equals(password)){
                 System.out.println("Successful login");
                 return true;
             }
