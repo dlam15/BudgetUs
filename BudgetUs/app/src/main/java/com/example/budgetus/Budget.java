@@ -59,14 +59,179 @@ public class Budget {
      *  Haven't worked this out yet (how to tell what field they are searching by to avoid a slow search?),  but searchable fields
      *  are amount, name, description, date, category for now.
      *
+     * How do we take in some input and tell what it is? (double vs string vs date etc)?
+     *
+     *  I'll keep basic for now - each of the searchable types are of different variable types (except name and description)
+     *  So I'll make a different function for each and assume we'll come up with some code to tell what field the user is searching by.
+     *
+     *  I'll also provide an intersection and a union function in case we need it.
+     *
      *  I'll just return the Transaction object and assume user can easily click on a transaction to work with it,  add/modify vars, sort, run stats, etc.
      *  I.e. front end has a way to display Transaction object.
      *
      * @param some searchable value
-     * @return the Transaction object matching this criteria (more than 1?)
+     * @return an arraylist of the Transaction object(s) matching this criteria
      */
-    public Transaction findTransaction(double amount){
-        return null;
+    public ArrayList<Transaction> findTransaction(double amount) {
+        ArrayList<Transaction> ret = new ArrayList<>();
+        for(Transaction t: listOfTransactions){
+            if(t.getAmount() == amount) ret.add(t);//i don't remember how these work - is this like a copy of a copy, doesn't work outside this?
+        }
+        System.out.println(ret.get(0).getAmount());//want to test
+        return ret;
+    }
+
+    /*
+     * As mentioned above, going to make a search function for each field. This is for Strings,
+     * so name or description, we'll check both for "contains" the identifier string.
+     *
+     * @param string we're looking for in name or description
+     * @return an arraylist of the Transaction object(s) with substring identifier in name or description field
+     */
+    public ArrayList<Transaction> findTransaction(String identifier) {
+        ArrayList<Transaction> ret = new ArrayList<>();
+        for(Transaction t: listOfTransactions){
+            if(t.getName().contains(identifier)) ret.add(t);//i don't remember how these work - is this like a copy of a copy, doesn't work outside this?
+            else if(t.getDescription()!=null && t.getDescription().contains(identifier)) ret.add(t);
+        }
+        return ret;
+    }
+
+    /*
+     * Search function for date. I'll do a bit more with ranges and whatnot as well, but probably not here.
+     * However, I am providing 3 different find functions that take a Calendar - this one is for an exact match,
+     * and the 2 below are for year match and month match.
+     *
+     * FIX - need to test and I want to provide year or month or day or all/mix and return any matches
+     *
+     * @param date of transaction we're looking for
+     * @return an arraylist of the Transaction object(s) that occurred on this date
+     */
+    public ArrayList<Transaction> findTransaction(Calendar date) {
+        ArrayList<Transaction> ret = new ArrayList<>();
+        for(Transaction t: listOfTransactions){
+            if(t.getDateOfTransaction()!=null && t.getDateOfTransaction().equals(date)) ret.add(t);
+        }
+        return ret;
+    }
+
+    /*
+     * Search function for date by year. So, we'll return all transactions that occurred on the same year as
+     * the date parameter.
+     *
+     * @param date of transaction who's year we'll compare with
+     * @return an arraylist of the Transaction object(s) that occurred during the same year as date parameter
+     */
+    public ArrayList<Transaction> findTransactionByYear(Calendar date) {
+        ArrayList<Transaction> ret = new ArrayList<>();
+        for(Transaction t: listOfTransactions){
+            if(t.getDateOfTransaction()!=null && t.getDateOfTransaction().YEAR == date.YEAR) ret.add(t);
+        }
+        return ret;
+    }
+
+    /*
+     * Search function for date by month. So, we'll return all transactions that occurred on the same month as
+     * the date parameter. This only checks month, and does not include year. For example, if March is the month
+     * the date parameter has,  transactions from March 2000 and March 2020 will be returned (and any others occurring in March).
+     *
+     * @param date of transaction who's month we'll compare with
+     * @return an arraylist of the Transaction object(s) that occurred during the same month as date parameter
+     */
+    public ArrayList<Transaction> findTransactionByMonth(Calendar date) {
+        ArrayList<Transaction> ret = new ArrayList<>();
+        for(Transaction t: listOfTransactions){
+            if(t.getDateOfTransaction()!=null && t.getDateOfTransaction().MONTH == date.MONTH) ret.add(t);
+        }
+        return ret;
+    }
+
+
+    /*
+     * Search function for category.
+     *
+     *
+     * @param date of transaction we're looking for
+     * @return an arraylist of the Transaction object(s) that occurred on this date
+     */
+    public ArrayList<Transaction> findTransaction(Transaction.Category category) {
+        ArrayList<Transaction> ret = new ArrayList<>();
+        for(Transaction t: listOfTransactions){
+            if(t.getCategory()!=null && t.getCategory() == category) ret.add(t);
+        }
+        return ret;
+    }
+
+    /*
+     * Providing intersection and union of 2 arraylists of transactions in case we need it (name X and amt y)
+     *
+     * Basic intersection function. Take in 2 arraylists, if an element is in both add it to a return list.
+     *
+     * @param list1 the first arraylist of transactions
+     * @param list2 the second arraylist of transactions
+     * @return intersection of list1 and list2 (all elements in both lists)
+     */
+    public ArrayList<Transaction> transactionsIntersection(ArrayList<Transaction> list1, ArrayList<Transaction> list2){
+        ArrayList<Transaction> retList = new ArrayList<Transaction>();
+        for(Transaction t: list1){
+            if(list2.contains(t)) retList.add(t);
+        }
+        return retList;
+    }
+    /*
+     *
+     * Basic union function. Take in 2 arraylists, return list of elements in either list with no duplicates.
+     *
+     * @param list1 the first arraylist of transactions
+     * @param list2 the second arraylist of transactions
+     * @return union of list1 and list2 (elements in list1 or list2)
+     */
+    public ArrayList<Transaction> transactionsUnion(ArrayList<Transaction> list1, ArrayList<Transaction> list2){
+        ArrayList<Transaction> retList = new ArrayList<Transaction>();
+        retList.addAll(list1);
+        for(Transaction t: list2){
+            if(!retList.contains(t)) retList.add(t);//avoid duplicates
+        }
+        return retList;
+    }
+
+
+    /*
+     * First attempt to provide some sort of filtering rather than searching - all transactions from a time period/range
+     * I'd like to reuse the findTransaction functions, but ranges are somewhat different.
+     *
+     * Here, we take in a startDate and endDate, and return all transactions that took place on and between these dates.
+     * This uses the before and after methods provided by the calendar class.
+     *
+     * @param startDate date on which to start search
+     * @param endDate date on which to end search
+     * @return arraylist of all transactions that occurred on or between these dates
+     */
+    public ArrayList<Transaction> eventsBetween(Calendar startDate, Calendar endDate){
+        ArrayList<Transaction> ret = new ArrayList<>();
+        for(Transaction t: listOfTransactions){
+            if(t.getDateOfTransaction()!=null && ((t.getDateOfTransaction().equals(endDate))||(t.getDateOfTransaction().equals(startDate)) || (t.getDateOfTransaction().after(startDate) && t.getDateOfTransaction().before(endDate)))) {
+                ret.add(t);
+                System.out.println(t.getDateOfTransaction());
+            }
+        }
+        return ret;
+    }
+
+    /*
+     * Use fundsSpentOverTime to get amount spent, could add extra stuff like X% in this category, etc. - probably will add next
+     * Can also do stuff with amountbefore and amountafter in each transaction, etc - will think about what's useful first
+     *
+     * @param startDate date on which to start search
+     * @param endDate date on which to end search
+     * @return amount spent between these dates
+     */
+    public double fundsSpentOverTime(Calendar startDate, Calendar endDate){
+        ArrayList<Transaction> allTransactions = new ArrayList<>();
+        allTransactions = eventsBetween(startDate, endDate);
+        double runningTotal = 0;
+        for(Transaction t: allTransactions) runningTotal+=t.getAmount();
+        return runningTotal;
     }
 
 
