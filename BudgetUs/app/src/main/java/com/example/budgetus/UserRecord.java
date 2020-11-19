@@ -191,13 +191,9 @@ public class UserRecord {
 
 
 
-    //Everything below this point can be moved to the User class
-    //Some parameters may change to make more sense in that context
 
 
     /*
-     * Move to User class and uncomment lines when functions exist.
-     *
      * 1st function fired when the user forgets their credentials. This emails the user
      * object the forgotID field for the user.
      *
@@ -220,8 +216,6 @@ public class UserRecord {
 
 
     /*
-    * Move to User class
-    *
     * This function sends the message in an email to the reciever. Majority of the code is done in 3 other files
     * (Gmailsender.java, ByteArrayDataSource.java, and JSSEProvider.java), and I found most of this code on the internet
     * so I will cite my sources as well. It also requires a few jar files, stored under app/build/libs. You may have to right-click
@@ -253,8 +247,7 @@ public class UserRecord {
         return ret[0];
     }
 
-    /* Move to User class and uncomment lines once functions exist.
-
+    /*
      * 2nd function fired when the user forgets their username or password. This checks if
      * the forgotID provided by the user matches the forgotID. We will also update the user's
      * random id after this attempted match.
@@ -270,8 +263,7 @@ public class UserRecord {
         return ret;
     }
 
-    /* MOVE TO USER CLASS
-     *
+    /*
      * This will be the function called when trying to register a user. We check the username
      * and email fields they provide to see if they are already in use. If not, we can create the user.
      * Otherwise, the user will have to provide different info.

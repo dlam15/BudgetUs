@@ -125,7 +125,7 @@ public class Budget {
     public ArrayList<Transaction> findTransactionByYear(Calendar date) {
         ArrayList<Transaction> ret = new ArrayList<>();
         for(Transaction t: listOfTransactions){
-            if(t.getDateOfTransaction()!=null && t.getDateOfTransaction().YEAR == date.YEAR) ret.add(t);
+            if(t.getDateOfTransaction()!=null && t.getDateOfTransaction().get(Calendar.YEAR) == date.get(Calendar.YEAR)) ret.add(t);
         }
         return ret;
     }
@@ -141,7 +141,7 @@ public class Budget {
     public ArrayList<Transaction> findTransactionByMonth(Calendar date) {
         ArrayList<Transaction> ret = new ArrayList<>();
         for(Transaction t: listOfTransactions){
-            if(t.getDateOfTransaction()!=null && t.getDateOfTransaction().MONTH == date.MONTH) ret.add(t);
+            if(t.getDateOfTransaction()!=null && t.getDateOfTransaction().get(Calendar.MONTH) == date.get(Calendar.MONTH)) ret.add(t);
         }
         return ret;
     }
@@ -212,7 +212,7 @@ public class Budget {
         for(Transaction t: listOfTransactions){
             if(t.getDateOfTransaction()!=null && ((t.getDateOfTransaction().equals(endDate))||(t.getDateOfTransaction().equals(startDate)) || (t.getDateOfTransaction().after(startDate) && t.getDateOfTransaction().before(endDate)))) {
                 ret.add(t);
-                System.out.println(t.getDateOfTransaction());
+                //System.out.println(t.getDateOfTransaction());
             }
         }
         return ret;
@@ -222,11 +222,22 @@ public class Budget {
      * Use fundsSpentOverTime to get amount spent, could add extra stuff like X% in this category, etc. - probably will add next
      * Can also do stuff with amountbefore and amountafter in each transaction, etc - will think about what's useful first
      *
+     * Also need to figure out if making parameters Calendar class works for front end easily of if converting a string to a
+     * Calendar object would be easier
+     *
+     * Also works with just year provided - we set undefined month as December and undefined day to 31st, allowing inclusive search
+     *
      * @param startDate date on which to start search
      * @param endDate date on which to end search
      * @return amount spent between these dates
      */
     public double fundsSpentOverTime(Calendar startDate, Calendar endDate){
+        //if date not defined, assume user wants month inclusive, set as 31st
+        if(endDate.get(Calendar.DATE) == 0) endDate.set(Calendar.DATE, 31);
+        if(startDate.get(Calendar.DATE) == 0) startDate.set(Calendar.DATE, 31);
+        //if month not defined, assume user wants year inclusive, set as December
+        if(endDate.get(Calendar.MONTH) == 0) endDate.set(Calendar.MONTH, 12);
+        if(startDate.get(Calendar.MONTH) == 0) startDate.set(Calendar.MONTH, 12);
         ArrayList<Transaction> allTransactions = new ArrayList<>();
         allTransactions = eventsBetween(startDate, endDate);
         double runningTotal = 0;
@@ -365,7 +376,7 @@ public class Budget {
 
 
     /*
-     * Sort by date in alphabetical order of old/past to new/future.
+     * Sort by date in order of old/past to new/future.
      */
     public void sortTransactionsDateOldToNew(){
         class SortByDateOldToNew implements Comparator<Transaction>{
@@ -383,7 +394,7 @@ public class Budget {
     }
 
     /*
-     * Sort by date in alphabetical order of new/future to old/past.
+     * Sort by date in order of new/future to old/past.
      */
     public void sortTransactionsDateNewToOld(){
         class SortByDateNewToOld implements Comparator<Transaction>{
