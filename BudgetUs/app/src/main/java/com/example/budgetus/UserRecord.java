@@ -33,12 +33,17 @@ import javax.activation.*;
 
 public class UserRecord {
 
+    //private Context mContext; matt
     private Map<String, User> hashmap = new HashMap<String, User>(1000);
 
+    //public UserRecord (Context context){ matt
     public UserRecord (){
+        //this.mContext = context; matt
         try {
             FileProcessor fp = new FileProcessor();
             hashmap = fp.getUserMap();
+            //System.out.println(getUser("dlam15").getSchool());//prints Binghamton
+            //System.out.println(getUser("admin").getName());//prints John Doe
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -50,7 +55,52 @@ public class UserRecord {
     //additional functions
     //correct communication between events firing, driver class, user class
     //collision resolution vs username unavailable (see how many collisions from testing)
+    /*
+     * A function for some simple tests of hashmap, adding users, reading info, etc
+     * What I've learned:
+     *  -hashmap handles pretty much everything (hash function, collisions, expanding, etc)
+     *  -reading from a null object will crash the entire app, so we might want some checks or catches?
+     *  -security stuff works
+     *  -Derrick's database stuff works
+     */
+  /* public void test()  {
+        try{
+            byte[] salt = PasswordEncryptionService.generateSalt();
+            System.out.println("salt: " + Arrays.toString(salt));
+            byte[] pw = PasswordEncryptionService.getEncryptedPassword("2e8u13189rh12d1f3dcx]1[dq3", salt);
+            System.out.println("password: " + Arrays.toString(pw));
+            System.out.println(PasswordEncryptionService.authenticate("2e8u13189rh12d1f3dcx]1[dq3", pw, salt));
+            System.out.println(PasswordEncryptionService.authenticate("notpassword", pw, salt));
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }*/
 
+
+    /* We use this function to check if a username a new user is trying to use is valid. For
+     * it to be valid, it must not be in use by someone else. So, we just check the hashmap for the name.
+     *
+     * @param username the username the registering user wants to use and we need to check for
+     * @return true if the username is not in use, false if it is
+     */
+  /*  public boolean checkUsername(String username){
+        return !hashmap.containsKey(username);
+    }*/
+
+    /* We use this function to check if a email a new user is trying to use is valid. For
+     * it to be valid, it must not be in use by someone else. So, we just check the hashmap for the email.
+     *
+     * @param email the email the registering user wants to use and we need to check for
+     * @return true if the email is not in use, false if it is
+     */
+ /*   public boolean checkEmail(String email){
+        for(User userElement : hashmap.values()){
+            User currUser = userElement;
+            if(currUser.getEmail().equals(email)) return false;
+        }
+        return true;
+    }*/
 
     /*
      * Add a new user to the hashmap. This is triggered when the user registers.
@@ -79,6 +129,7 @@ public class UserRecord {
         }
         if (hashmap.containsKey(username)) {//true if mapping for this key already exists - could be either a collision or that this username is taken
             User existingUser = hashmap.get(username);
+            //assert existingUser != null; britania
             if(existingUser.getUsername() == username){//username actually in use, otherwise its just a collision
                 System.out.println("User already exists");
                 return false;
@@ -93,7 +144,12 @@ public class UserRecord {
         }
         return false;
     }
-
+    /*public boolean addUser(User newUser) { matt
+        String username = newUser.getUsername();//obtain key from username hash function
+        hashmap.put(username, newUser);
+        System.out.println("Success");
+        return true;
+    }*/
 
     /*
      * Get a user from the hashmap. Considering that all of the user objects are stored in the hashmap,
@@ -121,6 +177,7 @@ public class UserRecord {
         for(User userElement : hashmap.values()){
             User currUser = userElement;
             if(currUser.getEmail() == email) return currUser;
+            //if(userElement.getEmail().equalsIgnoreCase (email)) return userElement; britania
         }
         return null;
     }
@@ -139,7 +196,11 @@ public class UserRecord {
         System.out.println("User does not exist");
         return false;
     }
-
+    /*public boolean removeUser(String username){ matt
+        if(hashmap.remove(username) != null) return true;
+        System.out.println("User does not exist");
+        return false;
+    }*/
 
 
 
@@ -161,6 +222,8 @@ public class UserRecord {
             return false;
         }else{//username exists
             User accessedUser = hashmap.get(username);
+            //assert accessedUser != null; britania
+            //if(accessedUser.getPassword().equals(password)){ matt
             if(password == accessedUser.getPassword()){
                 System.out.println("Successful login");
                 return true;
@@ -310,6 +373,7 @@ public class UserRecord {
     public boolean sendRandomID(User user){
         String email = user.getEmail();//email address of user
         String randomID = user.getRandomID();
+        //String randomID = "randomID placeholder"; matt
         String body = "Hello, this is an email from BudgetUs, sent because you forgot your login info. Enter this code to regain access: " + randomID;
         return sendEmail(body, "Forgot Credentials", email);
     }
@@ -347,6 +411,12 @@ public class UserRecord {
         }).start();
         return ret[0];
     }
+/* britania
+    public boolean sendUsername(User user){
+        String email = user.getEmail();//email address of user
+        String randomID = "123gruwguwecfcrugrb2y4i32t47vtc37";//user.getRandomID();//random id to email
+        return false;
+    }*/
 
     /* Move to User class
 
@@ -365,4 +435,28 @@ public class UserRecord {
         return ret;
     }
 
+    /*
+     * This will be the function called when trying to register a user. We check the username
+     * and email fields they provide to see if they are already in use. If not, we can create the user.
+     * Otherwise, the user will have to provide different info.
+     *
+     * After this function returns true, we make a new user object with what the new user provided, and
+     * then call addUser. We will also print out which of the fields are in use (if any). We could change this to the
+     * return value to pass somewhere to tell the user.
+     *
+     * @param username the new user's desired username
+     * @param email the new user's desired email
+     * @return true if both are available, false otherwise
+     */
+   /* public boolean attemptRegister(String username, String email){ matt
+        if(!checkUsername(username)){
+            System.out.println("Username in use");
+            return false;
+        }
+        if(!checkEmail(email)){
+            System.out.println("Email in use");
+            return false;
+        }
+        return true;
+    }*/
 }

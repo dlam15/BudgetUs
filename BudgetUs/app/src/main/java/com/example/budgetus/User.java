@@ -9,7 +9,7 @@ public class User
 	private String school;
 	private String username;
 	private String password;
-	private Map<Integer, String> groups;
+	private Map<Integer, String> groups=  new HashMap<>();;
 
 
 	public User(String name, String email, String school, String username, String password)
@@ -19,7 +19,7 @@ public class User
 		this.school = school;
 		this.username = username;
 		this.password = password;
-    		groups = new HashMap<>();
+
   }
 	
 	public boolean updateName(String name){
