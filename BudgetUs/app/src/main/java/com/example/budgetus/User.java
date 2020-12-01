@@ -1,6 +1,11 @@
 package com.example.budgetus;
-import java.util.*; 
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
+
+import java.util.*;
 import java.io.*;
+import java.security.*;
 
 public class User
 {
@@ -8,11 +13,11 @@ public class User
 	private String email;
 	private String school;
 	private String username;
-	private String password;
+	private byte[] password;
+	private byte[] randomID;
 	private Map<Integer, String> groups = new HashMap<>();
 
-
-	public User(String name, String email, String school, String username, String password)
+	public User(String name, String email, String school, String username, byte[] password)
 	{
 		this.name = name;
 		this.email = email;
@@ -31,7 +36,7 @@ public class User
 		return true;
 	}
 
-	public boolean updatePassword(String password){
+	public boolean updatePassword(byte[] password){
 		this.password = password;
 		return true;
 	}
@@ -69,8 +74,18 @@ public class User
 		return this.username;
 	}
 
-	public String getPassword(){
+	public byte[] getPassword(){
 		return this.password;
+	}
+
+	public byte[] getRandomID() {
+		return randomID;
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.O)
+	public void setRandomID() throws NoSuchAlgorithmException{
+		SecureRandom generatedID = SecureRandom.getInstanceStrong();
+		generatedID.nextBytes (randomID);
 	}
 
 	public String getStatus(int groupID){
