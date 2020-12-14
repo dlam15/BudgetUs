@@ -17,22 +17,28 @@ import java.util.Map;
 
 public class UserRecord {
 
-    private Context mContext;
-    private Map<String, User> hashmap = new HashMap<String, User>(1000);//will expand if necessary, so don't worry about that
+    //private Context mContext; matt
+    private Map<String, User> hashmap = new HashMap<String, User>(1000);
 
-    public UserRecord (Context context){
-        this.mContext = context;
+    //public UserRecord (Context context){ matt
+    public UserRecord (){
+        //this.mContext = context; matt
         try {
-            FileProcessor fp = new FileProcessor(mContext);
+            FileProcessor fp = new FileProcessor();
             hashmap = fp.getUserMap();
-            System.out.println(getUser("dlam15").getSchool());//prints Binghamton
-            System.out.println(getUser("admin").getName());//prints John Doe
+            //System.out.println(getUser("dlam15").getSchool());//prints Binghamton
+            //System.out.println(getUser("admin").getName());//prints John Doe
         }catch(Exception e){
             e.printStackTrace();
         }
 
     }
 
+    //TODO
+    //some tests
+    //additional functions
+    //correct communication between events firing, driver class, user class
+    //collision resolution vs username unavailable (see how many collisions from testing)
     /*
      * A function for some simple tests of hashmap, adding users, reading info, etc
      * What I've learned:
@@ -41,7 +47,7 @@ public class UserRecord {
      *  -security stuff works
      *  -Derrick's database stuff works
      */
-    public void test()  {
+  /* public void test()  {
         try{
             byte[] salt = PasswordEncryptionService.generateSalt();
             System.out.println("salt: " + Arrays.toString(salt));
@@ -53,7 +59,7 @@ public class UserRecord {
         catch(Exception e){
             e.printStackTrace();
         }
-    }
+    }*/
 
 
     /* We use this function to check if a username a new user is trying to use is valid. For
@@ -130,7 +136,8 @@ public class UserRecord {
     public User getUserFromEmail(String email){
         for(User userElement : hashmap.values()){
             User currUser = userElement;
-            if(userElement.getEmail().equals(email)) return userElement;
+            if(currUser.getEmail() == email) return currUser;
+            //if(userElement.getEmail().equalsIgnoreCase (email)) return userElement; britania
         }
         return null;
     }
@@ -168,7 +175,9 @@ public class UserRecord {
             return false;
         }else{//username exists
             User accessedUser = hashmap.get(username);
-            if(accessedUser.getPassword().equals(password)){
+            //assert accessedUser != null; britania
+            //if(accessedUser.getPassword().equals(password)){ matt
+            if(password == accessedUser.getPassword()){
                 System.out.println("Successful login");
                 return true;
             }
@@ -208,8 +217,8 @@ public class UserRecord {
      */
     public boolean sendRandomID(User user){
         String email = user.getEmail();//email address of user
-        //String randomID = user.getRandomID();
-        String randomID = "randomID placeholder";
+        String randomID = user.getRandomID();
+        //String randomID = "randomID placeholder"; matt
         String body = "Hello, this is an email from BudgetUs, sent because you forgot your login info. Enter this code to regain access: " + randomID;
         return sendEmail(body, "Forgot Credentials", email);
     }
@@ -246,6 +255,12 @@ public class UserRecord {
         }).start();
         return ret[0];
     }
+/* britania
+    public boolean sendUsername(User user){
+        String email = user.getEmail();//email address of user
+        String randomID = "123gruwguwecfcrugrb2y4i32t47vtc37";//user.getRandomID();//random id to email
+        return false;
+    }*/
 
     /*
      * 2nd function fired when the user forgets their username or password. This checks if
