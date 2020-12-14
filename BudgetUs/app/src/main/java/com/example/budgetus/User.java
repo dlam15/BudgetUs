@@ -25,7 +25,7 @@ public class User
 		this.username = username;
 		this.password = password;
 	}
-
+	
 	public boolean updateName(String name){
 		this.name = name;
 		return true;
