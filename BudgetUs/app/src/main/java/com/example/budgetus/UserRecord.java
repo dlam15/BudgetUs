@@ -6,6 +6,7 @@ import android.util.Log;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -68,9 +69,7 @@ public class UserRecord {
      * @param username the username the registering user wants to use and we need to check for
      * @return true if the username is not in use, false if it is
      */
-    public boolean checkUsername(String username){
-        return !hashmap.containsKey(username);
-    }
+    public boolean checkUsername(String username) { return !hashmap.containsKey(username); }
 
      /* We use this function to check if a email a new user is trying to use is valid. For
      * it to be valid, it must not be in use by someone else. So, we just check the hashmap for the email.
@@ -86,10 +85,38 @@ public class UserRecord {
         return true;
     }
 
-    /* MODIFIED - assumes that the User class has checked that the provided username and email are valid
-     * with checkUsername() and checkEmail. If both of these functions return true, the user can use what they provided.
-     * Then, the User class can create a User object and provide it here. We should do this instead of just providing the
-     * username because I need to store a User object here, which contains fields I don't have access to here.
+
+    /*
+     * This will be the function called when trying to register a user. We check the username
+     * and email fields they provide to see if they are already in use. If not, we can create the user.
+     * Otherwise, the user will have to provide different info.
+     *
+     * After this function returns true, we make a new user object with what the new user provided, and
+     * then call addUser. We will also print out which of the fields are in use (if any). We could change this to the
+     * return value to pass somewhere to tell the user.
+     *
+     * @param username the new user's desired username
+     * @param email the new user's desired email
+     * @return true if both are available, false otherwise
+     */
+    public boolean attemptRegister(String username, String email){
+        if(!checkUsername(username)){
+            System.out.println("Username in use");
+            return false;
+        }
+        if(!checkEmail(email)){
+            System.out.println("Email in use");
+            return false;
+        }
+        return true;
+    }
+
+
+    /* MODIFIED - I've provided the functions checkUsername() and checkEmail(), which the User class can use
+     * to determine if a User object should be created before calling this function. (for now, until that code is in place,
+     * I'll call these functions here as well as a reminder). We should do this instead of just providing the
+     * username because I need to store a User object in the hashmap, which contains fields I don't have access to here, but we shouldn't make
+     * a user object if it ends up not being valid (username or email already in use).
      *
      * So, make sure those 2 functions are called first, because I will not check here, and if the username was in use,
      * the old user will be overwritten without us noticing.
@@ -98,13 +125,12 @@ public class UserRecord {
      *
      * If this username is available, we can then populate a new entry of our hashmap with the user object.
      *
-     * I also print out a possible message the user should see when the User already exists - maybe pass this back to driver?
-     *
      * @param user the user object containing the info for registration
      * @return true if the user was registered correctly, false otherwise
      */
     public boolean addUser(User newUser) {
-        String username = newUser.getUsername();//obtain key from username hash function
+        if (attemptRegister(newUser) == false) return false;
+        String username = newUser.getUsername();
         hashmap.put(username, newUser);
         System.out.println("Success");
         return true;
@@ -136,8 +162,7 @@ public class UserRecord {
     public User getUserFromEmail(String email){
         for(User userElement : hashmap.values()){
             User currUser = userElement;
-            if(currUser.getEmail() == email) return currUser;
-            //if(userElement.getEmail().equalsIgnoreCase (email)) return userElement; britania
+            if(userElement.getEmail().equalsIgnoreCase(email)) return userElement;
         }
         return null;
     }
@@ -175,31 +200,24 @@ public class UserRecord {
             return false;
         }else{//username exists
             User accessedUser = hashmap.get(username);
-            //assert accessedUser != null; britania
-            //if(accessedUser.getPassword().equals(password)){ matt
-            if(password == accessedUser.getPassword()){
+            assert accessedUser != null;
+            byte[] salt = accessedUser.getSalt();
+            byte[] actualPassword = accessedUser.getPassword();
+            boolean validated = false;
+            try{
+                validated = PasswordEncryptionService.authenticate(password, salt, actualPassword)
+            }catch (Exception e){
+                System.out.println(e);
+            }
+            if(validated){
                 System.out.println("Successful login");
                 return true;
-            }
-
-               /*
-               //to use the encryption code, wrap this in try catch
-               byte[] salt = accessedUser.getSalt();
-               byte[] actualPassword = accessedUser.getPassword();
-               return PasswordEncryptionService.authenticate(password, salt, actualPassword);
-                */
-
-             else{
+            }else{
                 System.out.println("Incorrect password");
                 return false;
             }
         }
     }
-
-
-
-
-
 
 
     /*
@@ -217,8 +235,8 @@ public class UserRecord {
      */
     public boolean sendRandomID(User user){
         String email = user.getEmail();//email address of user
-        String randomID = user.getRandomID();
-        //String randomID = "randomID placeholder"; matt
+        byte[] randomID = user.getRandomID();// ? check what this looks like
+        String stringRandomID = new String(randomID, StandardCharsets.UTF_8);
         String body = "Hello, this is an email from BudgetUs, sent because you forgot your login info. Enter this code to regain access: " + randomID;
         return sendEmail(body, "Forgot Credentials", email);
     }
@@ -255,6 +273,7 @@ public class UserRecord {
         }).start();
         return ret[0];
     }
+
 /* britania
     public boolean sendUsername(User user){
         String email = user.getEmail();//email address of user
@@ -273,43 +292,12 @@ public class UserRecord {
      */
     public boolean matchForgotID(byte[] id, User user) {
         boolean ret = false;
-        //if(Arrays.equals(id, user.getRandomID)) ret = true;
-        //user.setRandomID();//in either case, we should generate a new random ID
+        if(Arrays.equals(id, user.getRandomID())) ret = true;
+        try{
+            user.setRandomID();//in either case, we should generate a new random ID
+        }catch (Exception e){
+            System.out.println(e);
+        }
         return ret;
     }
-
-    /*
-     * This will be the function called when trying to register a user. We check the username
-     * and email fields they provide to see if they are already in use. If not, we can create the user.
-     * Otherwise, the user will have to provide different info.
-     *
-     * After this function returns true, we make a new user object with what the new user provided, and
-     * then call addUser. We will also print out which of the fields are in use (if any). We could change this to the
-     * return value to pass somewhere to tell the user.
-     *
-     * @param username the new user's desired username
-     * @param email the new user's desired email
-     * @return true if both are available, false otherwise
-     */
-    public boolean attemptRegister(String username, String email){
-        if(!checkUsername(username)){
-            System.out.println("Username in use");
-            return false;
-        }
-        if(!checkEmail(email)){
-            System.out.println("Email in use");
-            return false;
-        }
-        return true;
-    }
-
-    //This code requires the following functions to be created in the User class
-    //I did not make them so that we did not have any merge conflicts
-    //Firstly, we need a char[] randomID field - this will store the random ID
-    //using char[] so that I can reuse the secure random salt generator - I figured this should be securely random too
-    //password field needs to changed to char[] as well
-    //char[] getRandomID() //returns randomID
-    //void setRandomID() //will call generateHash and use this random value to set randomID field
-
-
 }
