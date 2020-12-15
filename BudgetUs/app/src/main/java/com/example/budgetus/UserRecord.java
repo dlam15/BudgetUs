@@ -25,8 +25,8 @@ public class UserRecord {
     public UserRecord (){
         //this.mContext = context; matt
         try {
-            FileProcessor fp = new FileProcessor();
-            hashmap = fp.getUserMap();
+            //FileProcessor fp = new FileProcessor();
+           // hashmap = fp.getUserMap();
             //System.out.println(getUser("dlam15").getSchool());//prints Binghamton
             //System.out.println(getUser("admin").getName());//prints John Doe
         }catch(Exception e){
@@ -129,7 +129,7 @@ public class UserRecord {
      * @return true if the user was registered correctly, false otherwise
      */
     public boolean addUser(User newUser) {
-        if (attemptRegister(newUser) == false) return false;
+        if (attemptRegister(newUser.getUsername(), newUser.getEmail()) == false) return false;
         String username = newUser.getUsername();
         hashmap.put(username, newUser);
         System.out.println("Success");
@@ -201,11 +201,11 @@ public class UserRecord {
         }else{//username exists
             User accessedUser = hashmap.get(username);
             assert accessedUser != null;
-            byte[] salt = accessedUser.getSalt();
+            byte[] salt = null;// = accessedUser.getSalt();
             byte[] actualPassword = accessedUser.getPassword();
             boolean validated = false;
             try{
-                validated = PasswordEncryptionService.authenticate(password, salt, actualPassword)
+                validated = PasswordEncryptionService.authenticate(password, salt, actualPassword);
             }catch (Exception e){
                 System.out.println(e);
             }

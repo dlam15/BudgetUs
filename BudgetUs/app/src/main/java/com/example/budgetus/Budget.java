@@ -60,6 +60,7 @@ public class Budget {
      *  are amount, name, description, date, category for now.
      *
      * How do we take in some input and tell what it is? (double vs string vs date etc)?
+     *      probably a form - they are given a way to input info by field, a search will be similar. I.e. we'll know what field to search by on front end.
      *
      *  I'll keep basic for now - each of the searchable types are of different variable types (except name and description)
      *  So I'll make a different function for each and assume we'll come up with some code to tell what field the user is searching by.
@@ -77,7 +78,7 @@ public class Budget {
         for(Transaction t: listOfTransactions){
             if(t.getAmount() == amount) ret.add(t);//i don't remember how these work - is this like a copy of a copy, doesn't work outside this?
         }
-        System.out.println(ret.get(0).getAmount());//want to test
+        //System.out.println(ret.get(0).getAmount());//want to test
         return ret;
     }
 
@@ -248,15 +249,26 @@ public class Budget {
 
     /*
      *  A way to update a transaction (probably to add an optional field).
-     *  Comes in with a transaction parameter - user can click on or we'll search for it.
-     *  I haven't figured this out yet either - I'm imagining 1 screen/menu to update a transaction, not individual pop ups for edit name, edit amount, etc
-     *  and then we just update anything that's not null or not changed?
-     *  Also, will these fields be null, or will they be the previous values? probably the previous, but then how do we remove a value - provide null as picture would
-     *  have to mean remove rather than don't update
+     *
+     * I picture it working like this from front-end:
+     * -user selects a transaction (so we have the object)
+     * -user selects menu option to update (so we know to call this function)
+     * -update opens the same page as add (i.e. boxes for each possible field)
+     * -fields will be displayed as they are currently for the transaction
+     * -user adds, removes, edits, etc
+     * -front-end sends us the transaction object to edit, and all of the fields
+     * -we'll just update all with what's provided
+     * -its more likely that only a field or 2 is changed, but why bother checking for a change if we're just updating with itself?
+     *
+     * This makes me realize that optional items need a "null representation" on the front end. For example, if no date is specified, display "No date."
+     * I'll keep this in mind for now, but they should probably be defined in Transaction.
+     *
+     * So, this function pretty much makes a new transaction and replaces an old one with it.
+     *
      */
-    public void modifyTransaction(Transaction transaction, double amount, String name,  Image receipt,  String description,  Calendar date, Transaction.Category category){
-        //if(amount >0) transaction.amount = amount; //this needs to be more thought out - could have negatives?
-        //if(name != null)
+    public void modifyTransaction(Transaction transaction, double amount, String name,  Uri receipt,  String description,  Calendar date, Transaction.Category category){
+        Transaction updatedTransaction = new Transaction(c, transaction.getAmountBefore(), amount, name, receipt, description, date, category);
+        listOfTransactions.set(listOfTransactions.indexOf(transaction), updatedTransaction);//replace at index of old
     }
 
 
