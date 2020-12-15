@@ -17,42 +17,31 @@ public class MainActivity extends AppCompatActivity {
     private EditText username;
     private EditText password;
     private Button loginbutton;
-    private Button toRegBtn;//teresa
-    private Button forgotUsernamebutton;//teresa
-    private Button forgotPasswordbutton;//teresa
-    private UserRecord userRecord;
+    private Button toRegBtn;
+    private Button forgotUsernamebutton;
+    private Button forgotPasswordbutton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        Button toRegBtn = (Button) findViewById(R.id.goToRegisterButton);
-        toRegBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                launchRegisterActivity();
-            }
-        });
-        userRecord = new UserRecord();//UserRecord userRecord = new UserRecord(MainActivity.this); matt
-
-
         //Variables
          username = (EditText) findViewById(R.id.editUsername);
          password = (EditText)findViewById(R.id.editPassword);
          loginbutton = (Button) findViewById(R.id.btLogin);
-         toRegBtn = (Button) findViewById(R.id.goToRegisterButton);//teresa
-         forgotUsernamebutton = (Button) findViewById(R.id.btForgotUsername);//teresa
-         forgotPasswordbutton = (Button) findViewById(R.id.btForgotPassword);//teresa
+         toRegBtn = (Button) findViewById(R.id.goToRegisterButton);
+         forgotUsernamebutton = (Button) findViewById(R.id.btForgotUsername);
+         forgotPasswordbutton = (Button) findViewById(R.id.btForgotPassword);
 
-        //Register Button //teresa
+
+        //Register Button
         toRegBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) { launchRegisterActivity(); }
         });
 
-        //Login Button
+         //Login Button
          loginbutton.setOnClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View view) {
@@ -62,14 +51,7 @@ public class MainActivity extends AppCompatActivity {
              }
          });
 
-        // registerbutton.setOnClickListener(new Button.OnClickListener(){
-        //     public void onClick(View view) {
-        //         Intent registerPage = new Intent(MainActivity.this, Register.class);
-        //         startActivity(registerPage);
-        //     }
-        // });
-        /* teresa
-        //Forgot Username Button
+         //Forgot Username Button
         forgotUsernamebutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -84,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                 launchForgotPasswordActivity();
             }
         });
-        */
+
     }
 
     //Functions
@@ -92,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
     }
-/* teresa
+
     private void launchForgotUsernameActivity(){
         Intent intent = new Intent(this, forgotLogin.class);
         startActivity(intent);
@@ -102,9 +84,10 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, forgotLogin2.class);
         startActivity(intent);
     }
-*/
 
-    private void validate(String userName,String userPassword) {
+
+
+     private void validate(String userName,String userPassword) {
          //get username and password
          String matchUser = "admin";
          String matchPass = "123";
