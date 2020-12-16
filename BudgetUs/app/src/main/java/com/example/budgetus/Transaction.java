@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.ImageDecoder;
 import android.net.Uri;
 import java.io.ByteArrayOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /*
@@ -61,7 +62,7 @@ public class Transaction {
      * but I can't save bitmap as string and convert back for json
      * but I can do so with byte array, which is what we're doing here/why we're saving that
      *
-     * flow:
+     * execution flow:
      * - From front end: we obtain uri of image from user's phone -> convert to bitmap and save -> convert to byte array and save
      * - from back end: we obtain byte[] from database and save -> create bitmap and save
      */
@@ -70,12 +71,6 @@ public class Transaction {
     private String description = null;
     private Category category = null;
     private Calendar dateOfTransaction = null;//Date is depreciated
-    //should allow different levels?
-    //month and year
-    //month and week and year
-    //month and day and year
-    //m/d/y and hour
-    //m/d/y and hour and minute
     //might be able to use Calendar View to take input
 
     /*
@@ -107,8 +102,10 @@ public class Transaction {
         return category;
     }
 
+    //amount in budget before this transaction
     public double getAmountBefore() { return amountBefore; }
 
+    //amount in budget after this transaction
     public double getAmountAfter() { return amountAfter; }
 
     /*
@@ -133,7 +130,7 @@ public class Transaction {
     * so we just create bitmap and call that setter
     * @param uri - the path to the photo on the user's device, we use to create bitmap then don't need
      */
-    public void setReceipt(Uri uri){
+    public void setReceipt(Uri uri, Context c){
         try{
             setReceipt(ImageDecoder.decodeBitmap(ImageDecoder.createSource(c.getContentResolver(), uri)));
         }catch (Exception e){
@@ -164,67 +161,60 @@ public class Transaction {
         this.receipt = BitmapFactory.decodeByteArray(this.receiptByteArray, 0, this.receiptByteArray.length);
     }
 
+    //takes a Calendar object, could change to whatever's easiest
     public void setDateOfTransaction(Calendar date) { this.dateOfTransaction = date; }
 
-
-    /* work in progress
-     * little different - make it easy to provide numerical date rather than create calendar object
-     * might not actually be any easier, I'll see
-    */
-    public void setDateOfTransaction(int year, int month, int day, int hour, int minute) {
-        Calendar date = Calendar.getInstance();
-        date.clear();
-        /*
-        if(minute == -1) date.set(year, month, day, hour, 0);
-        if(hour == null) date.set(year, month, day);
-        if(day == null) date.set(year, month);
-        else
-        */
-        date.set(year, month, day, hour, minute);
-        this.dateOfTransaction = dateOfTransaction;
+    //will try to clean up, can try to use for front-end display too
+    @Override
+    public String toString(){
+        String ret = "Transaction\n";
+        ret+="\tName: "+this.name+"\n";
+        ret+="\tAmount: "+this.amount+"\n";
+        ret+="\tAmount Before: "+this.amountBefore+"\n";
+        ret+="\tAmount After: "+this.amountAfter+"\n";
+        ret+="\tContains Image: ";
+        ret+= (this.receipt != null) +"\n";
+        ret+="\tDescription: ";
+        if(this.description == null) ret+="Undefined\n";
+        else ret+=this.description+"\n";
+        ret+="\tDate: ";
+        if(this.dateOfTransaction == null) ret+="Undefined\n";
+        else ret+=this.dateOfTransaction.getTime().toString()+"\n";
+        ret+="\tCategory: ";
+        if(this.category == null) ret+="Undefined\n";
+        else ret+=this.category+"\n";
+        return ret;
     }
-
 
     /*
      * I decided that we'll use the same constructor no matter how many optional fields are defined.
-     * We can provide null for any of the last 4 parameters, but the first 4 must be provided.
+     * We can provide null for any of the last 5 parameters (except context if receipt is valid), but the first 3 must be provided.
      * I probably don't need to check for null here because I'll just set as null, but its a good reminder that these can be null.
      *
      * I also require the startingAmount variable so that each transaction is a mini-record of the budget's funds overtime.
      *
-     * @param c a context variable needed when calling some global functions (specifically a bitmap function here)
      * @param startingAmount the funds in the budget when this transaction is made
      * @param cost the amount the transaction was for, can be negative (but I haven't decided when that should be used)
      * @param name the name for the transaction we can use to identify it
+     * @param c OPTIONAL a context variable needed when creating image
      * @param receipt OPTIONAL - path to a photo on the user's device, we use it to make a bitmap image attached to the transaction
      * @param description OPTIONAL - description for transaction, can be used when name doesn't explain enough
      * @param date OPTIONAL - date the transaction occurred on. Right now this is a Calendar object, I might accept String format and convert if that's easier for caller
      * @param category OPTIONAL - category from category enum - will probably change how the enum works, basic pre-defined choice right now
      */
-    public Transaction(Context c, double startingAmount, double cost, String name, Uri receipt,  String description,  Calendar date,  Category category){
-        this.c = c;//need for bitmap stuff for some reason
+    public Transaction(double startingAmount, double cost, String name, Context c, Uri receipt,  String description,  Calendar date,  Category category){
         this.amountBefore = startingAmount;
         this.amountAfter = this.amountBefore - cost;//handles positive and negative
         this.amount = cost;
         this.name = name;
-        if(receipt!=null) setReceipt(receipt); //sets this.receipt and this.receiptByteArray, need to check for null
-        //don't need to check the rest because they're null already, but its a good reminder
-        //or I might set some flag for each one and use that to check if its undefined rather than checking for null?
-        if(description != null) this.description = description;
-        if(date != null) this.dateOfTransaction = date;
-        if(category!=null) this.category = category;
+
+        //optionals
+        this.c = c;//needed for image
+        if(receipt!=null && c!=null) setReceipt(receipt, c); //sets this.receipt and this.receiptByteArray, which assume object isn't null, need to check
+        //may add another parameter to make image from byte array (from database entry)
+        //don't need to check the rest because they're null already
+        this.description = description;
+        this.dateOfTransaction = date;
+        this.category = category;
     }
-
-    /* A possible option for optional variables. If we don't store null,
-     * and instead use some default value, we'd need checks like this to
-     * tell that the field has not been provided by the user.
-     *
-     * But I'm not doing that so far and probably won't need to
-     */
-    public boolean checkValidityDate(){
-        //if(this.dateOfTransaction == somedefaultval) return false;
-        return true;
-    }
-
-
 }

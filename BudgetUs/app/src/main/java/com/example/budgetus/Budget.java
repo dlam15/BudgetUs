@@ -35,20 +35,22 @@ public class Budget {
     //can get, but shouldn't be allowed to set - we want to maintain valid record via transactions
     public double getStartingFunds() { return startingFunds; }
     public double getRemainingFunds() { return remainingFunds; }
+    public ArrayList<Transaction> getListOfTransactions(){ return listOfTransactions; }
 
 
      /*
-     * Add a new transaction to the list of transactions. Last 4 parameters are optional. We also update the remaining funds after this transaction.
+     * Add a new transaction to the list of transactions. Last 5 parameters are optional. We also update the remaining funds after this transaction.
      *
      * @param amount the amount the transaction was for, can be negative (but I haven't decided when that should be used)
      * @param name the name for the transaction we can use to identify it
+     * @param c OPTIONAL a context variable needed when creating image
      * @param receipt OPTIONAL - path to a photo on the user's device, we use it to make a bitmap image attached to the transaction
      * @param description OPTIONAL - description for transaction, can be used when name doesn't explain enough
      * @param date OPTIONAL - date the transaction occurred on. Right now this is a Calendar object, I might accept String format and convert if that's easier for caller
      * @param category OPTIONAL - category from category enum - will probably change how the enum works, basic pre-defined choice right now
      */
     public void addTransaction(double amount, String name, Uri receipt, String description, Calendar date, Transaction.Category category){
-        Transaction t = new Transaction(c, startingFunds, amount, name, receipt, description, date, category);
+        Transaction t = new Transaction(startingFunds, amount, name, c, receipt, description, date, category);
         listOfTransactions.add(t);
         remainingFunds = this.remainingFunds - amount;//necessary to update funds correctly
     }
@@ -56,11 +58,10 @@ public class Budget {
 
     /*
      *  We need to provide a way to search the list of transactions - user could have huge list, needs to search for something.
-     *  Haven't worked this out yet (how to tell what field they are searching by to avoid a slow search?),  but searchable fields
-     *  are amount, name, description, date, category for now.
+     *  Not sure exactly how it will work, but maybe a form - they are given a way to input info by field, a search will be similar.
+     *  I.e. we'll know what field to search by on front end.
      *
-     * How do we take in some input and tell what it is? (double vs string vs date etc)?
-     *      probably a form - they are given a way to input info by field, a search will be similar. I.e. we'll know what field to search by on front end.
+     *  If not, we can just search every field for a match, which will be slower with bigger lists, but ok for smaller ones.
      *
      *  I'll keep basic for now - each of the searchable types are of different variable types (except name and description)
      *  So I'll make a different function for each and assume we'll come up with some code to tell what field the user is searching by.
@@ -76,9 +77,8 @@ public class Budget {
     public ArrayList<Transaction> findTransaction(double amount) {
         ArrayList<Transaction> ret = new ArrayList<>();
         for(Transaction t: listOfTransactions){
-            if(t.getAmount() == amount) ret.add(t);//i don't remember how these work - is this like a copy of a copy, doesn't work outside this?
+            if(t.getAmount() == amount) ret.add(t);
         }
-        //System.out.println(ret.get(0).getAmount());//want to test
         return ret;
     }
 
@@ -150,7 +150,6 @@ public class Budget {
 
     /*
      * Search function for category.
-     *
      *
      * @param date of transaction we're looking for
      * @return an arraylist of the Transaction object(s) that occurred on this date
@@ -267,7 +266,7 @@ public class Budget {
      *
      */
     public void modifyTransaction(Transaction transaction, double amount, String name,  Uri receipt,  String description,  Calendar date, Transaction.Category category){
-        Transaction updatedTransaction = new Transaction(c, transaction.getAmountBefore(), amount, name, receipt, description, date, category);
+        Transaction updatedTransaction = new Transaction(transaction.getAmountBefore(), amount, name, c, receipt, description, date, category);
         listOfTransactions.set(listOfTransactions.indexOf(transaction), updatedTransaction);//replace at index of old
     }
 
@@ -307,7 +306,6 @@ public class Budget {
         SortByAmountHighToLow amountComparator = new SortByAmountHighToLow();
         Collections.sort(listOfTransactions, amountComparator);
     }
-
 
     /*
      * Sort by name of transaction, in alphabetical order.
@@ -351,7 +349,7 @@ public class Budget {
      * Sort by description in alphabetical order.
      */
     public void sortTransactionsDescriptionAlphabetical(){
-        for(Transaction t: listOfTransactions) System.out.println(t.getDescription());
+        //for(Transaction t: listOfTransactions) System.out.println(t.getDescription());
         class SortByDescriptionAlphabetical implements Comparator<Transaction>{
             @Override
             public int compare(Transaction a, Transaction b){
@@ -363,15 +361,14 @@ public class Budget {
         }
         SortByDescriptionAlphabetical amountComparator = new SortByDescriptionAlphabetical();
         Collections.sort(listOfTransactions, amountComparator);
-        for(Transaction t: listOfTransactions) System.out.println(t.getDescription());
+        //for(Transaction t: listOfTransactions) System.out.println(t.getDescription());
     }
-
 
     /*
      * Sort by description in reverse alphabetical order.
      */
     public void sortTransactionsDescriptionReverseAlphabetical(){
-        for(Transaction t: listOfTransactions) System.out.println(t.getDescription());
+        //for(Transaction t: listOfTransactions) System.out.println(t.getDescription());
         class SortByDescriptionReverseAlphabetical implements Comparator<Transaction>{
             @Override
             public int compare(Transaction a, Transaction b){
@@ -383,9 +380,8 @@ public class Budget {
         }
         SortByDescriptionReverseAlphabetical amountComparator = new SortByDescriptionReverseAlphabetical();
         Collections.sort(listOfTransactions, amountComparator);
-        for(Transaction t: listOfTransactions) System.out.println(t.getDescription());
+        //for(Transaction t: listOfTransactions) System.out.println(t.getDescription());
     }
-
 
     /*
      * Sort by date in order of old/past to new/future.
