@@ -78,7 +78,12 @@ public class FileProcessor {
         String email = null;
         String school = null;
         String username = null;
+        //quick note - User stores password and salt as byte[]. To convert,
+        //string to byte[]: byte[] bytes = stringVar.getBytes();
+        //byte[] to string: String stringVar = new String (bytes, StandardCharsets.UTF_8);
+        //I need to check how storing byte[] in json works
         String password = null;
+        String salt = null;
 
         jFile.beginObject();
         while(jFile.hasNext()){
@@ -93,12 +98,15 @@ public class FileProcessor {
                 username = jFile.nextString();
             }else if(client.equals("password")){
                 password = jFile.nextString();
-            }else{
+            }else if(client.equals("salt")){//needed for secure password
+                salt = jFile.nextString();
+            }
+            else{
                 jFile.skipValue();
             }
         }
         jFile.endObject();
-        temp = new User(name,email,school,username,password);
+        temp = new User(name,email,school,username,password.getBytes(),salt.getBytes());
         return temp;
     }
 

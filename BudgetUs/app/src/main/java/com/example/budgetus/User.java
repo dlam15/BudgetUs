@@ -14,16 +14,18 @@ public class User
 	private String school;
 	private String username;
 	private byte[] password;
+	private byte[] salt;//sorry, I forgot about this one - used for security
 	private byte[] randomID;
 	private Map<Integer, String> groups = new HashMap<>();
 
-	public User(String name, String email, String school, String username, byte[] password)
+	public User(String name, String email, String school, String username, byte[] password, byte[] salt)
 	{
 		this.name = name;
 		this.email = email;
 		this.school = school;
 		this.username = username;
 		this.password = password;
+		this.salt = salt;
 	}
 	
 	public boolean updateName(String name){
@@ -38,6 +40,12 @@ public class User
 
 	public boolean updatePassword(byte[] password){
 		this.password = password;
+		return true;
+	}
+
+	//NOTE - updating password requires updating salt, so both setters will be called when password changed
+	public boolean updateSalt(byte[] salt){
+		this.salt = salt;
 		return true;
 	}
 
@@ -77,6 +85,8 @@ public class User
 	public byte[] getPassword(){
 		return this.password;
 	}
+
+	public byte[] getSalt() { return this.salt; }
 
 	public byte[] getRandomID() {
 		return randomID;

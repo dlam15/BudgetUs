@@ -80,7 +80,7 @@ public class UserRecord {
     public boolean checkEmail(String email){
         for(User userElement : hashmap.values()){
             User currUser = userElement;
-            if(currUser.getEmail().equals(email)) return false;
+            if(currUser.getEmail().equalsIgnoreCase(email)) return false;
         }
         return true;
     }
@@ -201,7 +201,7 @@ public class UserRecord {
         }else{//username exists
             User accessedUser = hashmap.get(username);
             assert accessedUser != null;
-            byte[] salt = null;// = accessedUser.getSalt();
+            byte[] salt = accessedUser.getSalt();
             byte[] actualPassword = accessedUser.getPassword();
             boolean validated = false;
             try{
