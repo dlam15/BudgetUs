@@ -8,67 +8,73 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-;
+import java.util.Arrays;
+import java.util.List;
 
-
+//import com.firebase.ui.auth.AuthUI;
+//import com.firebase.ui.auth.IdpResponse;
+//import com.google.firebase.auth.FirebaseAuth;
+//import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
-    private EditText username;
-    private EditText password;
-    private Button loginbutton;
-    private Button toRegBtn;//teresa
-    private Button forgotUsernamebutton;//teresa
-    private Button forgotPasswordbutton;//teresa
+    //private EditText username;
+    //private EditText password;
+    //private Button loginbutton;
+    //private Button toRegBtn;//teresa
+    //private Button forgotUsernamebutton;
+    //private Button forgotPasswordbutton;
     private UserRecord userRecord;
+    //static final String EXTRA_RECORD = "com.example.EXTRA_RECORD";
 
+   // private static final int RC_SIGN_IN = 123;//for authentication
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
 
-        Button toRegBtn = (Button) findViewById(R.id.goToRegisterButton);
+        /*Button toRegBtn = (Button) findViewById(R.id.goToRegisterButton);
         toRegBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 launchRegisterActivity();
             }
-        });
-        userRecord = new UserRecord();//UserRecord userRecord = new UserRecord(MainActivity.this); matt
+        });*/
+        //userRecord = new UserRecord();
+        userRecord = new UserRecord(MainActivity.this); //matt
+
 
 
         //Variables
-         username = (EditText) findViewById(R.id.editUsername);
-         password = (EditText)findViewById(R.id.editPassword);
-         loginbutton = (Button) findViewById(R.id.btLogin);
-         toRegBtn = (Button) findViewById(R.id.goToRegisterButton);//teresa
-         forgotUsernamebutton = (Button) findViewById(R.id.btForgotUsername);//teresa
-         forgotPasswordbutton = (Button) findViewById(R.id.btForgotPassword);//teresa
+         //final EditText username = (EditText) findViewById(R.id.editUsername);
+         //final EditText password = (EditText)findViewById(R.id.editPassword);
+         Button loginbutton = (Button) findViewById(R.id.btLogin);
+         Button toRegBtn = (Button) findViewById(R.id.goToRegisterButton);
+         Button forgotUsernamebutton = (Button) findViewById(R.id.btForgotUsername);
+         Button forgotPasswordbutton = (Button) findViewById(R.id.btForgotPassword);
 
-        //Register Button //teresa
+        //Register Button
         toRegBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) { launchRegisterActivity(); }
+            public void onClick(View view) {
+                launchRegisterActivity(); }
         });
 
         //Login Button
          loginbutton.setOnClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View view) {
+                 EditText username = (EditText) findViewById(R.id.editUsername); //derrick
+                 EditText password = (EditText)findViewById(R.id.editPassword); //derrick
                  String inputUser = username.getText().toString().trim();
                  String inputPass = password.getText().toString().trim();
                  validate(inputUser,inputPass);
              }
          });
 
-        // registerbutton.setOnClickListener(new Button.OnClickListener(){
-        //     public void onClick(View view) {
-        //         Intent registerPage = new Intent(MainActivity.this, Register.class);
-        //         startActivity(registerPage);
-        //     }
-        // });
-        /* teresa
+
+        // teresa
         //Forgot Username Button
         forgotUsernamebutton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,7 +90,17 @@ public class MainActivity extends AppCompatActivity {
                 launchForgotPasswordActivity();
             }
         });
-        */
+
+        //derrick
+        /*List<AuthUI.IdpConfig> providers = Arrays.asList(
+                new AuthUI.IdpConfig.EmailBuilder().build());
+        startActivityForResult(
+                AuthUI.getInstance()
+                        .createSignInIntentBuilder()
+                        .setAvailableProviders(providers)
+                        .build(),
+                RC_SIGN_IN);*/
+
     }
 
     //Functions
@@ -92,17 +108,17 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
     }
-/* teresa
+    // teresa
     private void launchForgotUsernameActivity(){
-        Intent intent = new Intent(this, forgotLogin.class);
+        Intent intent = new Intent(this, ForgotUser.class);
         startActivity(intent);
     }
 
     private void launchForgotPasswordActivity(){
-        Intent intent = new Intent(this, forgotLogin2.class);
+        Intent intent = new Intent(this, ForgotPass.class);
         startActivity(intent);
     }
-*/
+
 
     private void validate(String userName,String userPassword) {
          //get username and password
@@ -119,6 +135,26 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("Failed to validate");
          }
      }
+
+     //derrick
+    /*protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_IN) {
+            IdpResponse response = IdpResponse.fromResultIntent(data);
+
+            if (resultCode == RESULT_OK) {
+                // Successfully signed in
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                // ...
+            } else {
+                // Sign in failed. If response is null the user canceled the
+                // sign-in flow using the back button. Otherwise check
+                // response.getError().getErrorCode() and handle the error.
+                // ...
+            }
+        }
+    }*/
 
 
 }

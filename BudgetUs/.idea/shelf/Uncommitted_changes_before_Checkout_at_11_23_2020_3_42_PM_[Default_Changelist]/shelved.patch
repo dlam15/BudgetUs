@@ -1,0 +1,96 @@
+Index: app/src/main/java/com/example/budgetus/MainActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.budgetus;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.view.View;\r\nimport android.widget.Button;\r\nimport android.widget.EditText;\r\n\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\n;\r\n\r\n\r\n\r\npublic class MainActivity extends AppCompatActivity {\r\n\r\n    private EditText username;\r\n    private EditText password;\r\n    private Button loginbutton;\r\n    private Button registerbutton;\r\n    private UserRecord userRecord;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_main);\r\n\r\n\r\n        Button toRegBtn = (Button) findViewById(R.id.goToRegisterButton);\r\n        toRegBtn.setOnClickListener(new View.OnClickListener() {\r\n            @Override\r\n            public void onClick(View view) {\r\n                launchRegisterActivity();\r\n            }\r\n        });\r\n        userRecord = new UserRecord();\r\n\r\n        //Theresa's\r\n         username = (EditText) findViewById(R.id.editUsername);\r\n         password = (EditText)findViewById(R.id.editPassword);\r\n         loginbutton = (Button) findViewById(R.id.btLogin);\r\n\r\n         loginbutton.setOnClickListener(new View.OnClickListener() {\r\n             @Override\r\n             public void onClick(View view) {\r\n                 String inputUser = username.getText().toString().trim();\r\n                 String inputPass = password.getText().toString().trim();\r\n                 validate(inputUser,inputPass);\r\n             }\r\n         });\r\n\r\n        // registerbutton.setOnClickListener(new Button.OnClickListener(){\r\n        //     public void onClick(View view) {\r\n        //         Intent registerPage = new Intent(MainActivity.this, Register.class);\r\n        //         startActivity(registerPage);\r\n        //     }\r\n        // });\r\n\r\n    }\r\n\r\n    private void launchRegisterActivity(){\r\n        Intent intent = new Intent(this, RegisterActivity.class);\r\n        startActivity(intent);\r\n    }\r\n\r\n     private void validate(String userName,String userPassword) {\r\n         //get username and password\r\n         String matchUser = \"admin\";\r\n         String matchPass = \"123\";\r\n         //If match go to next page\r\n         if (userRecord.checkUser(userName,userPassword)) {\r\n             Intent dashboardPage = new Intent(this, MainDashboard.class);\r\n             startActivity(dashboardPage);\r\n         }\r\n         else{\r\n             //Can create limited attempts at login\r\n            System.out.println(\"Failed to validate\");\r\n         }\r\n     }\r\n\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/budgetus/MainActivity.java	(revision 6976b305048ceaf218fde1429623f3b7a25e0294)
++++ app/src/main/java/com/example/budgetus/MainActivity.java	(date 1606163937080)
+@@ -17,7 +17,9 @@
+     private EditText username;
+     private EditText password;
+     private Button loginbutton;
+-    private Button registerbutton;
++    //private Button toRegBtn; teresa
++    //private Button forgotUsernamebutton;
++    //private Button forgotPasswordbutton;
+     private UserRecord userRecord;
+ 
+     @Override
+@@ -33,13 +35,24 @@
+                 launchRegisterActivity();
+             }
+         });
+-        userRecord = new UserRecord();
++        userRecord = new UserRecord();//UserRecord userRecord = new UserRecord(MainActivity.this); matt
+ 
+         //Theresa's
++        //Variables
+          username = (EditText) findViewById(R.id.editUsername);
+          password = (EditText)findViewById(R.id.editPassword);
+          loginbutton = (Button) findViewById(R.id.btLogin);
++         //toRegBtn = (Button) findViewById(R.id.goToRegisterButton);
++         //forgotUsernamebutton = (Button) findViewById(R.id.btForgotUsername);
++         //forgotPasswordbutton = (Button) findViewById(R.id.btForgotPassword);
+ 
++        //Register Button teresa
++        //toRegBtn.setOnClickListener(new View.OnClickListener() {
++         //   @Override
++         //   public void onClick(View view) { launchRegisterActivity(); }
++        //});
++
++        //Login Button
+          loginbutton.setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View view) {
+@@ -55,19 +68,48 @@
+         //         startActivity(registerPage);
+         //     }
+         // });
++        /* teresa
++        //Forgot Username Button
++        forgotUsernamebutton.setOnClickListener(new View.OnClickListener() {
++            @Override
++            public void onClick(View view) {
++                launchForgotUsernameActivity();
++            }
++        });
+ 
++        //Forgot Password Button
++        forgotPasswordbutton.setOnClickListener(new View.OnClickListener() {
++            @Override
++            public void onClick(View view) {
++                launchForgotPasswordActivity();
++            }
++        });
++        */
+     }
+ 
++    //Functions
+     private void launchRegisterActivity(){
+         Intent intent = new Intent(this, RegisterActivity.class);
+         startActivity(intent);
+     }
++/* teresa
++    private void launchForgotUsernameActivity(){
++        Intent intent = new Intent(this, forgotLogin.class);
++        startActivity(intent);
++    }
++
++    private void launchForgotPasswordActivity(){
++        Intent intent = new Intent(this, forgotLogin2.class);
++        startActivity(intent);
++    }
++*/
+ 
+-     private void validate(String userName,String userPassword) {
++    private void validate(String userName,String userPassword) {
+          //get username and password
+          String matchUser = "admin";
+          String matchPass = "123";
+          //If match go to next page
++        //if (userName.equals(matchUser) && userPassword.equals(matchPass)) { teresa
+          if (userRecord.checkUser(userName,userPassword)) {
+              Intent dashboardPage = new Intent(this, MainDashboard.class);
+              startActivity(dashboardPage);

@@ -1,8 +1,10 @@
 package com.example.budgetus;
 
+import android.content.Context;
 import android.util.JsonReader;
 import android.util.Log;
 
+import java.io.Serializable;
 import java.util.Random;
 
 import java.security.NoSuchAlgorithmException;
@@ -33,14 +35,15 @@ import javax.activation.*;
 
 public class UserRecord {
 
-    //private Context mContext; matt
+    private Context mContext; //matt
     private Map<String, User> hashmap = new HashMap<String, User>(1000);
 
-    //public UserRecord (Context context){ matt
-    public UserRecord (){
-        //this.mContext = context; matt
+    public UserRecord (Context context){ //matt
+    //public UserRecord (){
+        this.mContext = context; //matt
         try {
-            FileProcessor fp = new FileProcessor();
+            //FileProcessor fp = new FileProcessor();
+            FileProcessor fp = new FileProcessor(mContext); //matt
             hashmap = fp.getUserMap();
             //System.out.println(getUser("dlam15").getSchool());//prints Binghamton
             //System.out.println(getUser("admin").getName());//prints John Doe
@@ -63,7 +66,7 @@ public class UserRecord {
      *  -security stuff works
      *  -Derrick's database stuff works
      */
-  /* public void test()  {
+   public void test()  {
         try{
             byte[] salt = PasswordEncryptionService.generateSalt();
             System.out.println("salt: " + Arrays.toString(salt));
@@ -75,7 +78,7 @@ public class UserRecord {
         catch(Exception e){
             e.printStackTrace();
         }
-    }*/
+    }
 
 
     /* We use this function to check if a username a new user is trying to use is valid. For
@@ -84,9 +87,9 @@ public class UserRecord {
      * @param username the username the registering user wants to use and we need to check for
      * @return true if the username is not in use, false if it is
      */
-  /*  public boolean checkUsername(String username){
+    public boolean checkUsername(String username){
         return !hashmap.containsKey(username);
-    }*/
+    }
 
     /* We use this function to check if a email a new user is trying to use is valid. For
      * it to be valid, it must not be in use by someone else. So, we just check the hashmap for the email.
@@ -94,13 +97,13 @@ public class UserRecord {
      * @param email the email the registering user wants to use and we need to check for
      * @return true if the email is not in use, false if it is
      */
- /*   public boolean checkEmail(String email){
+    public boolean checkEmail(String email){
         for(User userElement : hashmap.values()){
             User currUser = userElement;
             if(currUser.getEmail().equals(email)) return false;
         }
         return true;
-    }*/
+    }
 
     /*
      * Add a new user to the hashmap. This is triggered when the user registers.
@@ -121,7 +124,7 @@ public class UserRecord {
      * @param user the user object containing the info for registration
      * @return true if the user was registered correctly, false otherwise
      */
-    public boolean addUser(User newUser) {
+    /*public boolean addUser(User newUser) {
         String username = newUser.getUsername();//obtain key from username hash function
         if(getUserFromEmail(newUser.getEmail() )!= null){
             System.out.println("Email already in use.");
@@ -143,13 +146,17 @@ public class UserRecord {
             return true;
         }
         return false;
-    }
-    /*public boolean addUser(User newUser) { matt
-        String username = newUser.getUsername();//obtain key from username hash function
-        hashmap.put(username, newUser);
-        System.out.println("Success");
-        return true;
     }*/
+    public boolean addUser(User newUser) { //matt
+        if (attemptRegister(newUser.getUsername(),newUser.getEmail())){//derrick
+            String username = newUser.getUsername();//obtain key from username hash function
+            hashmap.put(username, newUser);
+            System.out.println("Success");
+
+            return true;
+        }
+        return false;
+    }
 
     /*
      * Get a user from the hashmap. Considering that all of the user objects are stored in the hashmap,
@@ -175,9 +182,9 @@ public class UserRecord {
      */
     public User getUserFromEmail(String email){
         for(User userElement : hashmap.values()){
-            User currUser = userElement;
-            if(currUser.getEmail() == email) return currUser;
-            //if(userElement.getEmail().equalsIgnoreCase (email)) return userElement; britania
+            //User currUser = userElement;
+            //if(currUser.getEmail() == email) return currUser;
+            if(userElement.getEmail().equalsIgnoreCase (email)) return userElement; //britania
         }
         return null;
     }
@@ -196,7 +203,7 @@ public class UserRecord {
         System.out.println("User does not exist");
         return false;
     }
-    /*public boolean removeUser(String username){ matt
+    /*public boolean removeUser(String username){ //matt
         if(hashmap.remove(username) != null) return true;
         System.out.println("User does not exist");
         return false;
@@ -223,8 +230,8 @@ public class UserRecord {
         }else{//username exists
             User accessedUser = hashmap.get(username);
             //assert accessedUser != null; britania
-            //if(accessedUser.getPassword().equals(password)){ matt
-            if(password == accessedUser.getPassword()){
+            if(accessedUser.getPassword().equals(password)){ //matt
+            //if(password == accessedUser.getPassword()){
                 System.out.println("Successful login");
                 return true;
             }
@@ -248,114 +255,6 @@ public class UserRecord {
 
 
     /*
-     * As I said before, we shouldn't store plaintext passwords. One common way to implement a safer system is with a salted hash.
-     * We generate some random string, called a salt, and mix this with the password in some way. We then feed this salted password
-     * to a hash function, and save the result as the user's "password." We also save the salt. When the user wants to login, repeat the
-     * process and check the saltedHashedPassword. By doing so, we are storing the password in a safe way with little overhead.
-     */
-
-    //the next 3 functions are a simple implementation of securely storing passwords I found at
-    //https://www.javacodegeeks.com/2012/05/secure-password-storage-donts-dos-and.html
-    //it could probably be improved or use a better hash function or replaced with the ability to sign in with another service (Google)
-    //but I will leave it for now as a first attempt
-    //I will also explain as I go through these functions
-
-    /* Move to User class?
-     *
-     * First step in storing a user's password securely. We generate a salt, which is a random string.
-     * We use SecureRandom to ensure that this value is actually random and cannot be predicted in any way.
-     * This salt will be combined with the user's password. This means that 2 exact passwords will not hash
-     * to the same value, as the random salt will make them different. We store this salt in plaintext - it does
-     * not need to be secret.
-     *
-     * @return a string (byte array) that is our 64 bit random salt
-     */
-    public byte[] generateSalt() throws NoSuchAlgorithmException {
-        // VERY important to use SecureRandom instead of just Random
-        SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-
-        // Generate a 8 byte (64 bit) salt as recommended by RSA PKCS5
-        byte[] salt = new byte[8];
-        random.nextBytes(salt);
-
-        return salt;
-    }
-
-
-
-    /* This can stay here or move - maybe its own class
-     *
-     * This will be called after generating the salt. This will be the only time
-     * that part of our code touches the plaintext password. The result of this function
-     * is what we will store as the User's password.
-     *
-     * This function is also called to check a provided password for a match. All we do is
-     * salt and hash what's provided, so we can use this to compare in the next function.
-     *
-     * This password isn't really encrypted, but hashed. The reasoning for this is that
-     * we don't need to unencrypt the password, and we actually want to avoid providing
-     * a way for that to be done. So, this is a one-way operation.
-     *
-     * @param password the user's plaintext password to encrypt
-     * @param salt the random string used to make it harder to figure out what the password is
-     * @return the salted, hashed, password which we can safely store
-     */
-    public byte[] getEncryptedPassword(String password, byte[] salt)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
-        // PBKDF2 with SHA-1 as the hashing algorithm. Note that the NIST
-        // specifically names SHA-1 as an acceptable hashing algorithm for PBKDF2
-        String algorithm = "PBKDF2WithHmacSHA1";
-        // SHA-1 generates 160 bit hashes, so that's what makes sense here
-        int derivedKeyLength = 160;
-        // Pick an iteration count that works for you. The NIST recommends at
-        // least 1,000 iterations:
-        // http://csrc.nist.gov/publications/nistpubs/800-132/nist-sp800-132.pdf
-        // iOS 4.x reportedly uses 10,000:
-        // http://blog.crackpassword.com/2010/09/smartphone-forensics-cracking-blackberry-backup-passwords/
-        int iterations = 20000;
-
-        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, iterations, derivedKeyLength);
-
-        SecretKeyFactory f = SecretKeyFactory.getInstance(algorithm);
-
-        return f.generateSecret(spec).getEncoded();
-    }
-
-
-
-    /* This can stay here or move
-     *
-     * This function checks the provided password against the password we have on record for the user.
-     * We are not storing the actual password. Instead, we store the result from getEncryptedPassword. So,
-     * to check a possible password against the stored one, we need to salt and hash the provided password
-     * and compare the 2.
-     *
-     */
-    public boolean authenticate(String attemptedPassword, byte[] encryptedPassword, byte[] salt)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
-        // Encrypt the clear-text password using the same salt that was used to
-        // encrypt the original password
-        byte[] encryptedAttemptedPassword = getEncryptedPassword(attemptedPassword, salt);
-
-        // Authentication succeeds if encrypted password that the user entered
-        // is equal to the stored hash
-        return Arrays.equals(encryptedPassword, encryptedAttemptedPassword);
-    }
-
-    /* How can we use these with our User class?
-        -when the user creates their account, we call generateSalt, and store the salt with their info
-        -we then call getEncryptedPassword with what they provided as a password, and the salt. THIS IS WHAT WE STORE AS THE PASSWORD
-        -when the user logs in, we call authenticate() with what they provided as a password, as well as the password and salt stored for the account
-        -they are trying to access
-     */
-
-
-
-
-
-
-
-    /*
      * Move to User class
      *
      * 1st function fired when the user forgets their credentials. This emails the user
@@ -372,8 +271,8 @@ public class UserRecord {
      */
     public boolean sendRandomID(User user){
         String email = user.getEmail();//email address of user
-        String randomID = user.getRandomID();
-        //String randomID = "randomID placeholder"; matt
+        //String randomID = user.getRandomID();
+        String randomID = "randomID placeholder"; //matt
         String body = "Hello, this is an email from BudgetUs, sent because you forgot your login info. Enter this code to regain access: " + randomID;
         return sendEmail(body, "Forgot Credentials", email);
     }
@@ -411,12 +310,12 @@ public class UserRecord {
         }).start();
         return ret[0];
     }
-/* britania
+    //britania
     public boolean sendUsername(User user){
         String email = user.getEmail();//email address of user
         String randomID = "123gruwguwecfcrugrb2y4i32t47vtc37";//user.getRandomID();//random id to email
         return false;
-    }*/
+    }
 
     /* Move to User class
 
@@ -430,8 +329,8 @@ public class UserRecord {
      */
     public boolean matchForgotID(String id, User user){
         boolean ret = false;
-        if(id == user.getRandomID()) ret = true;
-        user.setRandomID(Random());//in either case, we should generate a new random ID
+        //if(id == user.getRandomID()) ret = true;
+        //user.setRandomID(Random());//in either case, we should generate a new random ID
         return ret;
     }
 
@@ -448,7 +347,7 @@ public class UserRecord {
      * @param email the new user's desired email
      * @return true if both are available, false otherwise
      */
-   /* public boolean attemptRegister(String username, String email){ matt
+    private boolean attemptRegister(String username, String email){ //matt //private derrick
         if(!checkUsername(username)){
             System.out.println("Username in use");
             return false;
@@ -458,5 +357,5 @@ public class UserRecord {
             return false;
         }
         return true;
-    }*/
+    }
 }

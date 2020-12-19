@@ -1,10 +1,16 @@
 package com.example.budgetus;
 
+import android.content.Context;
 import android.util.JsonReader;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.nio.file.InvalidPathException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,15 +19,29 @@ import java.util.Map;
 
 public class FileProcessor {
     private String file = "database.json";
-    private FileReader reader;
+    //private FileReader reader;
+    private Reader reader;
+    private Context mContext;
 
-    public FileProcessor() throws InvalidPathException, SecurityException, FileNotFoundException, IOException {
-        reader = new FileReader(file);
+    //changes
+//-change FileReader to Reader
+//-add a context, passed from MainActivity (via UserRecord)
+//-move database to assets folder
+//-add InputStream to open file
+
+    //public FileProcessor() throws InvalidPathException, SecurityException, FileNotFoundException, IOException {
+        //reader = new FileReader(file);
+    public FileProcessor(Context context) throws InvalidPathException, SecurityException, FileNotFoundException, IOException {
+            //this code opens database.json, now stored at app/src/main/assets
+            //info from https://stackoverflow.com/questions/30417810/reading-from-a-text-file-in-android-studio-java
+            mContext = context;
+            InputStream in = mContext.getAssets().open(file);
+            reader = new InputStreamReader(in);
     }
 
     public Map<String, User> getUserMap(){
         Map<String, User> hashmap = new HashMap<String, User>(1000);
-        List<User> userList = new ArrayList<User>();
+        List<User> userList = new ArrayList<>();
 
         try {
             JsonReader jFile = new JsonReader(reader);

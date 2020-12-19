@@ -2,7 +2,7 @@ package com.example.budgetus;
 import java.util.*; 
 import java.io.*;
 
-public class User
+public class User implements Serializable
 {
 	private String name;
 	private String email;

@@ -10,44 +10,37 @@
         android:id="@+id/firstNameEditText"
         android:layout_width="0dp"
         android:layout_height="43dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginTop="25dp"
         android:ems="10"
         android:hint="First Name"
         android:inputType="textPersonName"
-        android:text="First Name"
-        app:layout_constraintBottom_toTopOf="@+id/lastNameEditText"
         app:layout_constraintEnd_toEndOf="@+id/lastNameEditText"
         app:layout_constraintStart_toStartOf="@+id/lastNameEditText"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.922" />
+        app:layout_constraintTop_toBottomOf="@+id/registerText" />
 
     <EditText
         android:id="@+id/lastNameEditText"
         android:layout_width="187dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="88dp"
-        android:layout_marginLeft="88dp"
-        android:layout_marginTop="145dp"
-        android:layout_marginBottom="19dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="25dp"
         android:ems="10"
+        android:hint="Last Name"
         android:inputType="textPersonName"
-        android:text="Last Name"
-        app:layout_constraintBottom_toTopOf="@+id/emailEditText"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/firstNameEditText" />
 
     <EditText
         android:id="@+id/emailEditText"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="56dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="25dp"
         android:ems="10"
         android:hint="Email"
         android:inputType="textEmailAddress"
         android:singleLine="true"
-        android:text="Email"
-        app:layout_constraintBottom_toTopOf="@+id/usernameEditText"
         app:layout_constraintEnd_toEndOf="@+id/lastNameEditText"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/lastNameEditText"
         app:layout_constraintTop_toBottomOf="@+id/lastNameEditText" />
 
@@ -55,30 +48,25 @@
         android:id="@+id/usernameEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="74dp"
-        android:layout_marginLeft="74dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginTop="35dp"
         android:ems="10"
-        android:hint="username"
+        android:hint="Username"
         android:inputType="textPersonName"
-        android:text="Username"
-        app:layout_constraintBottom_toTopOf="@+id/passwordEditText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/emailEditText" />
+        app:layout_constraintTop_toBottomOf="@+id/schoolEditText" />
 
     <EditText
         android:id="@+id/passwordEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="1dp"
-        android:layout_marginLeft="1dp"
-        android:layout_marginBottom="40dp"
-        android:contentDescription="password"
+        android:layout_marginTop="25dp"
         android:ems="10"
-        android:hint="password"
+        android:hint="Password"
         android:inputType="textPassword"
         android:singleLine="true"
-        app:layout_constraintBottom_toTopOf="@+id/registerBtn"
+        app:layout_constraintEnd_toEndOf="@+id/usernameEditText"
         app:layout_constraintStart_toStartOf="@+id/usernameEditText"
         app:layout_constraintTop_toBottomOf="@+id/usernameEditText" />
 
@@ -86,12 +74,12 @@
         android:id="@+id/registerBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="56dp"
-        android:layout_marginRight="56dp"
+        android:layout_marginTop="35dp"
         android:layout_marginBottom="26dp"
         android:text="Register"
         app:layout_constraintBottom_toTopOf="@+id/outTextView"
         app:layout_constraintEnd_toEndOf="@+id/passwordEditText"
+        app:layout_constraintStart_toStartOf="@+id/passwordEditText"
         app:layout_constraintTop_toBottomOf="@+id/passwordEditText" />
 
     <TextView
@@ -100,11 +88,36 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="23dp"
         android:layout_marginLeft="23dp"
-        android:layout_marginBottom="73dp"
+        android:layout_marginBottom="25dp"
         android:text="TextView"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/registerBtn"
         app:layout_constraintTop_toBottomOf="@+id/registerBtn"
         tools:text="output" />
+
+    <EditText
+        android:id="@+id/schoolEditText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:ems="10"
+        android:hint="School"
+        android:inputType="textPersonName"
+        app:layout_constraintEnd_toEndOf="@+id/emailEditText"
+        app:layout_constraintStart_toStartOf="@+id/emailEditText"
+        app:layout_constraintTop_toBottomOf="@+id/emailEditText" />
+
+    <TextView
+        android:id="@+id/registerText"
+        android:layout_width="191dp"
+        android:layout_height="51dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginEnd="175dp"
+        android:layout_marginRight="175dp"
+        android:text="Registration"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
