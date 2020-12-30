@@ -18,15 +18,16 @@ import java.util.Map;
 
 public class UserRecord {
 
-    //private Context mContext; matt
+    private Context mContext; //matt
     private Map<String, User> hashmap = new HashMap<String, User>(1000);
 
-    //public UserRecord (Context context){ matt
-    public UserRecord (){
-        //this.mContext = context; matt
+    public UserRecord (Context context){ //matt
+    //public UserRecord (){
+        this.mContext = context; //matt
         try {
             //FileProcessor fp = new FileProcessor();
-           // hashmap = fp.getUserMap();
+            FileProcessor fp = new FileProcessor(mContext); //matt
+            hashmap = fp.getUserMap();
             //System.out.println(getUser("dlam15").getSchool());//prints Binghamton
             //System.out.println(getUser("admin").getName());//prints John Doe
         }catch(Exception e){
@@ -48,7 +49,7 @@ public class UserRecord {
      *  -security stuff works
      *  -Derrick's database stuff works
      */
-  /* public void test()  {
+   public void test()  {
         try{
             byte[] salt = PasswordEncryptionService.generateSalt();
             System.out.println("salt: " + Arrays.toString(salt));
@@ -60,7 +61,7 @@ public class UserRecord {
         catch(Exception e){
             e.printStackTrace();
         }
-    }*/
+    }
 
 
     /* We use this function to check if a username a new user is trying to use is valid. For
@@ -69,9 +70,11 @@ public class UserRecord {
      * @param username the username the registering user wants to use and we need to check for
      * @return true if the username is not in use, false if it is
      */
-    public boolean checkUsername(String username) { return !hashmap.containsKey(username); }
+    public boolean checkUsername(String username){
+        return !hashmap.containsKey(username);
+    }
 
-     /* We use this function to check if a email a new user is trying to use is valid. For
+    /* We use this function to check if a email a new user is trying to use is valid. For
      * it to be valid, it must not be in use by someone else. So, we just check the hashmap for the email.
      *
      * @param email the email the registering user wants to use and we need to check for
@@ -161,8 +164,9 @@ public class UserRecord {
      */
     public User getUserFromEmail(String email){
         for(User userElement : hashmap.values()){
-            User currUser = userElement;
-            if(userElement.getEmail().equalsIgnoreCase(email)) return userElement;
+            //User currUser = userElement;
+            //if(currUser.getEmail() == email) return currUser;
+            if(userElement.getEmail().equalsIgnoreCase (email)) return userElement; //britania
         }
         return null;
     }
@@ -275,11 +279,12 @@ public class UserRecord {
     }
 
 /* britania
+    //britania
     public boolean sendUsername(User user){
         String email = user.getEmail();//email address of user
         String randomID = "123gruwguwecfcrugrb2y4i32t47vtc37";//user.getRandomID();//random id to email
         return false;
-    }*/
+    }
 
     /*
      * 2nd function fired when the user forgets their username or password. This checks if

@@ -8,6 +8,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.nio.file.InvalidPathException;
 import java.util.ArrayList;
@@ -15,28 +17,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//changes
+public class FileProcessor {
+    private String file = "database.json";
+    //private FileReader reader;
+    private Reader reader;
+    private Context mContext;
+
+    //changes
 //-change FileReader to Reader
 //-add a context, passed from MainActivity (via UserRecord)
 //-move database to assets folder
 //-add InputStream to open file
 
-public class FileProcessor {
-    private String file = "database.json";
-    private Reader reader;
-    private Context mContext;
-
+    //public FileProcessor() throws InvalidPathException, SecurityException, FileNotFoundException, IOException {
+        //reader = new FileReader(file);
     public FileProcessor(Context context) throws InvalidPathException, SecurityException, FileNotFoundException, IOException {
-        //this code opens database.json, now stored at app/src/main/assets
-        //info from https://stackoverflow.com/questions/30417810/reading-from-a-text-file-in-android-studio-java
-        mContext = context;
-        InputStream is = mContext.getAssets().open(file);
-        reader = new InputStreamReader(is);
+            //this code opens database.json, now stored at app/src/main/assets
+            //info from https://stackoverflow.com/questions/30417810/reading-from-a-text-file-in-android-studio-java
+            mContext = context;
+            InputStream in = mContext.getAssets().open(file);
+            reader = new InputStreamReader(in);
     }
 
     public Map<String, User> getUserMap(){
         Map<String, User> hashmap = new HashMap<String, User>(1000);
-        List<User> userList = new ArrayList<User>();
+        List<User> userList = new ArrayList<>();
 
         try {
             JsonReader jFile = new JsonReader(reader);
