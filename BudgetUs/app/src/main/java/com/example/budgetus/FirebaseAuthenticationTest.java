@@ -57,6 +57,7 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
       Test function to:
       -see if user is signed in
       -if not, make or sign in user, update their fields
+
      */
     public void test() {
         // Check if user is signed in (non-null) and update UI accordingly.
@@ -66,12 +67,119 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
             //createAccount("mkyea1@binghamton.edu", "password");//make account
             //updateUserFields();//update with extra info
             signIn("mkyea1@binghamton.edu", "password");//sign in
+            //resetPassword();
             //sendEmailVerification();
         } else {
             System.out.println("non null usr");
         }
         printInfo();
     }
+
+
+    /*
+     The rest of the functions below are copy-pasted from the documentation. However, they are a bit confusing to me,
+     and possibly async, so I need to learn more about anonymous functions (or whatever these are) or just make them more normal calls if possible
+     */
+
+
+
+    /*
+     Creates an account from an email and password. Will also sign the new user in.
+     There are a few other fields that a User contains, like name and picture. The function updateUserFields,
+     seen below, can be called here to register and set extra info all at once.
+     */
+    private void createAccount(String email, String password) {
+        Log.d(TAG, "createAccount:" + email);
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d(TAG, "createUserWithEmail:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                            //Toast.makeText(EmailPasswordActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+        // [END create_user_with_email]
+    }
+
+
+
+    /*
+    Used to verify email. So, we could make an account inactive until they click a link in the email sent here.
+    We can edit the email sent within Firebase.
+    */
+    private void sendEmailVerification() {
+        // Send verification email
+        // [START send_email_verification]
+        final FirebaseUser user = mAuth.getCurrentUser();
+        user.sendEmailVerification()
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        // [START_EXCLUDE]
+                        if (task.isSuccessful()) {
+                            System.out.println("sent");
+                        } else {
+                            Log.e(TAG, "sendEmailVerification", task.getException());
+                        }
+                        // [END_EXCLUDE]
+                    }
+                });
+        // [END send_email_verification]
+    }
+
+
+    /*
+     Used to reset password. I think there is a way to change User's email as well. Again, we can edit the email sent within Firebase.
+     */
+    private void resetPassword(){
+        FirebaseUser user = mAuth.getCurrentUser();
+        String emailAddress = user.getEmail();
+        mAuth.sendPasswordResetEmail(emailAddress)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "Email sent.");
+                        }
+                    }
+                });
+    }
+
+
+
+
+
+    /*
+     Sign a user in with their email and password.
+     */
+    private void signIn(String email, String password) {
+        Log.d(TAG, "signIn:" + email);
+        // [START sign_in_with_email]
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d(TAG, "signInWithEmail:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            resetPassword();
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w(TAG, "signInWithEmail:failure", task.getException());
+                        }
+                    }
+                });
+        // [END sign_in_with_email]
+    }
+
 
     /*
      Function to update additional user fields, like display name and profile picture. Will have to see
@@ -98,78 +206,14 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
     }
 
 
-    /*
-     Sign a user in with their email and password.
-     */
-    private void signIn(String email, String password) {
-        Log.d(TAG, "signIn:" + email);
-        // [START sign_in_with_email]
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "signInWithEmail:failure", task.getException());
-                        }
-                    }
-                });
-        // [END sign_in_with_email]
-    }
+
+
+
+
 
 
     /*
-     Creates an account from an email and password. Will also sign the new user in.
-     */
-    private void createAccount(String email, String password) {
-        Log.d(TAG, "createAccount:" + email);
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "createUserWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            //Toast.makeText(EmailPasswordActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-        // [END create_user_with_email]
-    }
-
-    /*
-     Used to verify email. So, we could make an account inactive until they click a link in the email sent here.
-     */
-    private void sendEmailVerification() {
-        // Send verification email
-        // [START send_email_verification]
-        final FirebaseUser user = mAuth.getCurrentUser();
-        user.sendEmailVerification()
-                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        // [START_EXCLUDE]
-                        if (task.isSuccessful()) {
-                            System.out.println("sent");
-                        } else {
-                            Log.e(TAG, "sendEmailVerification", task.getException());
-                        }
-                        // [END_EXCLUDE]
-                    }
-                });
-        // [END send_email_verification]
-    }
-
-    /*
-     Basic function to print a user's name, email, pic URL, email verification status, and uid.
+     Basic function to print a user's name, email, pic URL, email verification status, and uid. Not a copy-pasted function.
      */
     private void printInfo(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
