@@ -61,12 +61,13 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
      */
     public void test() {
         // Check if user is signed in (non-null) and update UI accordingly.
+        mAuth.signOut();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             System.out.println("null user, lets make one");
             //createAccount("mkyea1@binghamton.edu", "password");//make account
             //updateUserFields();//update with extra info
-            signIn("mkyea1@binghamton.edu", "password");//sign in
+            signIn("mkyea1@binghamton.edu", "password2");//sign in
             //resetPassword();
             //sendEmailVerification();
         } else {
@@ -77,8 +78,24 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
 
 
     /*
-     The rest of the functions below are copy-pasted from the documentation. However, they are a bit confusing to me,
-     and possibly async, so I need to learn more about anonymous functions (or whatever these are) or just make them more normal calls if possible
+   API functions are async, so we need to make sure that an operation completes before allowing anything else.
+   So, when we call a function, we disallow anything else from being selected until that call finishes.
+   hideActions() and showActions() can be used for this purpose. Right now I think just hiding and showing buttons on the
+   screen will work, but we can add checks in code instead if easier/cleaner/etc.
+
+   For example, user hits sign in->all possible actions hidden as web service called to sign user in -> web service returns -> display possible actions again
+   */
+    public void hideActions(){}
+    public void showActions(){
+        changeEmail("kyeamatt@gmail.com");
+    }
+
+
+    /*
+     The rest of the functions below are mostly copy-pasted from the documentation. However, keep in mind that they are mostly async (use Java tasks).
+     This makes sense - we can't just halt execution and wait on the web service to respond, and this lets us know when the call is finished. So,
+     we'll need to be careful and make sure an action is finished before allowing another one (i.e. make sure user is successfully logged in before
+     allowing them to display info or change password, etc).
      */
 
 
@@ -87,8 +104,17 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
      Creates an account from an email and password. Will also sign the new user in.
      There are a few other fields that a User contains, like name and picture. The function updateUserFields,
      seen below, can be called here to register and set extra info all at once.
+
+     Replaces:
+     checkUsername
+     checkEmail
+     attemptRegister
+     addUser
+     getUser
+     getUserFromEmail
      */
     private void createAccount(String email, String password) {
+        hideActions();
         Log.d(TAG, "createAccount:" + email);
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -98,10 +124,10 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
+                            showActions();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            //Toast.makeText(EmailPasswordActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -137,6 +163,11 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
 
     /*
      Used to reset password. I think there is a way to change User's email as well. Again, we can edit the email sent within Firebase.
+
+     Replaces:
+     sendRandomID
+     checkRandomID (link in email brings user to a page to reset password)
+     sendEmail
      */
     private void resetPassword(){
         FirebaseUser user = mAuth.getCurrentUser();
@@ -158,6 +189,10 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
 
     /*
      Sign a user in with their email and password.
+
+     Replaces:
+     checkUser
+     PasswordEncryptionService class
      */
     private void signIn(String email, String password) {
         Log.d(TAG, "signIn:" + email);
@@ -170,7 +205,7 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            resetPassword();
+                            showActions();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
@@ -205,15 +240,61 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
                 });
     }
 
+    /*
+    Delete User and their info from the system.
+
+    Replaces:
+    removeUser
+     */
+    private void deleteUser(){
+        mAuth.getCurrentUser().delete()
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "User deleted");
+                    }
+                }
+            });
+    }
+
+    private void signOut(){
+        mAuth.signOut();
+    }
 
 
+    //should I add getters and setters? these 2 are setters, but maybe these will go elsewhere.
+
+    private void changeEmail(String newEmail){
+        mAuth.getCurrentUser().updateEmail(newEmail)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "Email updated");
+                        }
+                    }
+                });
+    }
+
+    private void changePassword(String newPassword){
+            mAuth.getCurrentUser().updatePassword(newPassword)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Log.d(TAG, "Password updated");
+                            }
+                        }
+                    });
+    }
 
 
 
 
 
     /*
-     Basic function to print a user's name, email, pic URL, email verification status, and uid. Not a copy-pasted function.
+     Basic function to print a user's name, email, pic URL, email verification status, and uid. Not a copy-pasted function from the documentation/API.
      */
     private void printInfo(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
