@@ -41,37 +41,31 @@ import androidx.appcompat.app.AppCompatActivity;
  */
 public class FirebaseAuthenticationTest extends AppCompatActivity {
 
-    private FirebaseAuth mAuth;
+    private FirebaseAuth mAuth;//authentication object used to call functions
 
     /*
      Constructor for calling testing functions
      */
     FirebaseAuthenticationTest(){
-        System.out.println("AUTH STUFF");
-        // Initialize Firebase Auth
-        mAuth = FirebaseAuth.getInstance();
+        System.out.println("Preforming Authentication");
+        mAuth = FirebaseAuth.getInstance();// Initialize Firebase Auth
         test();
     }
 
     /*
-      Test function to:
-      -see if user is signed in
-      -if not, make or sign in user, update their fields
-
+      Test function to call the other functions
      */
     public void test() {
-        // Check if user is signed in (non-null) and update UI accordingly.
         mAuth.signOut();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
-            System.out.println("null user, lets make one");
             //createAccount("mkyea1@binghamton.edu", "password");//make account
             //updateUserFields();//update with extra info
             signIn("mkyea1@binghamton.edu", "password2");//sign in
             //resetPassword();
             //sendEmailVerification();
         } else {
-            System.out.println("non null usr");
+            System.out.println("User already signed in");
         }
         printInfo();
     }
@@ -84,18 +78,18 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
    screen will work, but we can add checks in code instead if easier/cleaner/etc.
 
    For example, user hits sign in->all possible actions hidden as web service called to sign user in -> web service returns -> display possible actions again
+
+   I'll start adding to these once I connect this code to the front-end/display abilities
    */
     public void hideActions(){}
-    public void showActions(){
-        changeEmail("kyeamatt@gmail.com");
-    }
+    public void showActions(){ }
 
 
     /*
      The rest of the functions below are mostly copy-pasted from the documentation. However, keep in mind that they are mostly async (use Java tasks).
      This makes sense - we can't just halt execution and wait on the web service to respond, and this lets us know when the call is finished. So,
      we'll need to be careful and make sure an action is finished before allowing another one (i.e. make sure user is successfully logged in before
-     allowing them to display info or change password, etc).
+     allowing them to display info or change password, etc) which is why we'll use something like hideActions() and showActions() described above.
      */
 
 
@@ -114,7 +108,7 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
      getUserFromEmail
      */
     private void createAccount(String email, String password) {
-        hideActions();
+        hideActions();//display "loading"
         Log.d(TAG, "createAccount:" + email);
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -124,45 +118,46 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            showActions();
+                            showActions();//display "success"
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                            showActions();//display "failure" and allow to try again
                         }
                     }
                 });
-        // [END create_user_with_email]
     }
-
 
 
     /*
     Used to verify email. So, we could make an account inactive until they click a link in the email sent here.
-    We can edit the email sent within Firebase.
+    We can edit the email sent within Firebase's settings.
+
+    Probably doesn't need to hide other options, email failing to send is an odd issue that'd we'd probably just try to send again
     */
     private void sendEmailVerification() {
-        // Send verification email
-        // [START send_email_verification]
         final FirebaseUser user = mAuth.getCurrentUser();
         user.sendEmailVerification()
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        // [START_EXCLUDE]
                         if (task.isSuccessful()) {
-                            System.out.println("sent");
+                            System.out.println("Email Sent");
                         } else {
                             Log.e(TAG, "sendEmailVerification", task.getException());
+                            //add retry?
                         }
-                        // [END_EXCLUDE]
                     }
                 });
-        // [END send_email_verification]
     }
 
 
     /*
      Used to reset password. I think there is a way to change User's email as well. Again, we can edit the email sent within Firebase.
+
+     Might need to sign the user out once they submit this request? Unsure
+
+     Probably don't need to hide other options, email failing to send is an odd issue that'd we'd probably just try to send again
 
      Replaces:
      sendRandomID
@@ -178,6 +173,9 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "Email sent.");
+                        }else {
+                            Log.e(TAG, "sendEmailVerification", task.getException());
+                            //add retry?
                         }
                     }
                 });
@@ -195,8 +193,8 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
      PasswordEncryptionService class
      */
     private void signIn(String email, String password) {
+        hideActions();//show "signing in"
         Log.d(TAG, "signIn:" + email);
-        // [START sign_in_with_email]
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -205,14 +203,14 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            showActions();
+                            showActions();//success, show dashboard/options available to a signed in user
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
+                            showActions();//show failure, ask to try again (probably add a limit if Firebase doesn't automatically)
                         }
                     }
                 });
-        // [END sign_in_with_email]
     }
 
 
@@ -221,6 +219,7 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
      if these can be specified at profile creation as well. Will need parameters.
      */
     private void updateUserFields(){
+        hideActions();//show "updating"
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         //uses a builder for changes
@@ -235,6 +234,10 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "User profile updated.");
+                            showActions();//show "fields updated"
+                        }else {
+                            Log.e(TAG, "Update profile", task.getException());
+                            showActions();//show "failure" and why
                         }
                     }
                 });
@@ -247,46 +250,75 @@ public class FirebaseAuthenticationTest extends AppCompatActivity {
     removeUser
      */
     private void deleteUser(){
+        hideActions();//show "deleting" (probably add confirm button)
         mAuth.getCurrentUser().delete()
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()) {
                         Log.d(TAG, "User deleted");
+                        //log out if it doesn't automatically
+                        showActions();//show "deleted," go back to register screen
+                    }else {
+                        Log.e(TAG, "Delete user", task.getException());
+                        showActions();//show error
                     }
                 }
             });
     }
 
+
+    /*
+     Users stay signed in after exiting the app by default, so we need an option to sign out.
+     */
     private void signOut(){
         mAuth.signOut();
     }
 
 
-    //should I add getters and setters? these 2 are setters, but maybe these will go elsewhere.
+
+
+    //These are 2 setters for email and password. I'll move these (and add the rest of the getters and setters) to a User class
+    //soon depending on how we'll deal with user objects.
+
+    //Rest of getters are as follows below, or use the builder as seen in updateUserFields above
+    //Setters are a bit easier, just .getX(), no async
+
+    //Also, the documentation says that these are security critical actions, and require the user to have signed in recently.
+    //I haven't run into an issue with this yet, but will keep an eye out for it.
 
     private void changeEmail(String newEmail){
+        hideActions();//show "updating"
         mAuth.getCurrentUser().updateEmail(newEmail)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "Email updated");
+                            showActions();//show "success"
+                        }else {
+                            Log.e(TAG, "Update Email", task.getException());
+                            showActions();//show "failure"
                         }
                     }
                 });
     }
 
     private void changePassword(String newPassword){
-            mAuth.getCurrentUser().updatePassword(newPassword)
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                Log.d(TAG, "Password updated");
-                            }
+        hideActions();
+        mAuth.getCurrentUser().updatePassword(newPassword)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "Password updated");
+                            showActions();//show "success"
+                        }else {
+                            Log.e(TAG, "sendEmailVerification", task.getException());
+                            showActions();//show "failure"
                         }
-                    });
+                    }
+                });
     }
 
 
