@@ -1,64 +1,64 @@
 package com.example.budgetus;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-;
-
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    private EditText username;
-    private EditText password;
+    private EditText editEmail;
+    private EditText editPassword;
     private Button loginbutton;
     private Button toRegBtn;//teresa
     private Button forgotUsernamebutton;//teresa
     private Button forgotPasswordbutton;//teresa
-    private UserRecord userRecord;
+    private ProgressDialog progressDialog;
+    private FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        firebaseAuth = FirebaseAuth.getInstance ();
 
-        Button toRegBtn = (Button) findViewById(R.id.goToRegisterButton);
+        progressDialog = new ProgressDialog (this);
+
+        toRegBtn = findViewById(R.id.goToRegisterButton);
         toRegBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 launchRegisterActivity();
             }
         });
-        userRecord = new UserRecord();//UserRecord userRecord = new UserRecord(MainActivity.this); matt
-
 
         //Variables
-         username = (EditText) findViewById(R.id.editUsername);
-         password = (EditText)findViewById(R.id.editPassword);
-         loginbutton = (Button) findViewById(R.id.btLogin);
-         toRegBtn = (Button) findViewById(R.id.goToRegisterButton);//teresa
-         forgotUsernamebutton = (Button) findViewById(R.id.btForgotUsername);//teresa
-         forgotPasswordbutton = (Button) findViewById(R.id.btForgotPassword);//teresa
-
-        //Register Button //teresa
-        toRegBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) { launchRegisterActivity(); }
-        });
+         editEmail = findViewById(R.id.editEmail);
+         editPassword = findViewById(R.id.editPassword);
+         loginbutton = findViewById(R.id.btLogin);
+         forgotUsernamebutton = findViewById(R.id.btForgotUsername);//teresa
+         forgotPasswordbutton = findViewById(R.id.btForgotPassword);//teresa
 
         //Login Button
          loginbutton.setOnClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View view) {
-                 String inputUser = username.getText().toString().trim();
-                 String inputPass = password.getText().toString().trim();
-                 validate(inputUser,inputPass);
+                 Login();
              }
          });
 
@@ -87,10 +87,46 @@ public class MainActivity extends AppCompatActivity {
         */
     }
 
+    private void Login() {
+        final String email =  editEmail.getText().toString();
+        final String password = editPassword.getText().toString();
+
+        if(TextUtils.isEmpty (email)){
+            editEmail.setError ("Enter your email");
+            return;
+        }
+        else if(TextUtils.isEmpty (password)){
+            editPassword.setError ("Enter your password");
+            return;
+        }
+        progressDialog.setMessage("Please wait...");
+        progressDialog.show();
+        progressDialog.setCanceledOnTouchOutside (false);
+
+        firebaseAuth.signInWithEmailAndPassword (email, password).addOnCompleteListener (this, new OnCompleteListener <AuthResult> ( ) {
+            @Override
+            public void onComplete(@NonNull Task <AuthResult> task) {
+                if(task.isSuccessful ()){
+
+                    Toast.makeText(MainActivity.this, "Successfully Login!", Toast.LENGTH_LONG).show();
+                    Intent intent  = new Intent(MainActivity.this, MainDashboard.class);
+                    startActivity(intent);
+                    finish();
+                }
+                else{
+                    Toast.makeText(MainActivity.this, "Login Fail!", Toast.LENGTH_LONG).show();
+                }
+                progressDialog.dismiss();
+            }
+        });
+
+    }
+
     //Functions
     private void launchRegisterActivity(){
         Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
+        finish ();
     }
 /* teresa
     private void launchForgotUsernameActivity(){
@@ -104,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
     }
 */
 
-    private void validate(String userName,String userPassword) {
+   /* private void validate(String userName,String userPassword) {
          //get username and password
          String matchUser = "admin";
          String matchPass = "123";
@@ -118,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
              //Can create limited attempts at login
             System.out.println("Failed to validate");
          }
-     }
+     }*/
 
 
 }

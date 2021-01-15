@@ -13,17 +13,22 @@ public class User
 	private String email;
 	private String school;
 	private String username;
-	private byte[] password;
-	private byte[] randomID;
+	private String password;
+	private String randomID;
 	private Map<Integer, String> groups = new HashMap<>();
 
-	public User(String name, String email, String school, String username, byte[] password)
+	public User(){
+
+	}
+
+	public User(String name, String email, String school, String username, String password, String randomID)
 	{
 		this.name = name;
 		this.email = email;
 		this.school = school;
 		this.username = username;
 		this.password = password;
+		this.randomID = randomID;
 	}
 	
 	public boolean updateName(String name){
@@ -36,7 +41,7 @@ public class User
 		return true;
 	}
 
-	public boolean updatePassword(byte[] password){
+	public boolean updatePassword(String password){
 		this.password = password;
 		return true;
 	}
@@ -74,18 +79,40 @@ public class User
 		return this.username;
 	}
 
-	public byte[] getPassword(){
+	public String getPassword(){
 		return this.password;
 	}
 
-	public byte[] getRandomID() {
-		return randomID;
+	public 	String getRandomID() {
+		return this.randomID;
 	}
 
-	@RequiresApi(api = Build.VERSION_CODES.O)
-	public void setRandomID() throws NoSuchAlgorithmException{
-		SecureRandom generatedID = SecureRandom.getInstanceStrong();
-		generatedID.nextBytes (randomID);
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public void setSchool(String school) {
+		this.school = school;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public void setGroups(Map <Integer, String> groups) {
+		this.groups = groups;
+	}
+
+	public Map <Integer, String> getGroups() {
+		return groups;
+	}
+
+	public void setRandomID(String id){
+		this.randomID = id;
 	}
 
 	public String getStatus(int groupID){
