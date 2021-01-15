@@ -25,9 +25,16 @@ public class RegisterActivity extends AppCompatActivity {
                 EditText lastNameEditText = (EditText) findViewById(R.id.lastNameEditText);
                 TextView outTextView = (TextView) findViewById(R.id.outTextView);
 
-                String res = firstNameEditText.getText() + " " + lastNameEditText.getText();
-                System.out.println(res);
-                outTextView.setText(res);
+                EditText pass = (EditText) findViewById(R.id.passwordEditText);
+                EditText pass2 = (EditText) findViewById(R.id.passwordConfirmEditText);
+                if(!pass.getText().equals(pass2.getText())){
+                    outTextView.setText("Uh oh, password doesn't match");
+                }else{
+                    String res = firstNameEditText.getText() + " " + lastNameEditText.getText();
+                    outTextView.setText(res);
+                }
+
+
             }
         });
 
