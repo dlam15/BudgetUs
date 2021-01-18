@@ -1,0 +1,34 @@
+{
+  "groups": [
+    {
+      "id": "123",
+      "name": "bing",
+      "users": [
+        {
+          "username": "dlam15",
+          "rank": "member"
+        },
+        {
+          "username": "admin",
+          "rank": "admin"
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "name": "Derrick Lam",
+      "email": "dlam15@binghamton.edu",
+      "school": "Binghamton",
+      "username": "dlam15",
+      "password": "BudgetUs123!"
+    },
+    {
+      "name": "John Doe",
+      "email": "budgetusemail@gmail.com",
+      "school": "Binghamton",
+      "username": "admin",
+      "password": "123"
+    }
+  ]
+}
