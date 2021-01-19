@@ -7,12 +7,13 @@
     tools:context=".MainDashboard">
 
     <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="146dp"
+        android:id="@+id/informationTextView"
+        android:layout_width="287dp"
+        android:layout_height="241dp"
+        android:layout_marginTop="92dp"
         android:text="TextView"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.609"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -22,11 +22,11 @@
         app:layout_constraintVertical_bias="0.442" />
 
     <EditText
-        android:id="@+id/editUsername"
+        android:id="@+id/editEmail"
         android:layout_width="213dp"
         android:layout_height="41dp"
         android:layout_marginBottom="380dp"
-        android:hint="Username"
+        android:hint="Email"
         android:shadowColor="#FFFFFF"
         android:textColor="#F1EEEE"
         android:textColorHint="#F3EFEF"
@@ -60,7 +60,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.492"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editUsername"
+        app:layout_constraintTop_toBottomOf="@+id/editEmail"
         app:layout_constraintVertical_bias="0.068" />
 
     <TextView
@@ -70,7 +70,7 @@
         android:foregroundGravity="center"
         android:text="LoginPage"
         android:textColor="#FAF6F6"
-        app:layout_constraintBottom_toTopOf="@+id/editUsername"
+        app:layout_constraintBottom_toTopOf="@+id/editEmail"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

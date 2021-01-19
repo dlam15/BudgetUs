@@ -7,25 +7,28 @@ import java.util.*;
 import java.io.*;
 import java.security.*;
 
-public class User implements Serializable
+public class User
 {
 	private String name;
 	private String email;
 	private String school;
 	private String username;
-	private byte[] password;
-	private byte[] salt;//sorry, I forgot about this one - used for security
-	private byte[] randomID;
+	private String password;
+	private String randomID;
 	private Map<Integer, String> groups = new HashMap<>();
 
-	public User(String name, String email, String school, String username, byte[] password, byte[] salt)
+	public User(){
+
+	}
+
+	public User(String name, String email, String school, String username, String password, String randomID)
 	{
 		this.name = name;
 		this.email = email;
 		this.school = school;
 		this.username = username;
 		this.password = password;
-		this.salt = salt;
+		this.randomID = randomID;
 	}
 	
 	public boolean updateName(String name){
@@ -38,14 +41,8 @@ public class User implements Serializable
 		return true;
 	}
 
-	public boolean updatePassword(byte[] password){
+	public boolean updatePassword(String password){
 		this.password = password;
-		return true;
-	}
-
-	//NOTE - updating password requires updating salt, so both setters will be called when password changed
-	public boolean updateSalt(byte[] salt){
-		this.salt = salt;
 		return true;
 	}
 
@@ -82,20 +79,40 @@ public class User implements Serializable
 		return this.username;
 	}
 
-	public byte[] getPassword(){
+	public String getPassword(){
 		return this.password;
 	}
 
-	public byte[] getSalt() { return this.salt; }
-
-	public byte[] getRandomID() {
-		return randomID;
+	public 	String getRandomID() {
+		return this.randomID;
 	}
 
-	@RequiresApi(api = Build.VERSION_CODES.O)
-	public void setRandomID() throws NoSuchAlgorithmException{
-		SecureRandom generatedID = SecureRandom.getInstanceStrong();
-		generatedID.nextBytes (randomID);
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public void setSchool(String school) {
+		this.school = school;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public void setGroups(Map <Integer, String> groups) {
+		this.groups = groups;
+	}
+
+	public Map <Integer, String> getGroups() {
+		return groups;
+	}
+
+	public void setRandomID(String id){
+		this.randomID = id;
 	}
 
 	public String getStatus(int groupID){
@@ -122,4 +139,9 @@ public class User implements Serializable
 		}
 		return false;
 	}
+
+	public void forgotPassword() {
+
+	}
 }
+
