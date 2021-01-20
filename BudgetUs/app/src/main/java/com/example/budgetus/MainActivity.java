@@ -68,7 +68,8 @@ public class MainActivity extends AppCompatActivity {
         //         startActivity(registerPage);
         //     }
         // });
-        /* teresa
+
+        // teresa
         //Forgot Username Button
         forgotUsernamebutton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
                 launchForgotPasswordActivity();
             }
         });
-        */
+
     }
 
     private void Login() {
@@ -128,17 +129,18 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
         finish ();
     }
-/* teresa
+
+// teresa
     private void launchForgotUsernameActivity(){
-        Intent intent = new Intent(this, forgotLogin.class);
+        Intent intent = new Intent(this, ForgotUser.class);
         startActivity(intent);
     }
 
     private void launchForgotPasswordActivity(){
-        Intent intent = new Intent(this, forgotLogin2.class);
+        Intent intent = new Intent(this, ForgotPass.class);
         startActivity(intent);
     }
-*/
+
 
    /* private void validate(String userName,String userPassword) {
          //get username and password
