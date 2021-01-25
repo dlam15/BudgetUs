@@ -103,7 +103,7 @@ public class FileProcessor {
             }
         }
         jFile.endObject();
-        temp = new User(name,email,school,username,password);
+        temp = new User(name,email,school,username,password,"");
         return temp;
     }
 

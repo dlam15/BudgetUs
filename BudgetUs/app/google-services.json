@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "773195752484",
+    "firebase_url": "https://budgetus-72e24.firebaseio.com",
+    "project_id": "budgetus-72e24",
+    "storage_bucket": "budgetus-72e24.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:773195752484:android:d32bc060418b4c62f8e4b1",
+        "android_client_info": {
+          "package_name": "com.example.budgetus"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "773195752484-7f5rluh62lo15re8iegc8pbqcl5o9vig.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZUsHrTgCBaCF6l_V_xDm3-CiJLjpLfFc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "773195752484-7f5rluh62lo15re8iegc8pbqcl5o9vig.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
