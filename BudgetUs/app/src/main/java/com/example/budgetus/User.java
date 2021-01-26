@@ -1,13 +1,8 @@
 package com.example.budgetus;
-import android.os.Build;
-
-import androidx.annotation.RequiresApi;
-
-import java.util.*;
+import java.util.*; 
 import java.io.*;
-import java.security.*;
 
-public class User
+public class User// implements Serializable
 {
 	private String name;
 	private String email;
@@ -15,13 +10,14 @@ public class User
 	private String username;
 	private String password;
 	private String randomID;
-	private Map<Integer, String> groups = new HashMap<>();
+	private Map<Integer, String> groups=  new HashMap<>();;
 
 	public User(){
 
 	}
 
 	public User(String name, String email, String school, String username, String password, String randomID)
+	//public User(String name, String email, String school, String username, String password)
 	{
 		this.name = name;
 		this.email = email;
@@ -29,7 +25,7 @@ public class User
 		this.username = username;
 		this.password = password;
 		this.randomID = randomID;
-	}
+  }
 	
 	public boolean updateName(String name){
 		this.name = name;
@@ -144,4 +140,3 @@ public class User
 
 	}
 }
-

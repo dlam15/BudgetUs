@@ -1,13 +1,14 @@
 package com.example.budgetus;
-import com.sun.mail.iap.ByteArray;
 
+//import com.sun.mail.iap.ByteArray;
 import java.util.*;
 import java.security.*;
 
 public class Group {
     private String groupName;
     private final long groupID;
-    private Map<byte[], String> members = new HashMap<>();
+    private Map<Integer, String> members = new HashMap<>();
+    //private Map<byte[], String> members = new HashMap<>();
 
     public Group(String groupName, long groupID){
         this.groupName = groupName;
@@ -23,7 +24,8 @@ public class Group {
         return groupName;
     }
 
-    public boolean registerUser(byte[] newUser, String status){
+    public boolean registerUser(int newUser, String status){
+    //public boolean registerUser(byte[] newUser, String status){
         if(members.isEmpty ()){
             members.put(newUser, status);
             return true;
@@ -37,7 +39,8 @@ public class Group {
         return false;
     }
 
-    public boolean unregisterUser(byte[] remUser){
+    public boolean unregisterUser(int remUser){
+    //public boolean unregisterUser(byte[] remUser){
         if(members.isEmpty ()){
             return false;
         }
@@ -50,13 +53,15 @@ public class Group {
         return false;
     }
 
-    public boolean changeStatus(byte[] curUser, String status){
+    public boolean changeStatus(int curUser, String status){
+    //public boolean changeStatus(byte[] curUser, String status){
         if(members.isEmpty ()){
             return false;
         }
         else{
             if(members.containsKey (curUser)){
-                for (Map.Entry<byte[], String> tmp : members.entrySet()){
+                //for (Map.Entry<byte[], String> tmp : members.entrySet()){
+                for (Map.Entry<Integer, String> tmp : members.entrySet()){
                     if(tmp.getKey() == curUser){
                         tmp.setValue(status);
                         return true;

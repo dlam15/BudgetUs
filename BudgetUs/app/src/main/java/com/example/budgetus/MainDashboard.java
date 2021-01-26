@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.View;
+import android.widget.RelativeLayout;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -28,7 +30,22 @@ public class MainDashboard extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_dashboard);
 
-        outView = (TextView)findViewById(R.id.informationTextView);
+
+        //atsuyo
+        /*RelativeLayout summaryContentView = (RelativeLayout) findViewById(R.id.summary_content);
+        summaryContentView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                launchSummaryContentActivity();
+            }
+        });*/
+
+        /*
+            basically repeat above with whatever sections we want
+        */
+
+
+        outView = (TextView)findViewById(R.id.informationTextView);//britania
 
         firebaseAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance ().getReference ( "users" );
@@ -65,6 +82,11 @@ public class MainDashboard extends AppCompatActivity {
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
             }
         });
-
     }
+
+    private void launchSummaryContentActivity() {
+        Intent intent = new Intent(this, SummaryContentActivity.class);
+        startActivity(intent);
+    }
+
 }

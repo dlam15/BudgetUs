@@ -1,26 +1,29 @@
 package com.example.budgetus;
+import java.util.*;
+import java.security.*;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
-import java.util.*;
-import java.security.*;
-
-
 public class GroupRecord {
     private static Map<Long, Group> groups = new HashMap<>();
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public boolean addGroup(String groupName) throws NoSuchAlgorithmException{
-        SecureRandom randID = SecureRandom.getInstanceStrong();
-        long tmpID = randID.nextLong ();
+    public boolean addGroup(String groupName){
+        /*@RequiresApi(api = Build.VERSION_CODES.O)
+        public boolean addGroup(String groupName) throws NoSuchAlgorithmException{
+            SecureRandom randID = SecureRandom.getInstanceStrong();
+            long tmpID = randID.nextLong ();*/
 
         if(groups.isEmpty ()){
+            SecureRandom randID = new SecureRandom();
+            long tmpID = randID.nextLong ();
             Group newGroup = new Group(groupName, tmpID);
             groups.put(tmpID, newGroup);
             return true;
         }
         else{
+            SecureRandom randID = new SecureRandom();
+            long tmpID = randID.nextLong();
             boolean created = false;
             while(!created){
                 if(!groups.containsKey(tmpID)){
