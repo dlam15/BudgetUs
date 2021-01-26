@@ -2,11 +2,14 @@ package com.example.budgetus;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.gms.common.util.JsonUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -37,6 +40,7 @@ public class ForgotPass extends AppCompatActivity {
     private EditText username;
     private FirebaseAuth mAuth;
     private DatabaseReference databaseReference;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +52,7 @@ public class ForgotPass extends AppCompatActivity {
         sendEmailButton= (Button) findViewById(R.id.sendEmailPBtn);
         mAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference ( "users" );
+        progressDialog = new ProgressDialog(this);
 
 
         //send user an email to reset password
@@ -57,6 +62,9 @@ public class ForgotPass extends AppCompatActivity {
             //triggered when user presses button
             @Override
             public void onClick(View view) {
+                progressDialog.setMessage("Please wait...");
+                progressDialog.show();
+                progressDialog.setCanceledOnTouchOutside (false);
 
                     //the usual way to search db uses a query - I couldn't get this to work so we'll search all objects ourselves (for now)
                     databaseReference.get()
@@ -87,15 +95,19 @@ public class ForgotPass extends AppCompatActivity {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         if (task.isSuccessful()) {
-                                                            Log.d(TAG, "Email sent.");
+                                                            Toast.makeText(ForgotPass.this, "Email Sent.", Toast.LENGTH_LONG).show();
+                                                            finish();
                                                         } else {
-                                                            Log.e(TAG, "sendEmailVerification", task.getException());
+                                                            Toast.makeText(ForgotPass.this, "Email not sent. Please try again.", Toast.LENGTH_LONG).show();
+                                                            //Log.e(TAG, "sendEmailVerification", task.getException());
                                                             //add retry?
                                                         }
+                                                        progressDialog.dismiss();
                                                     }
                                                 });
                                     }else{
-                                        System.out.println("User not found");
+                                        progressDialog.dismiss();
+                                        Toast.makeText(ForgotPass.this, "User not found.", Toast.LENGTH_LONG).show();
                                     }
 
                                 }

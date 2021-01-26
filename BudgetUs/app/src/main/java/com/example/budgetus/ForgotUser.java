@@ -3,11 +3,14 @@ package com.example.budgetus;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -25,6 +28,7 @@ public class ForgotUser extends AppCompatActivity {
     private EditText email;
     private FirebaseAuth mAuth;
     private DatabaseReference databaseReference;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,11 +40,16 @@ public class ForgotUser extends AppCompatActivity {
         sendEmailButton= (Button) findViewById(R.id.sendEmailBtn);
         mAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference("users");
+        progressDialog = new ProgressDialog(this);
+
 
 
         sendEmailButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                progressDialog.setMessage("Please wait...");
+                progressDialog.show();
+                progressDialog.setCanceledOnTouchOutside (false);
                 String inputEmail = email.getText().toString().trim();
 
                 //the usual way to search db uses a query - I couldn't get this to work so we'll search all objects ourselves (for now)
@@ -71,9 +80,9 @@ public class ForgotUser extends AppCompatActivity {
                                         //for now, I've added my old password code, but one of the alternatives is probably better
                                         sendEmail("Hello, you forgot your username, it is " + username, "Forgot Username", emailAddress);
                                 } else {
-                                    System.out.println("User not found");
+                                    progressDialog.dismiss();
+                                    Toast.makeText(ForgotUser.this, "Email not found.", Toast.LENGTH_LONG).show();
                                 }
-
                             }
                         });
 
@@ -99,18 +108,23 @@ public class ForgotUser extends AppCompatActivity {
      * @return true on success, false on any errors
      */
     public boolean sendEmail(final String message, final String subject, final String receiver){
-        System.out.println(message +", "+ subject +", "+ receiver);
+        //System.out.println(message +", "+ subject +", "+ receiver);
         final boolean[] ret = {true};//nested functions are weird
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
+                    Looper.prepare();
                     //NOTE - email login info is here, really this code should run on a server or something, where user cannot see the source code
                     GmailSender sender = new GmailSender("budgetusemail@gmail.com", "");//sender of email - credentials
                     //I have no idea how to hide the credentials, just don't push with password for now
                     sender.sendMail(subject, message, "budgetusemail@gmail.com", receiver);//subject, body, sender, receiver
+                    progressDialog.dismiss();
+                    Toast.makeText(ForgotUser.this, "Email Sent.", Toast.LENGTH_LONG).show();
+                    finish();
                 } catch (Exception e) {
-                    Log.e("SendMail", e.getMessage(), e);
+                    Toast.makeText(ForgotUser.this, "Email not sent. Please try again.", Toast.LENGTH_LONG).show();
+                    //Log.e("SendMail", e.getMessage(), e);
                     ret[0] = false;
                 }
             }
