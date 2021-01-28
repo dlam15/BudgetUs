@@ -24,6 +24,7 @@ import static android.content.ContentValues.TAG;
 public class ForgotPass extends AppCompatActivity {
 
     private Button sendEmailButton;
+    private Button backBtn;
     private EditText email;
     private FirebaseAuth mAuth;
     private DatabaseReference databaseReference;
@@ -51,6 +52,16 @@ public class ForgotPass extends AppCompatActivity {
                 finish();
             };
 
+        });
+
+        //Back to login screen button
+        backBtn = findViewById(R.id.forgotBack);
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(ForgotPass.this,MainActivity.class));
+                finish();
+            }
         });
     }
 

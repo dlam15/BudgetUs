@@ -17,8 +17,9 @@
       android:textColorHint="#F4F0F0"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/enterTxt"
+      app:layout_constraintHorizontal_bias="0.0"
+      app:layout_constraintStart_toStartOf="@+id/forgotEmail"
+      app:layout_constraintTop_toBottomOf="@+id/forgotEmail"
       app:layout_constraintVertical_bias="0.903" />
 
   <EditText
@@ -55,6 +56,13 @@
       app:layout_constraintTop_toTopOf="parent"
       app:layout_constraintVertical_bias="0.347" />
 
+  <Button
+      android:id="@+id/forgotBack"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Back"
+      app:layout_constraintEnd_toEndOf="@+id/forgotEmail"
+      app:layout_constraintTop_toTopOf="@+id/forgotSend" />
 
 
-  </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
