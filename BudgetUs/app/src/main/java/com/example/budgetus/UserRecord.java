@@ -147,8 +147,8 @@ public class UserRecord {
         }
         return false;
     }*/
-    public boolean addUser(User newUser) { //matt
-        if (attemptRegister(newUser.getUsername(),newUser.getEmail())){//derrick
+    /*public boolean addUser(User newUser) { //matt
+        /*if (attemptRegister(newUser.getUsername(),newUser.getEmail())){//derrick
             String username = newUser.getUsername();//obtain key from username hash function
             hashmap.put(username, newUser);
             System.out.println("Success");
@@ -156,7 +156,7 @@ public class UserRecord {
             return true;
         }
         return false;
-    }
+    }*/
 
     /*
      * Get a user from the hashmap. Considering that all of the user objects are stored in the hashmap,
@@ -166,9 +166,9 @@ public class UserRecord {
      * @param username string username used to index the hashmap and return the object
      * @return user the user object accessed from the hashmap with the username. null if user does not exist
      */
-    public User getUser(String username){
+    /*public User getUser(String username){
         return hashmap.get(username);
-    }
+    }*/
 
 
     /*
@@ -180,14 +180,14 @@ public class UserRecord {
      * @param email string containing the email address we're searching all users for
      * @return user the user object accessed from the hashmap with the email. null if user does not exist/cannot find email
      */
-    public User getUserFromEmail(String email){
+    /*public User getUserFromEmail(String email){
         for(User userElement : hashmap.values()){
             //User currUser = userElement;
             //if(currUser.getEmail() == email) return currUser;
             if(userElement.getEmail().equalsIgnoreCase (email)) return userElement; //britania
         }
         return null;
-    }
+    }*/
 
 
     /*
@@ -197,12 +197,12 @@ public class UserRecord {
      * @param user user object to remove
      * @return true on successful removal, false on unsuccessful removal
      */
-    public boolean removeUser(User newUser){
+    /*public boolean removeUser(User newUser){
         String username = newUser.getUsername();
         if(hashmap.remove(username) != null) return true;
         System.out.println("User does not exist");
         return false;
-    }
+    }*/
     /*public boolean removeUser(String username){ //matt
         if(hashmap.remove(username) != null) return true;
         System.out.println("User does not exist");
@@ -223,7 +223,7 @@ public class UserRecord {
      * @param password String value of input provided by user for password
      * @return true on successful login, false on unsuccessful login
      */
-    public boolean checkUser(String username, String password){
+    /*public boolean checkUser(String username, String password){
         if(!hashmap.containsKey(username)) {//username is incorrect - put we might not want to alert the user to this if they're malicious
             System.out.println("Username does not exist");
             return false;
@@ -240,12 +240,12 @@ public class UserRecord {
                byte[] actualPassword = accessedUser.getPassword();
                return authenticate(password, salt, actualPassword);
              */
-            else{
+            /*else{
                 System.out.println("Incorrect password");
                 return false;
             }
         }
-    }
+    }*/
 
 
 
@@ -269,7 +269,7 @@ public class UserRecord {
      * @param user User object to obtain email and randomID from
      * @return true on successful email sent, false otherwise
      */
-    public boolean sendRandomID(User user){
+    /*public boolean sendRandomID(User user){
         String email = user.getEmail();//email address of user
         //String randomID = user.getRandomID();
         String randomID = "randomID placeholder"; //matt
@@ -293,7 +293,7 @@ public class UserRecord {
     * @param receiver recipient of the email
     * @return true on success, false on any errors
     */
-    public boolean sendEmail(final String message, final String subject, final String receiver){
+    /*public boolean sendEmail(final String message, final String subject, final String receiver){
         final boolean[] ret = {true};//nested functions are weird
         new Thread(new Runnable() {
             @Override
@@ -327,7 +327,7 @@ public class UserRecord {
      * @param user User object to obtain real ID from
      * @return true on successful match, false otherwise
      */
-    public boolean matchForgotID(String id, User user){
+    /*public boolean matchForgotID(String id, User user){
         boolean ret = false;
         //if(id == user.getRandomID()) ret = true;
         //user.setRandomID(Random());//in either case, we should generate a new random ID
@@ -347,7 +347,7 @@ public class UserRecord {
      * @param email the new user's desired email
      * @return true if both are available, false otherwise
      */
-    private boolean attemptRegister(String username, String email){ //matt //private derrick
+    /*private boolean attemptRegister(String username, String email){ //matt //private derrick
         if(!checkUsername(username)){
             System.out.println("Username in use");
             return false;
@@ -357,5 +357,5 @@ public class UserRecord {
             return false;
         }
         return true;
-    }
+    }*/
 }

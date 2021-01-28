@@ -275,7 +275,9 @@ public class Budget {
         class SortByAmountLowToHigh implements Comparator<Transaction>{
             @Override
             public int compare(Transaction a, Transaction b){
-                return Integer.compare(((int) a.getAmount()), (int) b.getAmount());
+                //Integer.compare(((int) a.getAmount()), (int) b.getAmount()); //Requires API level 19
+                return Integer.valueOf((int)a.getAmount()).compareTo(Integer.valueOf((int) b.getAmount()));
+
             }
         }
         SortByAmountLowToHigh amountComparator = new SortByAmountLowToHigh();
@@ -289,7 +291,8 @@ public class Budget {
         class SortByAmountHighToLow implements Comparator<Transaction>{
             @Override
             public int compare(Transaction a, Transaction b){
-                return Integer.compare(((int) b.getAmount()), (int) a.getAmount());
+                //Integer.compare(((int) b.getAmount()), (int) a.getAmount()); //Requires API level 19
+                return Integer.valueOf((int)b.getAmount()).compareTo(Integer.valueOf((int) a.getAmount()));
             }
         }
         SortByAmountHighToLow amountComparator = new SortByAmountHighToLow();

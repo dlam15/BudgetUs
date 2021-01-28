@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/darkblue"
-    tools:context=".forgotLogin">
+    tools:context=".ForgotUser">
 
     <Button
         android:id="@+id/sendEmailBtn"
@@ -17,11 +17,11 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/enterEmailtxt"
+        app:layout_constraintTop_toBottomOf="@+id/enterTxt"
         app:layout_constraintVertical_bias="0.903" />
 
     <EditText
-        android:id="@+id/enterEmailtxt"
+        android:id="@+id/enterTxt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"

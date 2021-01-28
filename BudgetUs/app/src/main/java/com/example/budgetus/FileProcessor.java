@@ -47,8 +47,8 @@ public class FileProcessor {
             JsonReader jFile = new JsonReader(reader);
             userList = findUsers (jFile);
             for (User user:userList){
-                String username = user.getUsername();
-                hashmap.put(username,user);
+                //String username = user.getUsername();
+                //hashmap.put(username,user);
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -103,7 +103,7 @@ public class FileProcessor {
             }
         }
         jFile.endObject();
-        temp = new User(name,email,school,username,password,"");
+        temp = new User(name,email,school,password,"");
         return temp;
     }
 

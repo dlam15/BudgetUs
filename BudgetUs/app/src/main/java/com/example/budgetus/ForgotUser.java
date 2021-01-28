@@ -16,8 +16,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import static android.content.ContentValues.TAG;
-
 
 public class ForgotUser extends AppCompatActivity {
 
@@ -33,7 +31,7 @@ public class ForgotUser extends AppCompatActivity {
         setContentView(R.layout.activity_forgot_user);
 
         //Variables
-        email = (EditText) findViewById(R.id.enterEmailtxt);
+        email = (EditText) findViewById(R.id.enterTxt);
         sendEmailButton= (Button) findViewById(R.id.sendEmailBtn);
         mAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference("users");
@@ -62,7 +60,7 @@ public class ForgotUser extends AppCompatActivity {
                                     curUser = userDatasnapshot.getValue(User.class);//cast results to user obj
                                     if (curUser.getEmail() != null && curUser.getEmail().equals(emailAddress)) {//found username provided
                                         //get email, set a flag so we email next, break
-                                        username = curUser.getUsername();
+                                        username = curUser.getName();
                                         userFound = true;
                                         break;
                                     }

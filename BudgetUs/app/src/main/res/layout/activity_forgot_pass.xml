@@ -6,10 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/darkblue"
-    tools:context=".forgotLogin2">
+    tools:context=".ForgotPass">
 
   <Button
-      android:id="@+id/sendEmailPBtn"
+      android:id="@+id/forgotSend"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="188dp"
@@ -18,28 +18,28 @@
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/enterEmailtxt"
+      app:layout_constraintTop_toBottomOf="@+id/enterTxt"
       app:layout_constraintVertical_bias="0.903" />
 
   <EditText
-      android:id="@+id/enterUsernametxt"
+      android:id="@+id/forgotEmail"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:ems="10"
       android:gravity="center"
-      android:hint="Type your username"
+      android:hint="Enter your email"
       android:inputType="textPersonName"
       android:textColor="#F4F2F2"
       android:textColorHint="#FDFDFD"
       app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toEndOf="@+id/forgotLoginPasswordHeader"
+      app:layout_constraintEnd_toEndOf="@+id/forgotLabel"
       app:layout_constraintHorizontal_bias="1.0"
-      app:layout_constraintStart_toStartOf="@+id/forgotLoginPasswordHeader"
-      app:layout_constraintTop_toBottomOf="@+id/forgotLoginPasswordHeader"
+      app:layout_constraintStart_toStartOf="@+id/forgotLabel"
+      app:layout_constraintTop_toBottomOf="@+id/forgotLabel"
       app:layout_constraintVertical_bias="0.108" />
 
   <TextView
-      android:id="@+id/forgotLoginPasswordHeader"
+      android:id="@+id/forgotLabel"
       android:layout_width="203dp"
       android:layout_height="81dp"
       android:foregroundGravity="center"
