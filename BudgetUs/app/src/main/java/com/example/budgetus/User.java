@@ -12,21 +12,19 @@ public class User
 	private String name;
 	private String email;
 	private String school;
-	private String username;
 	private String password;
 	private String randomID;
-	private Map<Integer, String> groups = new HashMap<>();
+	private Map<String, String> groups = new HashMap<>();
 
 	public User(){
 
 	}
 
-	public User(String name, String email, String school, String username, String password, String randomID)
+	public User(String name, String email, String school, String password, String randomID)
 	{
 		this.name = name;
 		this.email = email;
 		this.school = school;
-		this.username = username;
 		this.password = password;
 		this.randomID = randomID;
 	}
@@ -51,10 +49,10 @@ public class User
 		return true;
 	}
 
-	public boolean updateStatus(int groupID, String status){
+	public boolean updateStatus(String groupID, String status){
 		if(groups.containsKey(groupID)){
-			for (Map.Entry<Integer, String> tmp : groups.entrySet()){
-				if(tmp.getKey() == groupID){
+			for (Map.Entry<String, String> tmp : groups.entrySet()){
+				if(tmp.getKey().equals( groupID)){
 					tmp.setValue(status);
 					return true;
 				}
@@ -73,10 +71,6 @@ public class User
 
 	public String getSchool(){
 		return this.school;
-	}
-
-	public String getUsername(){
-		return this.username;
 	}
 
 	public String getPassword(){
@@ -99,15 +93,11 @@ public class User
 		this.school = school;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public void setGroups(Map <Integer, String> groups) {
+	public void setGroups(Map <String, String> groups) {
 		this.groups = groups;
 	}
 
-	public Map <Integer, String> getGroups() {
+	public Map <String, String> getGroups() {
 		return groups;
 	}
 
@@ -115,10 +105,10 @@ public class User
 		this.randomID = id;
 	}
 
-	public String getStatus(int groupID){
+	public String getStatus(String groupID){
 		if(groups.containsKey(groupID)){
-			for (Map.Entry<Integer, String> tmp : groups.entrySet()){
-				if(tmp.getKey() == groupID){
+			for (Map.Entry<String, String> tmp : groups.entrySet()){
+				if(tmp.getKey().equals( groupID)){
 					return tmp.getValue();
 				}
 			}
@@ -126,7 +116,7 @@ public class User
 		return null;
 	}
 
-	public boolean updateGroups(int groupID, String status){
+	public boolean updateGroups(String groupID, String status){
 		if(groups.isEmpty()){
 			groups.put(groupID, status);
 			return true;

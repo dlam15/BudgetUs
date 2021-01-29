@@ -6,10 +6,14 @@ import java.security.*;
 
 public class Group {
     private String groupName;
-    private final long groupID;
-    private Map<byte[], String> members = new HashMap<>();
+    private String groupID;
+    private Map<String, String> members = new HashMap<>();
 
-    public Group(String groupName, long groupID){
+    public Group(){
+
+    }
+
+    public Group(String groupName, String groupID){
         this.groupName = groupName;
         this.groupID = groupID;
     }
@@ -19,11 +23,19 @@ public class Group {
         return true;
     }
 
+    public Map <String, String> getMembers() {
+        return members;
+    }
+
+    public String getGroupID() {
+        return groupID;
+    }
+
     public String getGroupName() {
         return groupName;
     }
 
-    public boolean registerUser(byte[] newUser, String status){
+    public boolean registerUser(String newUser, String status){
         if(members.isEmpty ()){
             members.put(newUser, status);
             return true;
@@ -37,7 +49,7 @@ public class Group {
         return false;
     }
 
-    public boolean unregisterUser(byte[] remUser){
+    public boolean unregisterUser(String remUser){
         if(members.isEmpty ()){
             return false;
         }
@@ -50,14 +62,14 @@ public class Group {
         return false;
     }
 
-    public boolean changeStatus(byte[] curUser, String status){
+    public boolean changeStatus(String curUser, String status){
         if(members.isEmpty ()){
             return false;
         }
         else{
             if(members.containsKey (curUser)){
-                for (Map.Entry<byte[], String> tmp : members.entrySet()){
-                    if(tmp.getKey() == curUser){
+                for (Map.Entry<String, String> tmp : members.entrySet()){
+                    if(tmp.getKey().equals(curUser)){
                         tmp.setValue(status);
                         return true;
                     }

@@ -1,19 +1,150 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<!--<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     tools:context=".MainDashboard">
-
     <TextView
         android:id="@+id/informationTextView"
-        android:layout_width="287dp"
-        android:layout_height="241dp"
+        android:layout_width="174dp"
+        android:layout_height="111dp"
         android:layout_marginTop="92dp"
         android:text="TextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.609"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <Button
+        android:id="@+id/changeName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Name"
+        app:layout_constraintEnd_toStartOf="@+id/back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/informationTextView" />
+    <Button
+        android:id="@+id/back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="back"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.8"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/informationTextView" />
+</androidx.constraintlayout.widget.ConstraintLayout>-->
+
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/displayDashboard"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/darkblue"
+    tools:context=".MainDashboard">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/displayUsername"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Jane Doe"
+                android:layout_marginTop="40sp"
+                android:layout_marginHorizontal="20sp"
+                android:textColor="#FFFFFF"
+                android:textSize="35sp" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20sp"
+                android:layout_marginTop="20sp"
+                app:cardCornerRadius="15dp">
+
+                <TextView
+                    android:id="@+id/displayDashboardText"
+                    android:layout_width="match_parent"
+                    android:layout_height="40sp"
+                    android:layout_marginLeft="15sp"
+                    android:layout_marginTop="15sp"
+                    android:text="Dashboard"
+                    android:textSize="20sp" />
+
+
+                <GridLayout
+                    android:id="@+id/gridLayoutDashboard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="15sp"
+                    android:layout_marginTop="50sp"
+                    android:layout_marginBottom="20sp"
+                    android:columnCount="2"
+                    android:columnOrderPreserved="true"
+                    android:isScrollContainer="true"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="150dp"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <ImageButton
+                            android:id="@+id/imageButton"
+                            android:layout_width="150dp"
+                            android:layout_height="100dp"
+                            android:scaleType="centerCrop"
+                            app:srcCompat="@drawable/groupicon" />
+
+                        <TextView
+                            android:id="@+id/textView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="Add Group" />
+
+                    </LinearLayout>
+
+
+                </GridLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/informationTextView"
+                android:layout_width="match_parent"
+                android:layout_height="106dp"
+                android:background="#FBFBFB"
+                android:text="TextView" />
+
+            <Button
+                android:id="@+id/changeName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Name" />
+
+            <Button
+                android:id="@+id/back"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Back" />
+
+            <Button
+                android:id="@+id/summary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Summary" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</ScrollView>

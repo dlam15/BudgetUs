@@ -25,7 +25,6 @@ public class MainActivity extends AppCompatActivity {
     private EditText editPassword;
     private Button loginbutton;
     private Button toRegBtn;//teresa
-    private Button forgotUsernamebutton;//teresa
     private Button forgotPasswordbutton;//teresa
     private ProgressDialog progressDialog;
     private FirebaseAuth firebaseAuth;
@@ -39,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
         progressDialog = new ProgressDialog (this);
 
-        toRegBtn = findViewById(R.id.goToRegisterButton);
+        toRegBtn = findViewById(R.id.mainRegister);
         toRegBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -48,11 +47,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //Variables
-         editEmail = findViewById(R.id.editEmail);
-         editPassword = findViewById(R.id.editPassword);
-         loginbutton = findViewById(R.id.btLogin);
-         forgotUsernamebutton = findViewById(R.id.btForgotUsername);//teresa
-         forgotPasswordbutton = findViewById(R.id.btForgotPassword);//teresa
+         editEmail = findViewById(R.id.mainEmail);
+         editPassword = findViewById(R.id.mainPassword);
+         loginbutton = findViewById(R.id.mainLogin);
+         forgotPasswordbutton = findViewById(R.id.mainForgot);//teresa
 
         //Login Button
          loginbutton.setOnClickListener(new View.OnClickListener() {
@@ -61,30 +59,6 @@ public class MainActivity extends AppCompatActivity {
                  Login();
              }
          });
-
-        // registerbutton.setOnClickListener(new Button.OnClickListener(){
-        //     public void onClick(View view) {
-        //         Intent registerPage = new Intent(MainActivity.this, Register.class);
-        //         startActivity(registerPage);
-        //     }
-        // });
-        /* teresa
-        //Forgot Username Button
-        forgotUsernamebutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                launchForgotUsernameActivity();
-            }
-        });
-
-        //Forgot Password Button
-        forgotPasswordbutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                launchForgotPasswordActivity();
-            }
-        });
-        */
     }
 
     private void Login() {
