@@ -66,17 +66,9 @@ public class RegisterActivity extends AppCompatActivity {
                 schoolEditText = findViewById(R.id.registerSchool);
                 emailEditText = findViewById (R.id.registerEmail);
                 passwordEditText = findViewById (R.id.registerPassword);
-                passwordEditText = findViewById (R.id.registerConfirm);
+                confirmEditText = findViewById (R.id.registerConfirm);
 
                 Register();
-            }
-        });
-
-        regBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent  = new Intent(RegisterActivity.this, MainActivity.class);
-                startActivity(intent);
             }
         });
     }
@@ -128,7 +120,7 @@ public class RegisterActivity extends AppCompatActivity {
                     String id = databaseReference1.push ().getKey ();
                     String id1 = databaseReference2.push().getKey ();
                     newUser = new User(name, email, school, password, id);
-                    newGroup = new Group("Admin", id1);
+                    newGroup = new Group("BudgetUs Admins", id1);
                     newUser.updateGroups (id1, "member");
                     newGroup.registerUser (id, "member");
                     assert id != null;

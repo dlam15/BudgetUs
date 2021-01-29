@@ -17,7 +17,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class MainDashboard extends AppCompatActivity {
-    /*private static final String TAG = "MainDashboard";
+    private static final String TAG = "MainDashboard";
     private FirebaseAuth firebaseAuth;
     private DatabaseReference databaseReference;
     private String email;
@@ -28,7 +28,7 @@ public class MainDashboard extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_dashboard);
 
-        outView = (TextView)findViewById(R.id.informationTextView);
+        /*outView = (TextView)findViewById(R.id.informationTextView);
 
         firebaseAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance ().getReference ( "users" );
@@ -66,5 +66,5 @@ public class MainDashboard extends AppCompatActivity {
             }
         });*/
 
-    //}
+    }
 }
