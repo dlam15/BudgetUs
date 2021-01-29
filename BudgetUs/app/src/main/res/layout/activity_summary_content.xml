@@ -24,122 +24,122 @@
     </RelativeLayout>
 
     <ScrollView
-        android:layout_height="match_parent"
-        android:layout_width="match_parent">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#F3DFFF"
-            android:orientation="vertical">
-
-            <RelativeLayout
-                android:id="@+id/summary_content"
-                android:layout_width="331dp"
-                android:layout_height="150dp"
-                android:layout_gravity="center"
-                android:layout_margin="10dp"
-                android:background="@drawable/background">
-                <!--android:ignoreGravity="false">-->
-
-                <ImageView
-                    android:id="@+id/summary_image"
-                    android:layout_width="226dp"
-                    android:layout_height="120dp"
-                    android:layout_centerInParent="true"
-                    android:contentDescription="@string/main_dashboard_image_content_description" />
-                <!--android:src="@drawable/temp" />-->
-
-            </RelativeLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="29dp" />
+            android:layout_height="match_parent"
+            android:layout_width="match_parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="160dp"
-                android:layout_gravity="center"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content"
+                android:background="#F3DFFF"
+                android:orientation="vertical">
 
                 <RelativeLayout
-                    android:layout_width="150dp"
+                    android:id="@+id/summary_content"
+                    android:layout_width="331dp"
                     android:layout_height="150dp"
-                    android:layout_gravity="left"
-                    android:layout_margin="25dp"
-                    android:background="@drawable/background"
-                    android:elevation="8dp">
+                    android:layout_gravity="center"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/background">
+                    <!--android:ignoreGravity="false">-->
 
                     <ImageView
+                        android:id="@+id/summary_image"
                         android:layout_width="226dp"
                         android:layout_height="120dp"
-                        android:layout_centerInParent="false" />
-                    <!--android:src="@drawable/temp" />-->
+                        android:layout_centerInParent="true"
+                        android:contentDescription="@string/main_dashboard_image_content_description" />
+                        <!--android:src="@drawable/temp" />-->
 
                 </RelativeLayout>
 
-                <RelativeLayout
-                    android:layout_width="150dp"
-                    android:layout_height="150dp"
-                    android:layout_gravity="right"
-                    android:layout_margin="20dp"
-                    android:background="@drawable/background"
-                    android:elevation="8dp">
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="29dp" />
 
-                    <ImageView
-                        android:layout_width="226dp"
-                        android:layout_height="120dp"
-                        android:layout_centerInParent="false" />
-                    <!--android:src="@drawable/temp" />-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="160dp"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal">
 
-                </RelativeLayout>
+                    <RelativeLayout
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:layout_gravity="left"
+                        android:layout_margin="25dp"
+                        android:background="@drawable/background"
+                        android:elevation="8dp">
+
+                        <ImageView
+                            android:layout_width="226dp"
+                            android:layout_height="120dp"
+                            android:layout_centerInParent="false" />
+                            <!--android:src="@drawable/temp" />-->
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:layout_gravity="right"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/background"
+                        android:elevation="8dp">
+
+                        <ImageView
+                            android:layout_width="226dp"
+                            android:layout_height="120dp"
+                            android:layout_centerInParent="false" />
+                            <!--android:src="@drawable/temp" />-->
+
+                    </RelativeLayout>
+                </LinearLayout>
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="29dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="160dp"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal">
+
+                    <RelativeLayout
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:layout_gravity="left"
+                        android:layout_margin="25dp"
+                        android:background="@drawable/background"
+                        android:elevation="8dp">
+
+                        <ImageView
+                            android:layout_width="226dp"
+                            android:layout_height="120dp"
+                            android:layout_centerInParent="false" />
+                            <!--android:src="@drawable/temp" />-->
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:layout_gravity="right"
+                        android:layout_margin="20dp"
+                        android:background="@drawable/background"
+                        android:elevation="8dp">
+
+                        <ImageView
+                            android:layout_width="226dp"
+                            android:layout_height="120dp"
+                            android:layout_centerInParent="false" />
+                            <!--android:src="@drawable/temp" />-->
+
+                    </RelativeLayout>
+                </LinearLayout>
+
             </LinearLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="29dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="160dp"
-                android:layout_gravity="center"
-                android:orientation="horizontal">
-
-                <RelativeLayout
-                    android:layout_width="150dp"
-                    android:layout_height="150dp"
-                    android:layout_gravity="left"
-                    android:layout_margin="25dp"
-                    android:background="@drawable/background"
-                    android:elevation="8dp">
-
-                    <ImageView
-                        android:layout_width="226dp"
-                        android:layout_height="120dp"
-                        android:layout_centerInParent="false" />
-                    <!--android:src="@drawable/temp" />-->
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="150dp"
-                    android:layout_height="150dp"
-                    android:layout_gravity="right"
-                    android:layout_margin="20dp"
-                    android:background="@drawable/background"
-                    android:elevation="8dp">
-
-                    <ImageView
-                        android:layout_width="226dp"
-                        android:layout_height="120dp"
-                        android:layout_centerInParent="false" />
-                    <!--android:src="@drawable/temp" />-->
-
-                </RelativeLayout>
-            </LinearLayout>
-
-        </LinearLayout>
-    </ScrollView>
+        </ScrollView>
 
 
-</androidx.appcompat.widget.LinearLayoutCompat>
+    </androidx.appcompat.widget.LinearLayoutCompat>
