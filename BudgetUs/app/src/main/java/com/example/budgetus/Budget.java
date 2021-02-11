@@ -197,6 +197,24 @@ public class Budget {
 
 
     /*
+     Not sure how easy it'll be to provide Calendar object from front end/what checks can be done there, so I added this function here,
+     It checks that the month and day are defined, and if they're not, sets them as December and the 31st respectively.
+     This allows us to use Calendars that are just set to a year while providing the expected behavior (e.g. 2019 - 2020 is Jan 1st 2019
+     to Dec 31st 2020 - this is not what Calendar does by default).
+
+     @param date the date to check for month and day
+     @return date, with Dec 31st as the month and day if it was not previously set
+     */
+    Calendar defineCalendar(Calendar date){
+        //if day not defined, assume user wants month inclusive, set as 31st
+        if(date.get(Calendar.DATE) == 0) date.set(Calendar.DATE, 31);
+        //if month not defined, assume user wants year inclusive, set as December
+        if(date.get(Calendar.MONTH) == 0) date.set(Calendar.MONTH, 12);
+        return date;
+    }
+
+
+    /*
      * First attempt to provide some sort of filtering rather than searching - all transactions from a time period/range
      * I'd like to reuse the findTransaction functions, but ranges are somewhat different.
      *
@@ -208,9 +226,47 @@ public class Budget {
      * @return arraylist of all transactions that occurred on or between these dates
      */
     public ArrayList<Transaction> eventsBetween(Calendar startDate, Calendar endDate){
+        startDate = defineCalendar(startDate);
+        endDate = defineCalendar(endDate);
         ArrayList<Transaction> ret = new ArrayList<>();
         for(Transaction t: listOfTransactions){
             if(t.getDateOfTransaction()!=null && ((t.getDateOfTransaction().equals(endDate))||(t.getDateOfTransaction().equals(startDate)) || (t.getDateOfTransaction().after(startDate) && t.getDateOfTransaction().before(endDate)))) {
+                ret.add(t);
+                //System.out.println(t.getDateOfTransaction());
+            }
+        }
+        return ret;
+    }
+
+    /*
+     * Like eventsBetween, but just all events after startDate.
+     *
+     * @param startDate date on which to start search
+     * @return arraylist of all transactions that occurred on or after startDate
+     */
+    public ArrayList<Transaction> eventsAfter(Calendar startDate){
+        startDate = defineCalendar(startDate);
+        ArrayList<Transaction> ret = new ArrayList<>();
+        for(Transaction t: listOfTransactions){
+            if(t.getDateOfTransaction()!=null && (t.getDateOfTransaction().equals(startDate) || t.getDateOfTransaction().after(startDate))) {
+                ret.add(t);
+                //System.out.println(t.getDateOfTransaction());
+            }
+        }
+        return ret;
+    }
+
+    /*
+     * Like eventsBetween, but just all events before endDate.
+     *
+     * @param endDate date on which to end search
+     * @return arraylist of all transactions that occurred on or before endDate
+     */
+    public ArrayList<Transaction> eventsBefore(Calendar endDate){
+        endDate = defineCalendar(endDate);
+        ArrayList<Transaction> ret = new ArrayList<>();
+        for(Transaction t: listOfTransactions){
+            if(t.getDateOfTransaction()!=null && (t.getDateOfTransaction().equals(endDate) || t.getDateOfTransaction().before(endDate))) {
                 ret.add(t);
                 //System.out.println(t.getDateOfTransaction());
             }
@@ -232,13 +288,16 @@ public class Budget {
      * @return amount spent between these dates
      */
     public double fundsSpentOverTime(Calendar startDate, Calendar endDate){
+        /*
         //if date not defined, assume user wants month inclusive, set as 31st
         if(endDate.get(Calendar.DATE) == 0) endDate.set(Calendar.DATE, 31);
         if(startDate.get(Calendar.DATE) == 0) startDate.set(Calendar.DATE, 31);
         //if month not defined, assume user wants year inclusive, set as December
         if(endDate.get(Calendar.MONTH) == 0) endDate.set(Calendar.MONTH, 12);
         if(startDate.get(Calendar.MONTH) == 0) startDate.set(Calendar.MONTH, 12);
-        ArrayList<Transaction> allTransactions = new ArrayList<>();
+        */
+
+        ArrayList<Transaction> allTransactions;
         allTransactions = eventsBetween(startDate, endDate);
         double runningTotal = 0;
         for(Transaction t: allTransactions) runningTotal+=t.getAmount();
@@ -421,21 +480,38 @@ public class Budget {
 
 
     /*
-     * Trying to do a quick breakdown of transactions by category. Didn't test and don't know how we'd display.
+     * A function we could use to display a pie chart or some info. Currently returns a map of string, double pairs,
+     * where the string is the category, and the double is the percentage of transactions in that category. We can also
+     * provide dates as parameters. Might add another function for different searches.
      *
+     * @param startDate optional parameter. If not null, we'll only look at transactions from or after this date
+     * @param endDate optional parameter. If not null, we'll only look at transactions from or after this date
      * @return a map/key val pairs of category, percentage we could use to make a pie chart or something
      */
-    public Map<String, Double> breakdownInfo(){
+    public Map<String, Double> breakdownInfo(Calendar startDate, Calendar endDate){
         Map<String, Double> ret = new HashMap<>();
-        int currCategoryEntries=0;
+        ArrayList<Transaction> currentTransactionsList;
+        if(startDate != null && endDate != null){//we want to search transactions in a time frame
+            currentTransactionsList = eventsBetween(startDate, endDate);
+        }else if(startDate != null){//search all after startDate
+            currentTransactionsList = eventsAfter(startDate);
+        }else if(endDate != null){//search all before endDate
+            currentTransactionsList = eventsBefore(endDate);
+        }else{//dates not set, search all
+            currentTransactionsList = listOfTransactions;
+        }
+        double currCategoryEntries=0;
+        //System.out.println(currentTransactionsList.size());
         for(Transaction.Category c: Transaction.Category.values()){
             currCategoryEntries = 0;
-            for(Transaction t: listOfTransactions){
+            for(Transaction t: currentTransactionsList){
                 if(t.getCategory() != null && t.getCategory() == c) currCategoryEntries++;
             }
-            ret.put(c.toString(), (double) (currCategoryEntries/listOfTransactions.size()));
+            //System.out.println(currCategoryEntries/currentTransactionsList.size());
+            ret.put(c.toString(), (double) (currCategoryEntries/currentTransactionsList.size()) );
         }
-        return null;
+        return ret;
     }
+
 
 }

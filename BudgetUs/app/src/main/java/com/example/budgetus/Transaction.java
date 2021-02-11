@@ -59,14 +59,14 @@ public class Transaction {
 
     /*
      * so for images, I found how to save bitmaps from local URI on user's device
-     * but I can't save bitmap as string and convert back for json
+     * but I can't save bitmap as string and convert back from database
      * but I can do so with byte array, which is what we're doing here/why we're saving that
      *
      * execution flow:
-     * - From front end: we obtain uri of image from user's phone -> convert to bitmap and save -> convert to byte array and save
+     * - From front end: we obtain uri of image from user's phone -> convert to bitmap and save -> convert to byte array and save to database
      * - from back end: we obtain byte[] from database and save -> create bitmap and save
      */
-    private byte[] receiptByteArray;//the bitmap converted to a byte array for JSON storage
+    private byte[] receiptByteArray;//the bitmap converted to a byte array for database storage
     private Bitmap receipt = null;//the actual image we can display on front end
     private String description = null;
     private Category category = null;

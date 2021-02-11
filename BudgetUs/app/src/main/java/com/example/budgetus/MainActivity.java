@@ -18,6 +18,10 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity {
 
     //private EditText username;
@@ -50,10 +54,19 @@ public class MainActivity extends AppCompatActivity {
                 launchRegisterActivity();
             }
         });
-        //userRecord = new UserRecord();
-        /*userRecord = new UserRecord(MainActivity.this); //matt
 
-
+        Calendar c1 = new GregorianCalendar();
+        c1.set(2021, 2, 11);
+        Calendar c2 = new GregorianCalendar();
+        c2.set(Calendar.YEAR, 2018);
+        //c2.set(2018, 1, 1);
+        Budget b = new Budget(1000, this);
+        b.addTransaction(20,"pizza", null, null,  c2, Transaction.Category.FOOD);
+        b.addTransaction(500,"bitcoin", null, null,  c1, Transaction.Category.OTHER);
+        Map<String, Double> m = b.breakdownInfo(null, null);
+        for(int i=0; i<m.size(); i++){
+            System.out.println(m.values().toArray()[i].toString() +  m.keySet().toArray()[i].toString());
+        }
 
         //Variables
         //final EditText username = (EditText) findViewById(R.id.editUsername);
@@ -68,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 launchRegisterActivity(); }
-        });*/
+        });
 
         editEmail = findViewById(R.id.editEmail);
         editPassword = findViewById(R.id.editPassword);
@@ -91,13 +104,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         // teresa
-        //Forgot Username Button
-        forgotUsernamebutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                launchForgotUsernameActivity();
-            }
-        });
 
         //Forgot Password Button
         forgotPasswordbutton.setOnClickListener(new View.OnClickListener() {
@@ -160,11 +166,6 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
         finish ();
-    }
-    // teresa
-    private void launchForgotUsernameActivity(){
-        Intent intent = new Intent(this, ForgotUser.class);
-        startActivity(intent);
     }
 
     private void launchForgotPasswordActivity(){
