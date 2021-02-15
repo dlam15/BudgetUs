@@ -1,14 +1,8 @@
 package com.example.budgetus;
 
 import android.content.Context;
-import android.media.Image;
 import android.net.Uri;
-import android.widget.ImageView;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -480,6 +474,28 @@ public class Budget {
 
 
     /*
+     * Find all transactions between 2 dates, where either or both of them may be null or missing info.
+     * Used in the breakdown functions below.
+     *
+     * @param startDate optional parameter. If not null, we'll only look at transactions from or after this date
+     * @param endDate optional parameter. If not null, we'll only look at transactions from or after this date
+     * @return an ArrayList of transactions between the startDate and endDate if neither are null, after the
+     *      startDate if endDate is null, before the endDate if the startDate is null, or just all transactions
+     *      if both are null.
+     */
+    public ArrayList<Transaction> getTransactionsList(Calendar startDate, Calendar endDate){
+        if(startDate != null && endDate != null){//we want to search transactions in a time frame
+            return eventsBetween(startDate, endDate);
+        }else if(startDate != null){//search all after startDate
+            return eventsAfter(startDate);
+        }else if(endDate != null){//search all before endDate
+            return eventsBefore(endDate);
+        }else{//dates not set, search all
+            return this.listOfTransactions;
+        }
+    }
+
+    /*
      * A function we could use to display a pie chart or some info. Currently returns a map of string, double pairs,
      * where the string is the category, and the double is the percentage of transactions in that category. We can also
      * provide dates as parameters. Might add another function for different searches.
@@ -488,18 +504,10 @@ public class Budget {
      * @param endDate optional parameter. If not null, we'll only look at transactions from or after this date
      * @return a map/key val pairs of category, percentage we could use to make a pie chart or something
      */
-    public Map<String, Double> breakdownInfo(Calendar startDate, Calendar endDate){
+    public Map<String, Double> breakdownInfoByCategory(Calendar startDate, Calendar endDate){
         Map<String, Double> ret = new HashMap<>();
-        ArrayList<Transaction> currentTransactionsList;
-        if(startDate != null && endDate != null){//we want to search transactions in a time frame
-            currentTransactionsList = eventsBetween(startDate, endDate);
-        }else if(startDate != null){//search all after startDate
-            currentTransactionsList = eventsAfter(startDate);
-        }else if(endDate != null){//search all before endDate
-            currentTransactionsList = eventsBefore(endDate);
-        }else{//dates not set, search all
-            currentTransactionsList = listOfTransactions;
-        }
+        ArrayList<Transaction> currentTransactionsList = getTransactionsList(startDate, endDate);
+
         double currCategoryEntries=0;
         //System.out.println(currentTransactionsList.size());
         for(Transaction.Category c: Transaction.Category.values()){
@@ -513,5 +521,55 @@ public class Budget {
         return ret;
     }
 
+    /*
+     * Another function for a pie chart (possibly), but done by cost. Will return percentage of transactions less
+     * than or equal to each value in the provided array (and greater than the last chunk we looked at). If no array is
+     * provided, we'll do $10, $50, $100, $500, $1000 and >$1000 (i.e, 0-10, 10.01-50, ....).
+     *
+     * @param startDate optional parameter. If not null, we'll only look at transactions from or after this date
+     * @param endDate optional parameter. If not null, we'll only look at transactions from or after this date
+     * @param values optional parameter. An array of length n. Each element is a double, for a numerical value.
+     *      Function uses the array as the values to split the pie chart into. For elements 0 - n, we find all
+     *      transactions less than or equal to the value. Our return map will have n+1 entries, as we'll also return
+     *      the percentage of values greater than the last value.
+     * @return a map/key val pairs of category, percentage we could use to make a pie chart or something
+     */
+    public Map<String, Double> breakdownInfoByCost(Calendar startDate, Calendar endDate, ArrayList<Double> values){
+        Map<String, Double> ret = new HashMap<>();
+        ArrayList<Transaction> currentTransactionsList = getTransactionsList(startDate, endDate);
+        if(values == null){
+            values = new ArrayList<>();
+            values.add(10.00);
+            values.add(50.00);
+            values.add(100.00);
+            values.add(500.00);
+            values.add(1000.00);
+        }
+        Collections.sort(values);
+        double currCategoryEntries=0;
+        double prevValue = 0;
+        System.out.println(currentTransactionsList.size());
+        for(Double currValue : values){
+            currCategoryEntries = 0;
+            for(Transaction t: currentTransactionsList) {
+                System.out.println("prev: " + prevValue);
+                System.out.println("curr: " + currValue);
+                if (t.getAmount() <= currValue && t.getAmount() > prevValue) currCategoryEntries++;
+            }
+            prevValue = currValue;
+            System.out.println(currCategoryEntries/currentTransactionsList.size());
+            ret.put("<= " + currValue.toString(), (double) (currCategoryEntries/currentTransactionsList.size()) );
+        }
+        //then the last value
+        currCategoryEntries = 0;
+        for(Transaction t: currentTransactionsList) {
+            System.out.println(prevValue);
+            if (t.getAmount() > prevValue) currCategoryEntries++;
+        }
+        System.out.println(currCategoryEntries/currentTransactionsList.size());
+        ret.put("> "+prevValue, (double) (currCategoryEntries/currentTransactionsList.size()) );
+
+        return ret;
+    }
 
 }
