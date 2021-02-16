@@ -269,6 +269,17 @@ public class Budget {
     }
 
     /*
+     * Another feature we can support is planned/future transactions. I was going to make a whole new system
+     * for this, but we can support by just adding normally, but with a date in the future. Then, getting
+     * future transactions is just calling eventsAfter(Today).
+     *
+     * @return all transactions in listOfTransactions that have a date after the current date.
+     */
+    public ArrayList<Transaction> getPlannedTransactions(){
+        return eventsAfter(Calendar.getInstance());
+    }
+
+    /*
      * Use fundsSpentOverTime to get amount spent, could add extra stuff like X% in this category, etc. - probably will add next
      * Can also do stuff with amountbefore and amountafter in each transaction, etc - will think about what's useful first
      *

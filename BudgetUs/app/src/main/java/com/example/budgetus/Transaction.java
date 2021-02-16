@@ -187,6 +187,19 @@ public class Transaction {
     }
 
     /*
+     * Probably not the final version of this function. I'm trying to pass back some basic/quick info.
+     * What I picture is a list of recent transactions, and a bit of info for each, like amount,
+     * name, and how much was in the budget before and after. So, I'll send those values back here.
+     *
+     * Might not use, and if we do I'll probably need a better way to pass it that's not a string.
+     *
+     * @return a concatenated string of name, amount, amountBefore, and amountAfter for this
+     */
+    public String quickInfo(){
+        return "Name: " + this.name +" Amount: "+ this.amount +" Amount Before Transaction: "+ this.amountBefore + " Amount After Transaction: " + this.amountAfter;
+    }
+
+    /*
      * I decided that we'll use the same constructor no matter how many optional fields are defined.
      * We can provide null for any of the last 5 parameters (except context if receipt is valid), but the first 3 must be provided.
      * I probably don't need to check for null here because I'll just set as null, but its a good reminder that these can be null.
