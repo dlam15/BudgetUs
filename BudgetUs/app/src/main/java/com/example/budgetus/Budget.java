@@ -14,6 +14,7 @@ import java.util.Map;
 public class Budget {
 
     private ArrayList<Transaction> listOfTransactions = new ArrayList<>();//might use a different data structure
+    private ArrayList<String> categoriesInUse = new ArrayList<>();//need to find a spot to initialize this
     private final double startingFunds;
     private double remainingFunds;
     Context c;
@@ -31,6 +32,16 @@ public class Budget {
     public double getRemainingFunds() { return remainingFunds; }
     public ArrayList<Transaction> getListOfTransactions(){ return listOfTransactions; }
 
+    //for now I'll always update before getting
+    //but I'll probably move the updating elsewhere
+    public ArrayList<String> getCategoriesInUse() {
+        if(categoriesInUse!=null) categoriesInUse.clear();
+        for(Transaction t: getListOfTransactions()){
+            if(t.getCategory()!= null && !categoriesInUse.contains(t.getCategory())) categoriesInUse.add(t.getCategory());
+        }
+        return categoriesInUse;
+    }
+
 
      /*
      * Add a new transaction to the list of transactions. Last 5 parameters are optional. We also update the remaining funds after this transaction.
@@ -43,7 +54,7 @@ public class Budget {
      * @param date OPTIONAL - date the transaction occurred on. Right now this is a Calendar object, I might accept String format and convert if that's easier for caller
      * @param category OPTIONAL - category from category enum - will probably change how the enum works, basic pre-defined choice right now
      */
-    public void addTransaction(double amount, String name, Uri receipt, String description, Calendar date, Transaction.Category category){
+    public void addTransaction(double amount, String name, Uri receipt, String description, Calendar date, String category){
         Transaction t = new Transaction(startingFunds, amount, name, c, receipt, description, date, category);
         listOfTransactions.add(t);
         remainingFunds = this.remainingFunds - amount;//necessary to update funds correctly
@@ -148,7 +159,7 @@ public class Budget {
      * @param date of transaction we're looking for
      * @return an arraylist of the Transaction object(s) that occurred on this date
      */
-    public ArrayList<Transaction> findTransaction(Transaction.Category category) {
+    public ArrayList<Transaction> findTransactionByCategory(String category) {
         ArrayList<Transaction> ret = new ArrayList<>();
         for(Transaction t: listOfTransactions){
             if(t.getCategory()!=null && t.getCategory() == category) ret.add(t);
@@ -329,7 +340,7 @@ public class Budget {
      * So, this function pretty much makes a new transaction and replaces an old one with it.
      *
      */
-    public void modifyTransaction(Transaction transaction, double amount, String name,  Uri receipt,  String description,  Calendar date, Transaction.Category category){
+    public void modifyTransaction(Transaction transaction, double amount, String name,  Uri receipt,  String description,  Calendar date, String category){
         Transaction updatedTransaction = new Transaction(transaction.getAmountBefore(), amount, name, c, receipt, description, date, category);
         listOfTransactions.set(listOfTransactions.indexOf(transaction), updatedTransaction);//replace at index of old
     }
@@ -521,7 +532,7 @@ public class Budget {
 
         double currCategoryEntries=0;
         //System.out.println(currentTransactionsList.size());
-        for(Transaction.Category c: Transaction.Category.values()){
+        for(String c: getCategoriesInUse()){
             currCategoryEntries = 0;
             for(Transaction t: currentTransactionsList){
                 if(t.getCategory() != null && t.getCategory() == c) currCategoryEntries++;

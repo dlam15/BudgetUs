@@ -42,6 +42,8 @@ public class Transaction {
         public String getTag(){return tag;}
     }
 
+    private String category;
+
 
     /*
      * Variables. We have required fields and optional fields
@@ -69,7 +71,7 @@ public class Transaction {
     private byte[] receiptByteArray;//the bitmap converted to a byte array for database storage
     private Bitmap receipt = null;//the actual image we can display on front end
     private String description = null;
-    private Category category = null;
+    //private Category category = null;
     private Calendar dateOfTransaction = null;//Date is depreciated
     //might be able to use Calendar View to take input
 
@@ -98,7 +100,7 @@ public class Transaction {
         return dateOfTransaction;
     }
 
-    public Category getCategory() {
+    public String getCategory() {
         return category;
     }
 
@@ -121,7 +123,7 @@ public class Transaction {
 
     public void setDescription(String description) { this.description = description; }
 
-    public void setCategory(Category category) { this.category = category; }
+    public void setCategory(String category) { this.category = category; }
 
     //image updating setters- when we update 1, update all (bitmap and byte[])
 
@@ -215,7 +217,7 @@ public class Transaction {
      * @param date OPTIONAL - date the transaction occurred on. Right now this is a Calendar object, I might accept String format and convert if that's easier for caller
      * @param category OPTIONAL - category from category enum - will probably change how the enum works, basic pre-defined choice right now
      */
-    public Transaction(double startingAmount, double cost, String name, Context c, Uri receipt,  String description,  Calendar date,  Category category){
+    public Transaction(double startingAmount, double cost, String name, Context c, Uri receipt,  String description,  Calendar date,  String category){
         this.amountBefore = startingAmount;
         this.amountAfter = this.amountBefore - cost;//handles positive and negative
         this.amount = cost;
