@@ -27,7 +27,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class RegisterActivity extends AppCompatActivity {
+    private static final String TAG = "RegisterActivity";
     private EditText firstNameEditText;
     private EditText lastNameEditText;
     private EditText emailEditText;
@@ -117,17 +121,47 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task <AuthResult> task) {
                 if(task.isSuccessful ()){
-                    String id = databaseReference1.push ().getKey ();
-                    String id1 = databaseReference2.push().getKey ();
-                    newUser = new User(name, email, school, password, id);
-                    newGroup = new Group("BudgetUs Admins", id1);
-                    newUser.updateGroups (id1, "member");
-                    newGroup.registerUser (id, "member");
-                    assert id != null;
-                    assert id1 != null;
+                    final String id = databaseReference1.push ().getKey ();
+                    final String id1 = "-MTqsHZPKUqQvooF8xPL";
 
-                    databaseReference2.child(id1).setValue(newGroup);
+                    newUser = new User(name, email, school, id);
+                    assert id != null;
+
+                    databaseReference2.addValueEventListener (new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            for(DataSnapshot userDatasnapshot: dataSnapshot.getChildren ()) {
+                                Group curGroup;
+                                curGroup = userDatasnapshot.getValue (Group.class);
+                                if (curGroup != null) {
+                                    if(curGroup.getGroupID ().equals (id1)){
+                                        if(curGroup.registerUser (id, "admin")){
+                                            databaseReference2.child (id1).child ("members").setValue (curGroup.getMembers ());
+                                            Toast.makeText(RegisterActivity.this, "Successfully added to Group!", Toast.LENGTH_LONG).show();
+                                        }
+                                        else{
+                                            Toast.makeText(RegisterActivity.this, "Group Sign-Up Failed!", Toast.LENGTH_LONG).show();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                            Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                        }
+                    });
+
+
+                    //String id1 = databaseReference2.push().getKey ();
+
+                    //newGroup = new Group("BudgetUs Admins", id1);
+                    newUser.updateGroups (id1, "admin");
+                    //newGroup.registerUser (id, "Admin");
+                    //assert id1 != null;
                     databaseReference1.child(id).setValue(newUser);
+                    //databaseReference2.child(id1).setValue(newGroup);
 
                     Toast.makeText(RegisterActivity.this, "Successfully registered", Toast.LENGTH_LONG).show();
                     Intent intent  = new Intent(RegisterActivity.this, MainActivity.class);

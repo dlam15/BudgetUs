@@ -12,7 +12,6 @@ public class User
 	private String name;
 	private String email;
 	private String school;
-	private String password;
 	private String randomID;
 	private Map<String, String> groups = new HashMap<>();
 
@@ -20,45 +19,12 @@ public class User
 
 	}
 
-	public User(String name, String email, String school, String password, String randomID)
+	public User(String name, String email, String school, String randomID)
 	{
 		this.name = name;
 		this.email = email;
 		this.school = school;
-		this.password = password;
 		this.randomID = randomID;
-	}
-	
-	public boolean updateName(String name){
-		this.name = name;
-		return true;
-	}
-
-	public boolean updateEmail(String email){
-		this.email = email;
-		return true;
-	}
-
-	public boolean updatePassword(String password){
-		this.password = password;
-		return true;
-	}
-
-	public boolean updateSchool(String school){
-		this.school = school;
-		return true;
-	}
-
-	public boolean updateStatus(String groupID, String status){
-		if(groups.containsKey(groupID)){
-			for (Map.Entry<String, String> tmp : groups.entrySet()){
-				if(tmp.getKey().equals( groupID)){
-					tmp.setValue(status);
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	public String getName(){
@@ -71,10 +37,6 @@ public class User
 
 	public String getSchool(){
 		return this.school;
-	}
-
-	public String getPassword(){
-		return this.password;
 	}
 
 	public 	String getRandomID() {
@@ -103,6 +65,18 @@ public class User
 
 	public void setRandomID(String id){
 		this.randomID = id;
+	}
+
+	public boolean updateStatus(String groupID, String status){
+		if(groups.containsKey(groupID)){
+			for (Map.Entry<String, String> tmp : groups.entrySet()){
+				if(tmp.getKey().equals( groupID)){
+					tmp.setValue(status);
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	public String getStatus(String groupID){
