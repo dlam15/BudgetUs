@@ -8,6 +8,7 @@ public class Group {
     private String groupName;
     private String groupID;
     private Map<String, String> members = new HashMap<>();
+    private Budget groupBudget;
 
     public Group(){
 
@@ -16,6 +17,7 @@ public class Group {
     public Group(String groupName, String groupID){
         this.groupName = groupName;
         this.groupID = groupID;
+        this.groupBudget = new Budget ();
     }
 
     public boolean setGroupName(String groupName) {
@@ -33,6 +35,10 @@ public class Group {
 
     public String getGroupName() {
         return groupName;
+    }
+
+    public Budget getGroupBudget() {
+        return groupBudget;
     }
 
     public boolean registerUser(String newUser, String status){

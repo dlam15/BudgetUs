@@ -157,7 +157,7 @@ public class RegisterActivity extends AppCompatActivity {
                     //String id1 = databaseReference2.push().getKey ();
 
                     //newGroup = new Group("BudgetUs Admins", id1);
-                    newUser.updateGroups (id1, "admin");
+                    newUser.updateGroups (id1, Role.ADMIN);
                     //newGroup.registerUser (id, "Admin");
                     //assert id1 != null;
                     databaseReference1.child(id).setValue(newUser);

@@ -20,10 +20,12 @@ import java.util.Map;
 public class Budget {
 
     private ArrayList<Transaction> listOfTransactions = new ArrayList<>();//might use a different data structure
-    private final double startingFunds;
+    private double startingFunds;
     private double remainingFunds;
     Context c;
 
+    public Budget(){
+    }
     /*
      *  Constructor requires startingFunds as well as a context (needed for a bitmap function in Transaction, so it gets passed there)
      */

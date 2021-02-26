@@ -13,7 +13,7 @@ public class User
 	private String email;
 	private String school;
 	private String randomID;
-	private Map<String, String> groups = new HashMap<>();
+	private Map<String, Role> groups = new HashMap<>();
 
 	public User(){
 
@@ -43,6 +43,10 @@ public class User
 		return this.randomID;
 	}
 
+	public Map <String, Role> getGroups() {
+		return groups;
+	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -55,21 +59,17 @@ public class User
 		this.school = school;
 	}
 
-	public void setGroups(Map <String, String> groups) {
+	public void setGroups(Map <String, Role> groups) {
 		this.groups = groups;
-	}
-
-	public Map <String, String> getGroups() {
-		return groups;
 	}
 
 	public void setRandomID(String id){
 		this.randomID = id;
 	}
 
-	public boolean updateStatus(String groupID, String status){
+	public boolean updateStatus(String groupID, Role status){
 		if(groups.containsKey(groupID)){
-			for (Map.Entry<String, String> tmp : groups.entrySet()){
+			for (Map.Entry<String, Role> tmp : groups.entrySet()){
 				if(tmp.getKey().equals( groupID)){
 					tmp.setValue(status);
 					return true;
@@ -79,9 +79,9 @@ public class User
 		return false;
 	}
 
-	public String getStatus(String groupID){
+	public Role getStatus(String groupID){
 		if(groups.containsKey(groupID)){
-			for (Map.Entry<String, String> tmp : groups.entrySet()){
+			for (Map.Entry<String, Role> tmp : groups.entrySet()){
 				if(tmp.getKey().equals( groupID)){
 					return tmp.getValue();
 				}
@@ -90,7 +90,7 @@ public class User
 		return null;
 	}
 
-	public boolean updateGroups(String groupID, String status){
+	public boolean updateGroups(String groupID, Role status){
 		if(groups.isEmpty()){
 			groups.put(groupID, status);
 			return true;
