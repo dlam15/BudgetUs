@@ -96,9 +96,18 @@ public class Transaction {
         return description;
     }
 
+
     public Calendar getDateOfTransaction() {
         return dateOfTransaction;
     }
+
+    private String DateAsString;
+
+    public String getDateAsString(){
+        return DateAsString;
+    }
+
+
 
     public String getCategory() {
         return category;
@@ -230,6 +239,9 @@ public class Transaction {
         //don't need to check the rest because they're null already
         this.description = description;
         this.dateOfTransaction = date;
+        if(this.dateOfTransaction != null){
+            this.DateAsString = getDateOfTransaction().get(Calendar.MONTH) +"/" + getDateOfTransaction().get(Calendar.DATE) +"/" + getDateOfTransaction().get(Calendar.YEAR);
+        }
         this.category = category;
     }
 }

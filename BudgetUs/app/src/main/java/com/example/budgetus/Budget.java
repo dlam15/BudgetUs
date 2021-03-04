@@ -1,7 +1,22 @@
 package com.example.budgetus;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -9,7 +24,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static android.content.ContentValues.TAG;
 
 public class Budget {
 
@@ -42,6 +60,33 @@ public class Budget {
         return categoriesInUse;
     }
 
+    public void saveToDB(){
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("matt budget test/budget1");
+        for(Transaction t: getListOfTransactions()){
+            t.setDateOfTransaction(null);
+            String id = databaseReference.push().getKey();
+            databaseReference.child(id).setValue(t);
+        }
+    }
+
+    public void loadFromDB(){
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference myRef = database.child("matt budget test/budget1/");
+        final Transaction[] t = new Transaction[1];
+        myRef.child("t1").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                System.out.println("MADE IT");
+                t[0] = dataSnapshot.getValue(Transaction.class);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+
+        });
+        listOfTransactions.add(t[0]);
+    }
 
      /*
      * Add a new transaction to the list of transactions. Last 5 parameters are optional. We also update the remaining funds after this transaction.
@@ -526,8 +571,9 @@ public class Budget {
      * @param endDate optional parameter. If not null, we'll only look at transactions from or after this date
      * @return a map/key val pairs of category, percentage we could use to make a pie chart or something
      */
-    public Map<String, Double> breakdownInfoByCategory(Calendar startDate, Calendar endDate){
-        Map<String, Double> ret = new HashMap<>();
+    public PieData pieChartByCategory(Calendar startDate, Calendar endDate){
+        List<PieEntry> entries = new ArrayList<>();
+
         ArrayList<Transaction> currentTransactionsList = getTransactionsList(startDate, endDate);
 
         double currCategoryEntries=0;
@@ -538,9 +584,28 @@ public class Budget {
                 if(t.getCategory() != null && t.getCategory() == c) currCategoryEntries++;
             }
             //System.out.println(currCategoryEntries/currentTransactionsList.size());
-            ret.put(c.toString(), (double) (currCategoryEntries/currentTransactionsList.size()) );
+            entries.add(new PieEntry((float) (currCategoryEntries/currentTransactionsList.size()), c));
         }
-        return ret;
+        PieDataSet set = new PieDataSet(entries, "");//don't think this label does anything
+
+        //but I can do colors here - will have to see how many entries we have first
+        set.setColors(Color.rgb(0,0,255), Color.rgb(0,255,0), Color.rgb(255,0,0), Color.rgb(255,255,0), Color.rgb(255,0,255));
+
+        set.setValueTextSize(16f);
+
+        PieData data = new PieData(set);
+        data.setValueTextSize(16f);
+
+        //unfortunately there's a few things that need to be done on front end:
+        /*
+        com.github.mikephil.charting.charts.PieChart pieChart = findViewById(R.id.chart);//get from XML
+        pieChart.setData(data);//populate XML with this data
+        pieChart.setUsePercentValues(true);//use percentages
+        pieChart.setCenterText("Percent of Y-Values in Predefined Ranges");//set text - this does nothing when in the DataSet
+        pieChart.getDescription().setEnabled(false);//remove description from corner of screen
+         */
+
+        return data;
     }
 
     /*
@@ -556,8 +621,11 @@ public class Budget {
      *      the percentage of values greater than the last value.
      * @return a map/key val pairs of category, percentage we could use to make a pie chart or something
      */
-    public Map<String, Double> breakdownInfoByCost(Calendar startDate, Calendar endDate, ArrayList<Double> values){
+    public PieData pieChartByCost(Calendar startDate, Calendar endDate, ArrayList<Double> values){
         Map<String, Double> ret = new HashMap<>();
+
+        List<PieEntry> entries = new ArrayList<>();
+
         ArrayList<Transaction> currentTransactionsList = getTransactionsList(startDate, endDate);
         if(values == null){
             values = new ArrayList<>();
@@ -570,28 +638,50 @@ public class Budget {
         Collections.sort(values);
         double currCategoryEntries=0;
         double prevValue = 0;
-        System.out.println(currentTransactionsList.size());
+        //System.out.println(currentTransactionsList.size());
         for(Double currValue : values){
             currCategoryEntries = 0;
             for(Transaction t: currentTransactionsList) {
-                System.out.println("prev: " + prevValue);
-                System.out.println("curr: " + currValue);
+                //System.out.println("prev: " + prevValue);
+                //System.out.println("curr: " + currValue);
                 if (t.getAmount() <= currValue && t.getAmount() > prevValue) currCategoryEntries++;
             }
             prevValue = currValue;
-            System.out.println(currCategoryEntries/currentTransactionsList.size());
-            ret.put("<= " + currValue.toString(), (double) (currCategoryEntries/currentTransactionsList.size()) );
+            //System.out.println(currCategoryEntries/currentTransactionsList.size());
+            //ret.put("<= " + currValue.toString(), (double) (currCategoryEntries/currentTransactionsList.size()) );
+            entries.add(new PieEntry((float) (currCategoryEntries/currentTransactionsList.size()), "<= " + currValue.toString()));
         }
         //then the last value
         currCategoryEntries = 0;
         for(Transaction t: currentTransactionsList) {
-            System.out.println(prevValue);
+            //System.out.println(prevValue);
             if (t.getAmount() > prevValue) currCategoryEntries++;
         }
-        System.out.println(currCategoryEntries/currentTransactionsList.size());
-        ret.put("> "+prevValue, (double) (currCategoryEntries/currentTransactionsList.size()) );
+        //System.out.println(currCategoryEntries/currentTransactionsList.size());
+        //ret.put("> "+prevValue, (double) (currCategoryEntries/currentTransactionsList.size()) );
+        entries.add(new PieEntry((float) (currCategoryEntries/currentTransactionsList.size()), "> "+prevValue));
 
-        return ret;
+        PieDataSet set = new PieDataSet(entries, "");//don't think this label does anything
+
+        //but I can do colors here - will have to see how many entries we have first
+        set.setColors(Color.rgb(0,0,255), Color.rgb(0,255,0), Color.rgb(255,0,0), Color.rgb(255,255,0), Color.rgb(255,0,255));
+
+        set.setValueTextSize(16f);
+
+        PieData data = new PieData(set);
+        data.setValueTextSize(16f);
+
+        //unfortunately there's a few things that need to be done on front end:
+        /*
+        com.github.mikephil.charting.charts.PieChart pieChart = findViewById(R.id.chart);//get from XML
+        pieChart.setData(data);//populate XML with this data
+        pieChart.setUsePercentValues(true);//use percentages
+        pieChart.setCenterText("Percent of Y-Values in Predefined Ranges");//set text - this does nothing when in the DataSet
+        pieChart.getDescription().setEnabled(false);//remove description from corner of screen
+         */
+
+
+        return data;
     }
 
 }

@@ -23,19 +23,6 @@
             android:theme="@style/AppTheme.NoActionBar"></activity>
 
         <activity
-            android:name=".ForgotUser"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-
-        <activity
-            android:name=".forgotLogin2"
-            android:label="@string/title_activity_forgotLogin2"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity
-            android:name=".forgotLogin"
-            android:label="@string/title_activity_forgotLogin"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-
-        <activity
             android:name=".RegisterActivity"
             android:label="@string/title_activity_register"
             android:theme="@style/AppTheme.NoActionBar"></activity>
