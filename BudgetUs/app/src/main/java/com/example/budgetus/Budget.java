@@ -32,34 +32,15 @@ import static android.content.ContentValues.TAG;
 public class Budget {
 
     private ArrayList<Transaction> listOfTransactions = new ArrayList<>();//might use a different data structure
+    private ArrayList<Transaction> requestedTransactions = new ArrayList<>();//members can make requests, they go in here until approved or denied
     private ArrayList<String> categoriesInUse = new ArrayList<>();//need to find a spot to initialize this
     private final double startingFunds;
     private double remainingFunds;
     Context c;
 
-    /*
-     *  Constructor requires startingFunds as well as a context (needed for a bitmap function in Transaction, so it gets passed there)
-     */
-    public Budget(double startingFunds, Context c){
-        this.startingFunds = this.remainingFunds = startingFunds;
-        this.c = c;
-    }
 
-    //can get, but shouldn't be allowed to set - we want to maintain valid record via transactions
-    public double getStartingFunds() { return startingFunds; }
-    public double getRemainingFunds() { return remainingFunds; }
-    public ArrayList<Transaction> getListOfTransactions(){ return listOfTransactions; }
-
-    //for now I'll always update before getting
-    //but I'll probably move the updating elsewhere
-    public ArrayList<String> getCategoriesInUse() {
-        if(categoriesInUse!=null) categoriesInUse.clear();
-        for(Transaction t: getListOfTransactions()){
-            if(t.getCategory()!= null && !categoriesInUse.contains(t.getCategory())) categoriesInUse.add(t.getCategory());
-        }
-        return categoriesInUse;
-    }
-
+    //I'm still testing these
+    //I don't know who could call them
     public void saveToDB(){
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("matt budget test/budget1");
@@ -88,7 +69,22 @@ public class Budget {
         listOfTransactions.add(t[0]);
     }
 
-     /*
+
+
+    //The following functions can be called by the Admin/Owner (same as e-board)
+    //The following functions can be called by the E-Board/Members with permissions
+    //mostly adding/modifing transactions, making a new budget, etc.
+
+
+    /*
+     *  Constructor requires startingFunds as well as a context (needed for a bitmap function in Transaction, so it gets passed there)
+     */
+    public Budget(double startingFunds, Context c){
+        this.startingFunds = this.remainingFunds = startingFunds;
+        this.c = c;
+    }
+
+    /*
      * Add a new transaction to the list of transactions. Last 5 parameters are optional. We also update the remaining funds after this transaction.
      *
      * @param amount the amount the transaction was for, can be negative (but I haven't decided when that should be used)
@@ -104,6 +100,112 @@ public class Budget {
         listOfTransactions.add(t);
         remainingFunds = this.remainingFunds - amount;//necessary to update funds correctly
     }
+
+    /*
+     * Same as above, but use a Transaction object. Used for adding pending/requested transactions.
+     *
+     * @param t Transaction object to add to listOfTransactions
+     */
+    public void addTransaction(Transaction t){
+        listOfTransactions.add(t);
+        remainingFunds = this.remainingFunds - t.getAmount();//necessary to update funds correctly
+    }
+
+    /*
+     *  A way to update a transaction (probably to add an optional field).
+     *
+     * I picture it working like this from front-end:
+     * -user selects a transaction (so we have the object)
+     * -user selects menu option to update (so we know to call this function)
+     * -update opens the same page as add (i.e. boxes for each possible field)
+     * -fields will be displayed as they are currently for the transaction
+     * -user adds, removes, edits, etc
+     * -front-end sends us the transaction object to edit, and all of the fields
+     * -we'll just update all with what's provided
+     * -its more likely that only a field or 2 is changed, but why bother checking for a change if we're just updating with itself?
+     *
+     * This makes me realize that optional items need a "null representation" on the front end. For example, if no date is specified, display "No date."
+     * I'll keep this in mind for now, but they should probably be defined in Transaction.
+     *
+     * So, this function pretty much makes a new transaction and replaces an old one with it.
+     *
+     */
+    public void modifyTransaction(Transaction transaction, double amount, String name,  Uri receipt,  String description,  Calendar date, String category){
+        Transaction updatedTransaction = new Transaction(transaction.getAmountBefore(), amount, name, c, receipt, description, date, category);
+        listOfTransactions.set(listOfTransactions.indexOf(transaction), updatedTransaction);//replace at index of old
+    }
+
+    /*
+     * Members who cannot add or modify transactions directly must make requests. They go into
+     * this ArrayList. I've decided that only e-board members/people who can approve or deny these requests
+     * should be able to deal with this list.
+     */
+    public ArrayList<Transaction> getRequestedTransactions() {
+        return requestedTransactions;
+    }
+
+
+    //these 2 functions are a work in progress right now
+    //the idea is simple, but I haven't decided how they'll work yet
+    //i.e. how is an e-board member going to see a transaction in the pending list to begin with?
+    //we'll have a section for it, and I'll need to modify the functions below to take a list of transactions as a parameter
+    //then we can use for the requested list or the real/approved list
+
+    public void approveRequestedTransaction(Transaction t){
+        addTransaction(t);
+        requestedTransactions.remove(t);
+        //somehow send notification to user that requested
+    }
+
+    public void denyRequestedTransaction(Transaction t){
+        requestedTransactions.remove(t);
+        //somehow send notification to user that requested
+    }
+
+
+
+    //The following functions can be called by any member of the group
+    //they are mostly searches and info about the budget
+
+    /*
+     * Members without the ability to directly add a Transaction should be able to request a new Transaction.
+     * I haven't figured out how this will work, but it would have to go something like this:
+     * -member makes request with Transaction
+     * -This is put in some pending queue that E-board members can see
+     * -E-board members have ability to look at transactions in the queue, approve or deny
+     * -Approving just calls addTransaction
+     * -Deny does not
+     * -In either case, maybe the member that requested should get a notification (this is a later feature)
+     */
+    public void requestTransaction(double amount, String name, Uri receipt, String description, Calendar date, String category){
+        Transaction t = new Transaction(startingFunds, amount, name, c, receipt, description, date, category);
+        requestedTransactions.add(t);
+    }
+
+    //can get, but shouldn't be allowed to set - we want to maintain valid record via transactions
+    public double getStartingFunds() { return startingFunds; }
+    public double getRemainingFunds() { return remainingFunds; }
+
+    public ArrayList<Transaction> getListOfTransactions(){ return listOfTransactions; }
+
+    /*
+     * Users define the category of a Transaction. This function returns all
+     * categories in use in the budget.
+     *
+     * For now I'll always update/search for changes before getting
+     * but I'll probably move the updating elsewhere eventually.
+     *
+     * @return an arraylist of strings containing all categories used in the budget currently
+     */
+    public ArrayList<String> getCategoriesInUse() {
+        if(categoriesInUse!=null) categoriesInUse.clear();
+        for(Transaction t: getListOfTransactions()){
+            if(t.getCategory()!= null && !categoriesInUse.contains(t.getCategory())) categoriesInUse.add(t.getCategory());
+        }
+        return categoriesInUse;
+    }
+
+
 
 
     /*
@@ -222,7 +324,7 @@ public class Budget {
      * @return intersection of list1 and list2 (all elements in both lists)
      */
     public ArrayList<Transaction> transactionsIntersection(ArrayList<Transaction> list1, ArrayList<Transaction> list2){
-        ArrayList<Transaction> retList = new ArrayList<Transaction>();
+        ArrayList<Transaction> retList = new ArrayList<>();
         for(Transaction t: list1){
             if(list2.contains(t)) retList.add(t);
         }
@@ -237,7 +339,7 @@ public class Budget {
      * @return union of list1 and list2 (elements in list1 or list2)
      */
     public ArrayList<Transaction> transactionsUnion(ArrayList<Transaction> list1, ArrayList<Transaction> list2){
-        ArrayList<Transaction> retList = new ArrayList<Transaction>();
+        ArrayList<Transaction> retList = new ArrayList<>();
         retList.addAll(list1);
         for(Transaction t: list2){
             if(!retList.contains(t)) retList.add(t);//avoid duplicates
@@ -349,15 +451,6 @@ public class Budget {
      * @return amount spent between these dates
      */
     public double fundsSpentOverTime(Calendar startDate, Calendar endDate){
-        /*
-        //if date not defined, assume user wants month inclusive, set as 31st
-        if(endDate.get(Calendar.DATE) == 0) endDate.set(Calendar.DATE, 31);
-        if(startDate.get(Calendar.DATE) == 0) startDate.set(Calendar.DATE, 31);
-        //if month not defined, assume user wants year inclusive, set as December
-        if(endDate.get(Calendar.MONTH) == 0) endDate.set(Calendar.MONTH, 12);
-        if(startDate.get(Calendar.MONTH) == 0) startDate.set(Calendar.MONTH, 12);
-        */
-
         ArrayList<Transaction> allTransactions;
         allTransactions = eventsBetween(startDate, endDate);
         double runningTotal = 0;
@@ -365,30 +458,6 @@ public class Budget {
         return runningTotal;
     }
 
-
-    /*
-     *  A way to update a transaction (probably to add an optional field).
-     *
-     * I picture it working like this from front-end:
-     * -user selects a transaction (so we have the object)
-     * -user selects menu option to update (so we know to call this function)
-     * -update opens the same page as add (i.e. boxes for each possible field)
-     * -fields will be displayed as they are currently for the transaction
-     * -user adds, removes, edits, etc
-     * -front-end sends us the transaction object to edit, and all of the fields
-     * -we'll just update all with what's provided
-     * -its more likely that only a field or 2 is changed, but why bother checking for a change if we're just updating with itself?
-     *
-     * This makes me realize that optional items need a "null representation" on the front end. For example, if no date is specified, display "No date."
-     * I'll keep this in mind for now, but they should probably be defined in Transaction.
-     *
-     * So, this function pretty much makes a new transaction and replaces an old one with it.
-     *
-     */
-    public void modifyTransaction(Transaction transaction, double amount, String name,  Uri receipt,  String description,  Calendar date, String category){
-        Transaction updatedTransaction = new Transaction(transaction.getAmountBefore(), amount, name, c, receipt, description, date, category);
-        listOfTransactions.set(listOfTransactions.indexOf(transaction), updatedTransaction);//replace at index of old
-    }
 
 
     /*
@@ -563,13 +632,13 @@ public class Budget {
     }
 
     /*
-     * A function we could use to display a pie chart or some info. Currently returns a map of string, double pairs,
+     * A function we can use to display a pie chart . Returns a PieChart of string, double PieEntries,
      * where the string is the category, and the double is the percentage of transactions in that category. We can also
      * provide dates as parameters. Might add another function for different searches.
      *
      * @param startDate optional parameter. If not null, we'll only look at transactions from or after this date
      * @param endDate optional parameter. If not null, we'll only look at transactions from or after this date
-     * @return a map/key val pairs of category, percentage we could use to make a pie chart or something
+     * @return a PieChart with category name, percentage of transactions in that category
      */
     public PieData pieChartByCategory(Calendar startDate, Calendar endDate){
         List<PieEntry> entries = new ArrayList<>();
@@ -609,7 +678,7 @@ public class Budget {
     }
 
     /*
-     * Another function for a pie chart (possibly), but done by cost. Will return percentage of transactions less
+     * Another function for a pie chart, but done by cost. Will return PieChart with percentage of transactions less
      * than or equal to each value in the provided array (and greater than the last chunk we looked at). If no array is
      * provided, we'll do $10, $50, $100, $500, $1000 and >$1000 (i.e, 0-10, 10.01-50, ....).
      *
@@ -619,7 +688,7 @@ public class Budget {
      *      Function uses the array as the values to split the pie chart into. For elements 0 - n, we find all
      *      transactions less than or equal to the value. Our return map will have n+1 entries, as we'll also return
      *      the percentage of values greater than the last value.
-     * @return a map/key val pairs of category, percentage we could use to make a pie chart or something
+     * @return a PieChart with percentage of transactions within each range provided in values parameter
      */
     public PieData pieChartByCost(Calendar startDate, Calendar endDate, ArrayList<Double> values){
         Map<String, Double> ret = new HashMap<>();
@@ -683,5 +752,9 @@ public class Budget {
 
         return data;
     }
+
+    //Pending members cannot call any Budget functions
+    //Users not in the group cannot call any Budget functions
+
 
 }
