@@ -1,13 +1,11 @@
 package com.example.budgetus;
-import com.sun.mail.iap.ByteArray;
 
 import java.util.*;
-import java.security.*;
 
 public class Group {
     private String groupName;
     private String groupID;
-    private Map<String, String> members = new HashMap<>();
+    private Map <String, Role> members = new HashMap <String, Role> ();
     private Budget groupBudget;
 
     public Group(){
@@ -25,7 +23,7 @@ public class Group {
         return true;
     }
 
-    public Map <String, String> getMembers() {
+    public Map <String, Role> getMembers() {
         return members;
     }
 
@@ -41,7 +39,7 @@ public class Group {
         return groupBudget;
     }
 
-    public boolean registerUser(String newUser, String status){
+    public boolean registerUser(String newUser, Role status){
         if(members.isEmpty ()){
             members.put(newUser, status);
             return true;
@@ -68,13 +66,13 @@ public class Group {
         return false;
     }
 
-    public boolean changeStatus(String curUser, String status){
+    public boolean changeStatus(String curUser, Role status){
         if(members.isEmpty ()){
             return false;
         }
         else{
             if(members.containsKey (curUser)){
-                for (Map.Entry<String, String> tmp : members.entrySet()){
+                for (Map.Entry <String, Role> tmp : members.entrySet()){
                     if(tmp.getKey().equals(curUser)){
                         tmp.setValue(status);
                         return true;

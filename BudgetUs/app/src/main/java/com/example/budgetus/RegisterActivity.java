@@ -122,10 +122,14 @@ public class RegisterActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task <AuthResult> task) {
                 if(task.isSuccessful ()){
                     final String id = databaseReference1.push ().getKey ();
-                    final String id1 = "-MTqsHZPKUqQvooF8xPL";
+                    final String id1 = "-MWV9xhWXUEUYI0hlr2E";
 
                     newUser = new User(name, email, school, id);
+                    //newGroup = new Group ("BudgetUs Admins",id1);
+                    //newGroup.registerUser (newUser.getRandomID (), Role.ADMIN);
                     assert id != null;
+                    assert id1 != null;
+
 
                     databaseReference2.addValueEventListener (new ValueEventListener() {
                         @Override
@@ -135,7 +139,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 curGroup = userDatasnapshot.getValue (Group.class);
                                 if (curGroup != null) {
                                     if(curGroup.getGroupID ().equals (id1)){
-                                        if(curGroup.registerUser (id, "admin")){
+                                        if(curGroup.registerUser (id, Role.MEMBER)){
                                             databaseReference2.child (id1).child ("members").setValue (curGroup.getMembers ());
                                             Toast.makeText(RegisterActivity.this, "Successfully added to Group!", Toast.LENGTH_LONG).show();
                                         }
@@ -154,6 +158,7 @@ public class RegisterActivity extends AppCompatActivity {
                     });
 
 
+
                     //String id1 = databaseReference2.push().getKey ();
 
                     //newGroup = new Group("BudgetUs Admins", id1);
@@ -161,6 +166,7 @@ public class RegisterActivity extends AppCompatActivity {
                     //newGroup.registerUser (id, "Admin");
                     //assert id1 != null;
                     databaseReference1.child(id).setValue(newUser);
+                    //databaseReference2.child(id1).setValue (newGroup);
                     //databaseReference2.child(id1).setValue(newGroup);
 
                     Toast.makeText(RegisterActivity.this, "Successfully registered", Toast.LENGTH_LONG).show();
