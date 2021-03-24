@@ -36,6 +36,7 @@ public class Budget {
     private ArrayList<String> categoriesInUse = new ArrayList<>();//need to find a spot to initialize this
     private final double startingFunds;
     private double remainingFunds;
+    private Role callingUserRole;
     Context c;
 
 
@@ -73,13 +74,13 @@ public class Budget {
 
     //The following functions can be called by the Admin/Owner (same as e-board)
     //The following functions can be called by the E-Board/Members with permissions
-    //mostly adding/modifing transactions, making a new budget, etc.
+    //mostly adding/modifying transactions, making a new budget, etc.
 
 
     /*
      *  Constructor requires startingFunds as well as a context (needed for a bitmap function in Transaction, so it gets passed there)
      */
-    public Budget(double startingFunds, Context c){
+    public Budget(double startingFunds, Context c, Role role){
         this.startingFunds = this.remainingFunds = startingFunds;
         this.c = c;
     }
