@@ -32,9 +32,10 @@ import static android.content.ContentValues.TAG;
 public class Budget {
 
     private ArrayList<Transaction> listOfTransactions = new ArrayList<>();//might use a different data structure
+    private double startingFunds;
     private ArrayList<Transaction> requestedTransactions = new ArrayList<>();//members can make requests, they go in here until approved or denied
     private ArrayList<String> categoriesInUse = new ArrayList<>();//need to find a spot to initialize this
-    private final double startingFunds;
+    private double startingFunds;
     private double remainingFunds;
     private Role callingUserRole;
     Context c;
@@ -476,7 +477,9 @@ public class Budget {
         class SortByAmountLowToHigh implements Comparator<Transaction>{
             @Override
             public int compare(Transaction a, Transaction b){
-                return Integer.compare(((int) a.getAmount()), (int) b.getAmount());
+                //Integer.compare(((int) a.getAmount()), (int) b.getAmount()); //Requires API level 19
+                return Integer.valueOf((int)a.getAmount()).compareTo(Integer.valueOf((int) b.getAmount()));
+
             }
         }
         SortByAmountLowToHigh amountComparator = new SortByAmountLowToHigh();
@@ -490,7 +493,8 @@ public class Budget {
         class SortByAmountHighToLow implements Comparator<Transaction>{
             @Override
             public int compare(Transaction a, Transaction b){
-                return Integer.compare(((int) b.getAmount()), (int) a.getAmount());
+                //Integer.compare(((int) b.getAmount()), (int) a.getAmount()); //Requires API level 19
+                return Integer.valueOf((int)b.getAmount()).compareTo(Integer.valueOf((int) a.getAmount()));
             }
         }
         SortByAmountHighToLow amountComparator = new SortByAmountHighToLow();

@@ -1,62 +1,30 @@
 package com.example.budgetus;
-import java.util.*; 
-import java.io.*;
+import android.os.Build;
 
-public class User// implements Serializable
+import androidx.annotation.RequiresApi;
+
+import java.util.*;
+import java.io.*;
+import java.security.*;
+
+public class User
 {
 	private String name;
 	private String email;
 	private String school;
-	private String username;
-	private String password;
 	private String randomID;
-	private Map<Integer, String> groups=  new HashMap<>();;
+	private Map<String, Role> groups = new HashMap<>();
 
 	public User(){
 
 	}
 
-	public User(String name, String email, String school, String username, String password, String randomID)
-	//public User(String name, String email, String school, String username, String password)
+	public User(String name, String email, String school, String randomID)
 	{
 		this.name = name;
 		this.email = email;
 		this.school = school;
-		this.username = username;
-		this.password = password;
 		this.randomID = randomID;
-  }
-	
-	public boolean updateName(String name){
-		this.name = name;
-		return true;
-	}
-
-	public boolean updateEmail(String email){
-		this.email = email;
-		return true;
-	}
-
-	public boolean updatePassword(String password){
-		this.password = password;
-		return true;
-	}
-
-	public boolean updateSchool(String school){
-		this.school = school;
-		return true;
-	}
-
-	public boolean updateStatus(int groupID, String status){
-		if(groups.containsKey(groupID)){
-			for (Map.Entry<Integer, String> tmp : groups.entrySet()){
-				if(tmp.getKey() == groupID){
-					tmp.setValue(status);
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	public String getName(){
@@ -71,16 +39,12 @@ public class User// implements Serializable
 		return this.school;
 	}
 
-	public String getUsername(){
-		return this.username;
-	}
-
-	public String getPassword(){
-		return this.password;
-	}
-
 	public 	String getRandomID() {
 		return this.randomID;
+	}
+
+	public Map <String, Role> getGroups() {
+		return groups;
 	}
 
 	public void setName(String name) {
@@ -95,26 +59,30 @@ public class User// implements Serializable
 		this.school = school;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public void setGroups(Map <Integer, String> groups) {
+	public void setGroups(Map <String, Role> groups) {
 		this.groups = groups;
-	}
-
-	public Map <Integer, String> getGroups() {
-		return groups;
 	}
 
 	public void setRandomID(String id){
 		this.randomID = id;
 	}
 
-	public String getStatus(int groupID){
+	public boolean updateStatus(String groupID, Role status){
 		if(groups.containsKey(groupID)){
-			for (Map.Entry<Integer, String> tmp : groups.entrySet()){
-				if(tmp.getKey() == groupID){
+			for (Map.Entry<String, Role> tmp : groups.entrySet()){
+				if(tmp.getKey().equals( groupID)){
+					tmp.setValue(status);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public Role getStatus(String groupID){
+		if(groups.containsKey(groupID)){
+			for (Map.Entry<String, Role> tmp : groups.entrySet()){
+				if(tmp.getKey().equals( groupID)){
 					return tmp.getValue();
 				}
 			}
@@ -122,7 +90,7 @@ public class User// implements Serializable
 		return null;
 	}
 
-	public boolean updateGroups(int groupID, String status){
+	public boolean updateGroups(String groupID, Role status){
 		if(groups.isEmpty()){
 			groups.put(groupID, status);
 			return true;
@@ -134,9 +102,5 @@ public class User// implements Serializable
 			}
 		}
 		return false;
-	}
-
-	public void forgotPassword() {
-
 	}
 }

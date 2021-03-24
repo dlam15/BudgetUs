@@ -1,18 +1,21 @@
 package com.example.budgetus;
 
-//import com.sun.mail.iap.ByteArray;
 import java.util.*;
-import java.security.*;
 
 public class Group {
     private String groupName;
-    private final long groupID;
-    private Map<Integer, String> members = new HashMap<>();
-    //private Map<byte[], String> members = new HashMap<>();
+    private String groupID;
+    private Map <String, Role> members = new HashMap <String, Role> ();
+    private Budget groupBudget;
 
-    public Group(String groupName, long groupID){
+    public Group(){
+
+    }
+
+    public Group(String groupName, String groupID){
         this.groupName = groupName;
         this.groupID = groupID;
+        this.groupBudget = new Budget ();
     }
 
     public boolean setGroupName(String groupName) {
@@ -20,12 +23,23 @@ public class Group {
         return true;
     }
 
+    public Map <String, Role> getMembers() {
+        return members;
+    }
+
+    public String getGroupID() {
+        return groupID;
+    }
+
     public String getGroupName() {
         return groupName;
     }
 
-    public boolean registerUser(int newUser, String status){
-    //public boolean registerUser(byte[] newUser, String status){
+    public Budget getGroupBudget() {
+        return groupBudget;
+    }
+
+    public boolean registerUser(String newUser, Role status){
         if(members.isEmpty ()){
             members.put(newUser, status);
             return true;
@@ -39,8 +53,7 @@ public class Group {
         return false;
     }
 
-    public boolean unregisterUser(int remUser){
-    //public boolean unregisterUser(byte[] remUser){
+    public boolean unregisterUser(String remUser){
         if(members.isEmpty ()){
             return false;
         }
@@ -53,16 +66,14 @@ public class Group {
         return false;
     }
 
-    public boolean changeStatus(int curUser, String status){
-    //public boolean changeStatus(byte[] curUser, String status){
+    public boolean changeStatus(String curUser, Role status){
         if(members.isEmpty ()){
             return false;
         }
         else{
             if(members.containsKey (curUser)){
-                //for (Map.Entry<byte[], String> tmp : members.entrySet()){
-                for (Map.Entry<Integer, String> tmp : members.entrySet()){
-                    if(tmp.getKey() == curUser){
+                for (Map.Entry <String, Role> tmp : members.entrySet()){
+                    if(tmp.getKey().equals(curUser)){
                         tmp.setValue(status);
                         return true;
                     }

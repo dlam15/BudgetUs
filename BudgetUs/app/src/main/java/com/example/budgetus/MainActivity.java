@@ -18,26 +18,17 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    //private EditText username;
-    //private EditText password;
     private EditText editEmail;
     private EditText editPassword;
     private Button loginbutton;
     private Button toRegBtn;//teresa
-    private Button forgotUsernamebutton;
-    private Button forgotPasswordbutton;
-    //private UserRecord userRecord;
+    private Button forgotPasswordbutton;//teresa
     private ProgressDialog progressDialog;
     private FirebaseAuth firebaseAuth;
-    //static final String EXTRA_RECORD = "com.example.EXTRA_RECORD";
 
-   // private static final int RC_SIGN_IN = 123;//for authentication
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,8 +37,8 @@ public class MainActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance ();
 
         progressDialog = new ProgressDialog (this);
-        //Button toRegBtn = (Button) findViewById(R.id.goToRegisterButton);
-        toRegBtn = findViewById(R.id.goToRegisterButton);
+
+        toRegBtn = findViewById(R.id.mainRegister);
         toRegBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -55,77 +46,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Calendar c1 = new GregorianCalendar();
-        c1.set(2021, 2, 11);
-        Calendar c2 = new GregorianCalendar();
-        c2.set(Calendar.YEAR, 2018);
-        //c2.set(2018, 1, 1);
-        Budget b = new Budget(1000, this);
-        b.addTransaction(20,"pizza", null, null,  c2, Transaction.Category.FOOD);
-        b.addTransaction(500,"bitcoin", null, null,  c1, Transaction.Category.OTHER);
-        Map<String, Double> m = b.breakdownInfo(null, null);
-        for(int i=0; i<m.size(); i++){
-            System.out.println(m.values().toArray()[i].toString() +  m.keySet().toArray()[i].toString());
-        }
-
         //Variables
-        //final EditText username = (EditText) findViewById(R.id.editUsername);
-        //final EditText password = (EditText)findViewById(R.id.editPassword);
-        Button loginbutton = (Button) findViewById(R.id.btLogin);
-        Button toRegBtn = (Button) findViewById(R.id.goToRegisterButton);
-        Button forgotUsernamebutton = (Button) findViewById(R.id.btForgotUsername);
-        Button forgotPasswordbutton = (Button) findViewById(R.id.btForgotPassword);
-
-        //Register Button
-        toRegBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                launchRegisterActivity(); }
-        });
-
-        editEmail = findViewById(R.id.editEmail);
-        editPassword = findViewById(R.id.editPassword);
-        loginbutton = findViewById(R.id.btLogin);
-        forgotUsernamebutton = findViewById(R.id.btForgotUsername);//teresa
-        forgotPasswordbutton = findViewById(R.id.btForgotPassword);//teresa
+         editEmail = findViewById(R.id.mainEmail);
+         editPassword = findViewById(R.id.mainPassword);
+         loginbutton = findViewById(R.id.mainLogin);
+         forgotPasswordbutton = findViewById(R.id.mainForgot);//teresa
 
         //Login Button
-        loginbutton.setOnClickListener(new View.OnClickListener() {
+         loginbutton.setOnClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View view) {
-                /*EditText username = (EditText) findViewById(R.id.editUsername); //derrick
-                EditText password = (EditText)findViewById(R.id.editPassword); //derrick
-                String inputUser = username.getText().toString().trim();
-                String inputPass = password.getText().toString().trim();
-                validate(inputUser,inputPass);*/
-                login();
+                 Login();
              }
          });
-
-
-        // teresa
-
-        //Forgot Password Button
-        forgotPasswordbutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                launchForgotPasswordActivity();
-            }
-        });
-
-        //derrick
-        /*List<AuthUI.IdpConfig> providers = Arrays.asList(
-                new AuthUI.IdpConfig.EmailBuilder().build());
-        startActivityForResult(
-                AuthUI.getInstance()
-                        .createSignInIntentBuilder()
-                        .setAvailableProviders(providers)
-                        .build(),
-                RC_SIGN_IN);*/
-
     }
 
-    private void login() {
+    private void Login() {
         final String email =  editEmail.getText().toString();
         final String password = editPassword.getText().toString();
 
@@ -160,21 +96,25 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
     //Functions
     private void launchRegisterActivity(){
         Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
         finish ();
     }
-
-    private void launchForgotPasswordActivity(){
-        Intent intent = new Intent(this, ForgotPass.class);
+/* teresa
+    private void launchForgotUsernameActivity(){
+        Intent intent = new Intent(this, forgotLogin.class);
         startActivity(intent);
     }
 
+    private void launchForgotPasswordActivity(){
+        Intent intent = new Intent(this, forgotLogin2.class);
+        startActivity(intent);
+    }
+*/
 
-    /*private void validate(String userName,String userPassword) {
+   /* private void validate(String userName,String userPassword) {
          //get username and password
          String matchUser = "admin";
          String matchPass = "123";
@@ -189,26 +129,6 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("Failed to validate");
          }
      }*/
-
-     //derrick
-    /*protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == RC_SIGN_IN) {
-            IdpResponse response = IdpResponse.fromResultIntent(data);
-
-            if (resultCode == RESULT_OK) {
-                // Successfully signed in
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                // ...
-            } else {
-                // Sign in failed. If response is null the user canceled the
-                // sign-in flow using the back button. Otherwise check
-                // response.getError().getErrorCode() and handle the error.
-                // ...
-            }
-        }
-    }*/
 
 
 }
