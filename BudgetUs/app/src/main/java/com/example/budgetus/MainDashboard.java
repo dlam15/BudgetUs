@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,7 +36,7 @@ public class MainDashboard extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_dashboard);
 
-        outView = (TextView)findViewById(R.id.displayUsername);
+        outView = (TextView)findViewById(R.id.displayUsername); 
         nameBtn = findViewById (R.id.changeName);
         summaryBtn = findViewById(R.id.summary);
         backBtn = findViewById(R.id.back);
@@ -42,7 +44,23 @@ public class MainDashboard extends AppCompatActivity {
 
         firebaseAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance ().getReference ( "users" );
-
+        final String id2 = FirebaseAuth.getInstance ().getCurrentUser ().getUid ();
+        databaseReference.child(id2).get().addOnCompleteListener(new OnCompleteListener <DataSnapshot> () {
+            @Override
+            public void onComplete(@NonNull Task <DataSnapshot> task) {
+                if (!task.isSuccessful()) {
+                    Log.e("firebase", "Error getting data", task.getException());
+                }
+                else {
+                    curUser = task.getResult ().getValue (User.class);
+                    if (curUser != null) {
+                        outView.setText (curUser.getName ( ));
+                    }
+                    Log.d("firebase", id2);
+                }
+            }
+        });
+        /*
         if (firebaseAuth.getCurrentUser() != null){
             email = firebaseAuth.getCurrentUser().getEmail();
 
@@ -66,6 +84,7 @@ public class MainDashboard extends AppCompatActivity {
                 }
             });
         }
+         */
 
         summaryBtn.setOnClickListener(new View.OnClickListener() {
             @Override

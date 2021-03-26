@@ -121,13 +121,14 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task <AuthResult> task) {
                 if(task.isSuccessful ()){
-                    final String id = databaseReference1.push ().getKey ();
+                    final String id2 = firebaseAuth.getCurrentUser ().getUid ();
+                    //final String id = databaseReference1.push ().getKey ();
                     final String id1 = "-MWV9xhWXUEUYI0hlr2E";
 
-                    newUser = new User(name, email, school, id);
+                    newUser = new User(name, email, school, id2);
                     //newGroup = new Group ("BudgetUs Admins",id1);
                     //newGroup.registerUser (newUser.getRandomID (), Role.ADMIN);
-                    assert id != null;
+                    assert id2 != null;
                     assert id1 != null;
 
 
@@ -139,7 +140,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 curGroup = userDatasnapshot.getValue (Group.class);
                                 if (curGroup != null) {
                                     if(curGroup.getGroupID ().equals (id1)){
-                                        if(curGroup.registerUser (id, Role.MEMBER)){
+                                        if(curGroup.registerUser (id2, Role.MEMBER)){
                                             databaseReference2.child (id1).child ("members").setValue (curGroup.getMembers ());
                                             Toast.makeText(RegisterActivity.this, "Successfully added to Group!", Toast.LENGTH_LONG).show();
                                         }
@@ -162,10 +163,10 @@ public class RegisterActivity extends AppCompatActivity {
                     //String id1 = databaseReference2.push().getKey ();
 
                     //newGroup = new Group("BudgetUs Admins", id1);
-                    newUser.updateGroups (id1, Role.ADMIN);
+                    newUser.updateGroups (id1, Role.MEMBER);
                     //newGroup.registerUser (id, "Admin");
                     //assert id1 != null;
-                    databaseReference1.child(id).setValue(newUser);
+                    databaseReference1.child(id2).setValue(newUser);
                     //databaseReference2.child(id1).setValue (newGroup);
                     //databaseReference2.child(id1).setValue(newGroup);
 
