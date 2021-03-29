@@ -5,6 +5,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageDecoder;
 import android.net.Uri;
+
+import com.google.firebase.database.Exclude;
+
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -72,7 +75,7 @@ public class Transaction {
     private Bitmap receipt = null;//the actual image we can display on front end
     private String description = null;
     //private Category category = null;
-    private Calendar dateOfTransaction = null;//Date is depreciated
+    @Exclude private Calendar dateOfTransaction = null;//Date is depreciated
     //might be able to use Calendar View to take input
 
     /*
@@ -97,7 +100,7 @@ public class Transaction {
     }
 
 
-    public Calendar getDateOfTransaction() {
+    @Exclude public Calendar getDateOfTransaction() {
         return dateOfTransaction;
     }
 
@@ -133,6 +136,8 @@ public class Transaction {
     public void setDescription(String description) { this.description = description; }
 
     public void setCategory(String category) { this.category = category; }
+
+    public void setDateAsString(String dateAsString) { DateAsString = dateAsString; }
 
     //image updating setters- when we update 1, update all (bitmap and byte[])
 
@@ -243,5 +248,7 @@ public class Transaction {
             this.DateAsString = getDateOfTransaction().get(Calendar.MONTH) +"/" + getDateOfTransaction().get(Calendar.DATE) +"/" + getDateOfTransaction().get(Calendar.YEAR);
         }
         this.category = category;
+    }
+    public Transaction(){
     }
 }

@@ -10,6 +10,8 @@ import androidx.annotation.NonNull;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -26,13 +28,14 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static android.content.ContentValues.TAG;
 
 public class Budget {
 
     private ArrayList<Transaction> listOfTransactions = new ArrayList<>();//might use a different data structure
-    private double startingFunds;
     private ArrayList<Transaction> requestedTransactions = new ArrayList<>();//members can make requests, they go in here until approved or denied
     private ArrayList<String> categoriesInUse = new ArrayList<>();//need to find a spot to initialize this
     private double startingFunds;
@@ -53,22 +56,53 @@ public class Budget {
         }
     }
 
-    public void loadFromDB(){
+
+    //https://stackoverflow.com/questions/30659569/wait-until-firebase-retrieves-data
+    //answer by rusty1996
+    public interface OnGetDataListener {
+        //this is for callbacks
+        void onSuccess(Budget budget);
+    }
+
+
+    //have to figure out where this would be called
+    //probably
+    // -sign in, pull list of groups from user
+    // -pull all group data for every group, make local object (need for real names to display)
+    // -click on group
+    // -call this function to return a fully functioning Budget object for the current group
+    //or loading all groups will automatically load their budgets
+    //i.e. look at what I'm doing here - I work with the group, budget info automatically pulled
+    //as long as I save all info we need in DB, load shouldn't need extra code
+    //but it might, as some stuff is undefined, not null, etc - so that's what I'll work on
+    public Budget loadFromDB(String groupID, final OnGetDataListener listener){
+        //final CountDownLatch done = new CountDownLatch(1);
+       // final AtomicBoolean done = new AtomicBoolean(false);
+
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference myRef = database.child("matt budget test/budget1/");
-        final Transaction[] t = new Transaction[1];
-        myRef.child("t1").addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference myRef = database.child("groups/-MWaSTjzJ7EmIB6jtIeA");//will replace with group ID param
+        final Budget[] ret = {null};
+        System.out.println("loading budget");
+
+        myRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                System.out.println("MADE IT");
-                t[0] = dataSnapshot.getValue(Transaction.class);
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if(task.isSuccessful()){
+                    Group g = task.getResult().getValue(Group.class);
+                    //System.out.println(g.getGroupBudget().getListOfTransactions());
+                    ret[0] =  g.getGroupBudget();
+                    //System.out.println("for 100: "+ g.getGroupBudget().findTransaction(100).get(0).toString());
+                    listener.onSuccess(g.getGroupBudget());
+                }else{
+                    System.out.println(task.getException().toString());
+                }
             }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-
         });
-        listOfTransactions.add(t[0]);
+
+        return ret[0];
+
     }
 
 
@@ -84,6 +118,10 @@ public class Budget {
     public Budget(double startingFunds, Context c, Role role){
         this.startingFunds = this.remainingFunds = startingFunds;
         this.c = c;
+    }
+
+    public Budget(){
+
     }
 
     /*
