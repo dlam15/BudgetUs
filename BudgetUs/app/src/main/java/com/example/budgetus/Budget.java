@@ -74,14 +74,42 @@ public class Budget {
     //or loading all groups will automatically load their budgets
     //i.e. look at what I'm doing here - I work with the group, budget info automatically pulled
     //as long as I save all info we need in DB, load shouldn't need extra code
-    //but it might, as some stuff is undefined, not null, etc - so that's what I'll work on
-    public Budget loadFromDB(String groupID, final OnGetDataListener listener){
+
+    /* example of how to use this right now:
+
+            final Budget[] b = new Budget[1];
+         Budget.loadFromDB("", new Budget.OnGetDataListener() {
+             @Override
+             public void onSuccess(Budget budget) {
+                 b[0] = budget;
+                 System.out.println(b[0].findTransaction(100).get(0).getDescription());
+             }
+         });
+
+        //System.out.println(b[0].findTransaction(100).get(0).toString()); // this causes a null pointer exception - i.e. back to where we started
+
+        //so we kinda need this all the way up
+        //user logs in
+        //we call method to load their info
+        //as well as all of their groups and those group's budgets
+        //then we have all of it ready to go, onSuccess redisplay home screen post-login
+        //or we can do it later, at a group-by-group basis
+        //but this requires the front-end to work a bit differently
+        //--on create, make budget/group, call load
+        //--on load success, call rest of functions to set up display and values and whatnot
+        //I will decide/think of pros and cons, but this interface or something like it is the way to go
+
+
+     */
+
+
+
+    public static void loadFromDB(String groupID, final OnGetDataListener listener){
         //final CountDownLatch done = new CountDownLatch(1);
        // final AtomicBoolean done = new AtomicBoolean(false);
 
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference myRef = database.child("groups/-MWaSTjzJ7EmIB6jtIeA");//will replace with group ID param
-        final Budget[] ret = {null};
+        DatabaseReference myRef = database.child("groups/-MWaSTjzJ7EmIB6jtIeA");//will replace with group ID param=
         System.out.println("loading budget");
 
         myRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
@@ -89,19 +117,14 @@ public class Budget {
             @Override
             public void onComplete(@NonNull Task<DataSnapshot> task) {
                 if(task.isSuccessful()){
-                    Group g = task.getResult().getValue(Group.class);
-                    //System.out.println(g.getGroupBudget().getListOfTransactions());
-                    ret[0] =  g.getGroupBudget();
-                    //System.out.println("for 100: "+ g.getGroupBudget().findTransaction(100).get(0).toString());
-                    listener.onSuccess(g.getGroupBudget());
+                    Budget b = task.getResult().getValue(Group.class).getGroupBudget();
+                    listener.onSuccess(b);
                 }else{
                     System.out.println(task.getException().toString());
                 }
             }
 
         });
-
-        return ret[0];
 
     }
 
