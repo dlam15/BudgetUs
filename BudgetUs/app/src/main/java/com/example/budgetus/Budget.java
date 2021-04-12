@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -77,7 +78,7 @@ public class Budget {
 
     /* example of how to use this right now:
 
-            final Budget[] b = new Budget[1];
+         final Budget[] b = new Budget[1];
          Budget.loadFromDB("", new Budget.OnGetDataListener() {
              @Override
              public void onSuccess(Budget budget) {
@@ -105,11 +106,8 @@ public class Budget {
 
 
     public static void loadFromDB(String groupID, final OnGetDataListener listener){
-        //final CountDownLatch done = new CountDownLatch(1);
-       // final AtomicBoolean done = new AtomicBoolean(false);
-
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference myRef = database.child("groups/-MWaSTjzJ7EmIB6jtIeA");//will replace with group ID param=
+        DatabaseReference myRef = database.child("groups/-MWaSTjzJ7EmIB6jtIeA");//will replace with group ID param
         System.out.println("loading budget");
 
         myRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
@@ -139,13 +137,34 @@ public class Budget {
      *  Constructor requires startingFunds as well as a context (needed for a bitmap function in Transaction, so it gets passed there)
      */
     public Budget(double startingFunds, Context c, Role role){
-        this.startingFunds = this.remainingFunds = startingFunds;
-        this.c = c;
+        if(role == Role.ADMIN || role == Role.OWNER) {
+            this.startingFunds = this.remainingFunds = startingFunds;
+            this.c = c;
+            this.callingUserRole = role;
+        }else{
+            Toast.makeText(this.c, "invalid permissions", Toast.LENGTH_LONG).show();
+        }
     }
 
-    public Budget(){
-
+    public boolean permissionsCheckAdminOwner(){
+        if(callingUserRole == Role.ADMIN || callingUserRole == Role.OWNER) {
+            return true;
+        }else{
+            Toast.makeText(this.c, "invalid permissions", Toast.LENGTH_LONG).show();
+            return false;
+        }
     }
+
+    public boolean permissionsCheckMember(){
+        if(permissionsCheckAdminOwner() ||  callingUserRole == Role.MEMBER) {
+            return true;
+        }else{
+            Toast.makeText(this.c, "invalid permissions", Toast.LENGTH_LONG).show();
+            return false;
+        }
+    }
+
+    public Budget(){ }
 
     /*
      * Add a new transaction to the list of transactions. Last 5 parameters are optional. We also update the remaining funds after this transaction.
@@ -159,9 +178,11 @@ public class Budget {
      * @param category OPTIONAL - category from category enum - will probably change how the enum works, basic pre-defined choice right now
      */
     public void addTransaction(double amount, String name, Uri receipt, String description, Calendar date, String category){
-        Transaction t = new Transaction(startingFunds, amount, name, c, receipt, description, date, category);
-        listOfTransactions.add(t);
-        remainingFunds = this.remainingFunds - amount;//necessary to update funds correctly
+        if(permissionsCheckAdminOwner()) {
+            Transaction t = new Transaction(startingFunds, amount, name, c, receipt, description, date, category);
+            listOfTransactions.add(t);
+            remainingFunds = this.remainingFunds - amount;//necessary to update funds correctly
+        }
     }
 
     /*
@@ -170,8 +191,10 @@ public class Budget {
      * @param t Transaction object to add to listOfTransactions
      */
     public void addTransaction(Transaction t){
-        listOfTransactions.add(t);
-        remainingFunds = this.remainingFunds - t.getAmount();//necessary to update funds correctly
+        if(permissionsCheckAdminOwner()) {
+            listOfTransactions.add(t);
+            remainingFunds = this.remainingFunds - t.getAmount();//necessary to update funds correctly
+        }
     }
 
     /*
@@ -194,8 +217,10 @@ public class Budget {
      *
      */
     public void modifyTransaction(Transaction transaction, double amount, String name,  Uri receipt,  String description,  Calendar date, String category){
-        Transaction updatedTransaction = new Transaction(transaction.getAmountBefore(), amount, name, c, receipt, description, date, category);
-        listOfTransactions.set(listOfTransactions.indexOf(transaction), updatedTransaction);//replace at index of old
+        if(permissionsCheckAdminOwner()) {
+            Transaction updatedTransaction = new Transaction(transaction.getAmountBefore(), amount, name, c, receipt, description, date, category);
+            listOfTransactions.set(listOfTransactions.indexOf(transaction), updatedTransaction);//replace at index of old
+        }
     }
 
     /*
@@ -204,7 +229,8 @@ public class Budget {
      * should be able to deal with this list.
      */
     public ArrayList<Transaction> getRequestedTransactions() {
-        return requestedTransactions;
+        if(permissionsCheckAdminOwner()) return requestedTransactions;
+        else return null;
     }
 
 
@@ -215,14 +241,18 @@ public class Budget {
     //then we can use for the requested list or the real/approved list
 
     public void approveRequestedTransaction(Transaction t){
-        addTransaction(t);
-        requestedTransactions.remove(t);
-        //somehow send notification to user that requested
+        if(permissionsCheckAdminOwner()) {
+            addTransaction(t);
+            requestedTransactions.remove(t);
+            //somehow send notification to user that requested
+        }
     }
 
     public void denyRequestedTransaction(Transaction t){
-        requestedTransactions.remove(t);
-        //somehow send notification to user that requested
+        if(permissionsCheckAdminOwner()) {
+            requestedTransactions.remove(t);
+            //somehow send notification to user that requested
+        }
     }
 
 
@@ -241,15 +271,32 @@ public class Budget {
      * -In either case, maybe the member that requested should get a notification (this is a later feature)
      */
     public void requestTransaction(double amount, String name, Uri receipt, String description, Calendar date, String category){
-        Transaction t = new Transaction(startingFunds, amount, name, c, receipt, description, date, category);
-        requestedTransactions.add(t);
+        if(permissionsCheckMember()) {
+            Transaction t = new Transaction(startingFunds, amount, name, c, receipt, description, date, category);
+            requestedTransactions.add(t);
+        }
     }
 
     //can get, but shouldn't be allowed to set - we want to maintain valid record via transactions
-    public double getStartingFunds() { return startingFunds; }
-    public double getRemainingFunds() { return remainingFunds; }
+    public double getStartingFunds() {
+        if(permissionsCheckMember()) {
+            return startingFunds;
+        }
+        return -1;
+    }
+    public double getRemainingFunds() {
+        if (permissionsCheckMember()) {
+            return remainingFunds;
+        }
+        return -1;
+    }
 
-    public ArrayList<Transaction> getListOfTransactions(){ return listOfTransactions; }
+    public ArrayList<Transaction> getListOfTransactions(){
+        if(permissionsCheckMember()) {
+            return listOfTransactions;
+        }
+        return new ArrayList<>();
+    }
 
     /*
      * Users define the category of a Transaction. This function returns all
@@ -261,11 +308,15 @@ public class Budget {
      * @return an arraylist of strings containing all categories used in the budget currently
      */
     public ArrayList<String> getCategoriesInUse() {
-        if(categoriesInUse!=null) categoriesInUse.clear();
-        for(Transaction t: getListOfTransactions()){
-            if(t.getCategory()!= null && !categoriesInUse.contains(t.getCategory())) categoriesInUse.add(t.getCategory());
+        if(permissionsCheckMember()) {
+            if (categoriesInUse != null) categoriesInUse.clear();
+            for (Transaction t : getListOfTransactions()) {
+                if (t.getCategory() != null && !categoriesInUse.contains(t.getCategory()))
+                    categoriesInUse.add(t.getCategory());
+            }
+            return categoriesInUse;
         }
-        return categoriesInUse;
+        return new ArrayList<>();
     }
 
 
@@ -291,8 +342,10 @@ public class Budget {
      */
     public ArrayList<Transaction> findTransaction(double amount) {
         ArrayList<Transaction> ret = new ArrayList<>();
-        for(Transaction t: listOfTransactions){
-            if(t.getAmount() == amount) ret.add(t);
+        if(permissionsCheckMember()) {
+            for (Transaction t : listOfTransactions) {
+                if (t.getAmount() == amount) ret.add(t);
+            }
         }
         return ret;
     }
@@ -306,9 +359,13 @@ public class Budget {
      */
     public ArrayList<Transaction> findTransaction(String identifier) {
         ArrayList<Transaction> ret = new ArrayList<>();
-        for(Transaction t: listOfTransactions){
-            if(t.getName().contains(identifier)) ret.add(t);//i don't remember how these work - is this like a copy of a copy, doesn't work outside this?
-            else if(t.getDescription()!=null && t.getDescription().contains(identifier)) ret.add(t);
+        if(permissionsCheckMember()) {
+            for (Transaction t : listOfTransactions) {
+                if (t.getName().contains(identifier))
+                    ret.add(t);//i don't remember how these work - is this like a copy of a copy, doesn't work outside this?
+                else if (t.getDescription() != null && t.getDescription().contains(identifier))
+                    ret.add(t);
+            }
         }
         return ret;
     }
@@ -325,8 +382,11 @@ public class Budget {
      */
     public ArrayList<Transaction> findTransaction(Calendar date) {
         ArrayList<Transaction> ret = new ArrayList<>();
-        for(Transaction t: listOfTransactions){
-            if(t.getDateOfTransaction()!=null && t.getDateOfTransaction().equals(date)) ret.add(t);
+        if(permissionsCheckMember()) {
+            for (Transaction t : listOfTransactions) {
+                if (t.getDateOfTransaction() != null && t.getDateOfTransaction().equals(date))
+                    ret.add(t);
+            }
         }
         return ret;
     }
@@ -340,8 +400,11 @@ public class Budget {
      */
     public ArrayList<Transaction> findTransactionByYear(Calendar date) {
         ArrayList<Transaction> ret = new ArrayList<>();
-        for(Transaction t: listOfTransactions){
-            if(t.getDateOfTransaction()!=null && t.getDateOfTransaction().get(Calendar.YEAR) == date.get(Calendar.YEAR)) ret.add(t);
+        if(permissionsCheckMember()) {
+            for (Transaction t : listOfTransactions) {
+                if (t.getDateOfTransaction() != null && t.getDateOfTransaction().get(Calendar.YEAR) == date.get(Calendar.YEAR))
+                    ret.add(t);
+            }
         }
         return ret;
     }
@@ -356,8 +419,11 @@ public class Budget {
      */
     public ArrayList<Transaction> findTransactionByMonth(Calendar date) {
         ArrayList<Transaction> ret = new ArrayList<>();
-        for(Transaction t: listOfTransactions){
-            if(t.getDateOfTransaction()!=null && t.getDateOfTransaction().get(Calendar.MONTH) == date.get(Calendar.MONTH)) ret.add(t);
+        if(permissionsCheckMember()) {
+            for (Transaction t : listOfTransactions) {
+                if (t.getDateOfTransaction() != null && t.getDateOfTransaction().get(Calendar.MONTH) == date.get(Calendar.MONTH))
+                    ret.add(t);
+            }
         }
         return ret;
     }
@@ -371,11 +437,453 @@ public class Budget {
      */
     public ArrayList<Transaction> findTransactionByCategory(String category) {
         ArrayList<Transaction> ret = new ArrayList<>();
-        for(Transaction t: listOfTransactions){
-            if(t.getCategory()!=null && t.getCategory() == category) ret.add(t);
+        if(permissionsCheckMember()) {
+            for (Transaction t : listOfTransactions) {
+                if (t.getCategory() != null && t.getCategory() == category) ret.add(t);
+            }
         }
         return ret;
     }
+
+
+
+    /*
+     * First attempt to provide some sort of filtering rather than searching - all transactions from a time period/range
+     * I'd like to reuse the findTransaction functions, but ranges are somewhat different.
+     *
+     * Here, we take in a startDate and endDate, and return all transactions that took place on and between these dates.
+     * This uses the before and after methods provided by the calendar class.
+     *
+     * @param startDate date on which to start search
+     * @param endDate date on which to end search
+     * @return arraylist of all transactions that occurred on or between these dates
+     */
+    public ArrayList<Transaction> eventsBetween(Calendar startDate, Calendar endDate){
+        ArrayList<Transaction> ret = new ArrayList<>();
+        if(permissionsCheckMember()) {
+            startDate = defineCalendar(startDate);
+            endDate = defineCalendar(endDate);
+            for (Transaction t : listOfTransactions) {
+                if (t.getDateOfTransaction() != null && ((t.getDateOfTransaction().equals(endDate)) || (t.getDateOfTransaction().equals(startDate)) || (t.getDateOfTransaction().after(startDate) && t.getDateOfTransaction().before(endDate)))) {
+                    ret.add(t);
+                    //System.out.println(t.getDateOfTransaction());
+                }
+            }
+        }
+        return ret;
+    }
+
+    /*
+     * Like eventsBetween, but just all events after startDate.
+     *
+     * @param startDate date on which to start search
+     * @return arraylist of all transactions that occurred on or after startDate
+     */
+    public ArrayList<Transaction> eventsAfter(Calendar startDate){
+        ArrayList<Transaction> ret = new ArrayList<>();
+        if(permissionsCheckMember()) {
+            startDate = defineCalendar(startDate);
+            for (Transaction t : listOfTransactions) {
+                if (t.getDateOfTransaction() != null && (t.getDateOfTransaction().equals(startDate) || t.getDateOfTransaction().after(startDate))) {
+                    ret.add(t);
+                    //System.out.println(t.getDateOfTransaction());
+                }
+            }
+        }
+        return ret;
+    }
+
+    /*
+     * Like eventsBetween, but just all events before endDate.
+     *
+     * @param endDate date on which to end search
+     * @return arraylist of all transactions that occurred on or before endDate
+     */
+    public ArrayList<Transaction> eventsBefore(Calendar endDate){
+        ArrayList<Transaction> ret = new ArrayList<>();
+        if(permissionsCheckMember()) {
+            endDate = defineCalendar(endDate);
+            for (Transaction t : listOfTransactions) {
+                if (t.getDateOfTransaction() != null && (t.getDateOfTransaction().equals(endDate) || t.getDateOfTransaction().before(endDate))) {
+                    ret.add(t);
+                    //System.out.println(t.getDateOfTransaction());
+                }
+            }
+        }
+        return ret;
+    }
+
+    /*
+     * Another feature we can support is planned/future transactions. I was going to make a whole new system
+     * for this, but we can support by just adding normally, but with a date in the future. Then, getting
+     * future transactions is just calling eventsAfter(Today).
+     *
+     * @return all transactions in listOfTransactions that have a date after the current date.
+     */
+    public ArrayList<Transaction> getPlannedTransactions(){
+        if(permissionsCheckMember()) {
+            return eventsAfter(Calendar.getInstance());
+        }
+        return new ArrayList<>();
+    }
+
+    /*
+     * Use fundsSpentOverTime to get amount spent, could add extra stuff like X% in this category, etc. - probably will add next
+     * Can also do stuff with amountbefore and amountafter in each transaction, etc - will think about what's useful first
+     *
+     * Also need to figure out if making parameters Calendar class works for front end easily of if converting a string to a
+     * Calendar object would be easier
+     *
+     * Also works with just year provided - we set undefined month as December and undefined day to 31st, allowing inclusive search
+     *
+     * @param startDate date on which to start search
+     * @param endDate date on which to end search
+     * @return amount spent between these dates
+     */
+    public double fundsSpentOverTime(Calendar startDate, Calendar endDate){
+        double runningTotal = 0;
+        if(permissionsCheckMember()) {
+            ArrayList<Transaction> allTransactions = new ArrayList<>();
+            allTransactions = eventsBetween(startDate, endDate);
+            for (Transaction t : allTransactions) runningTotal += t.getAmount();
+        }
+        return runningTotal;
+    }
+
+
+
+    /*
+     * Methods for sorting arraylist by different fields. Each works pretty much the same:
+     *  -declare a nested class that implements a Comparator for Transactions
+     *  -override compare function to compare what field we want
+     *  -call Collections.sort with arraylist and comparator we made
+     */
+
+
+    /*
+     * Sort by amount of transaction, low to high.
+     */
+    public void sortTransactionsLowToHigh(){
+        if(permissionsCheckMember()) {
+            class SortByAmountLowToHigh implements Comparator<Transaction> {
+                @Override
+                public int compare(Transaction a, Transaction b) {
+                    //Integer.compare(((int) a.getAmount()), (int) b.getAmount()); //Requires API level 19
+                    return Integer.valueOf((int) a.getAmount()).compareTo(Integer.valueOf((int) b.getAmount()));
+
+                }
+            }
+            SortByAmountLowToHigh amountComparator = new SortByAmountLowToHigh();
+            Collections.sort(listOfTransactions, amountComparator);
+        }
+    }
+
+    /*
+     * Sort by amount of transaction, high to low.
+     */
+    public void sortTransactionsHighToLow(){
+        if(permissionsCheckMember()) {
+            class SortByAmountHighToLow implements Comparator<Transaction> {
+                @Override
+                public int compare(Transaction a, Transaction b) {
+                    //Integer.compare(((int) b.getAmount()), (int) a.getAmount()); //Requires API level 19
+                    return Integer.valueOf((int) b.getAmount()).compareTo(Integer.valueOf((int) a.getAmount()));
+                }
+            }
+            SortByAmountHighToLow amountComparator = new SortByAmountHighToLow();
+            Collections.sort(listOfTransactions, amountComparator);
+        }
+    }
+
+    /*
+     * Sort by name of transaction, in alphabetical order.
+     */
+    public void sortTransactionsNameAlphabetical(){
+        if(permissionsCheckMember()) {
+            class SortByNameAlphabetical implements Comparator<Transaction> {
+                @Override
+                public int compare(Transaction a, Transaction b) {
+                    return a.getName().compareTo(b.getName());
+                }
+            }
+            SortByNameAlphabetical amountComparator = new SortByNameAlphabetical();
+            Collections.sort(listOfTransactions, amountComparator);
+        }
+    }
+
+    /*
+     * Sort by name of transaction, in reverse alphabetical order.
+     */
+    public void sortTransactionsNameReverseAlphabetical(){
+        if(permissionsCheckMember()) {
+            class SortByNameReverseAlphabetical implements Comparator<Transaction> {
+                @Override
+                public int compare(Transaction a, Transaction b) {
+                    return b.getName().compareTo(a.getName());
+                }
+            }
+            SortByNameReverseAlphabetical amountComparator = new SortByNameReverseAlphabetical();
+            Collections.sort(listOfTransactions, amountComparator);
+        }
+    }
+
+    /* Now some optional ones - requires checking null
+     * I will treat null as undefined/empty, so it will always come last (after the sorted/valid stuff)
+     * For example in alphabetical order: A, B, null, null
+     * In reverse alphabetical order: B, A, null
+     * Although in both of those example the user will probably see a blank space/empty string rather than the word null.
+     * I tested most of these but want to double check null always comes after.
+     *
+     * I'm also thinking about comparing by a required field when we have 2 nulls, but I haven't done that yet.
+     */
+
+    /*
+     * Sort by description in alphabetical order.
+     */
+    public void sortTransactionsDescriptionAlphabetical(){
+        if(permissionsCheckMember()) {
+            //for(Transaction t: listOfTransactions) System.out.println(t.getDescription());
+            class SortByDescriptionAlphabetical implements Comparator<Transaction> {
+                @Override
+                public int compare(Transaction a, Transaction b) {
+                    //what worked for me so far is to compare by the empty string multiply by -1 to get all nulls after all sorted values
+                    if (a.getDescription() == null) return -1 * "".compareTo(b.getDescription());
+                    if (b.getDescription() == null) return -1 * a.getDescription().compareTo("");
+                    return a.getDescription().compareTo(b.getDescription());
+                }
+            }
+            SortByDescriptionAlphabetical amountComparator = new SortByDescriptionAlphabetical();
+            Collections.sort(listOfTransactions, amountComparator);
+            //for(Transaction t: listOfTransactions) System.out.println(t.getDescription());
+        }
+    }
+
+    /*
+     * Sort by description in reverse alphabetical order.
+     */
+    public void sortTransactionsDescriptionReverseAlphabetical(){
+        if(permissionsCheckMember()) {
+            //for(Transaction t: listOfTransactions) System.out.println(t.getDescription());
+            class SortByDescriptionReverseAlphabetical implements Comparator<Transaction> {
+                @Override
+                public int compare(Transaction a, Transaction b) {
+                    //same here, comparing with empty string will put nulls after everything else
+                    if (a.getDescription() == null) return b.getDescription().compareTo("");
+                    if (b.getDescription() == null) return "".compareTo(a.getDescription());
+                    return b.getDescription().compareTo(a.getDescription());
+                }
+            }
+            SortByDescriptionReverseAlphabetical amountComparator = new SortByDescriptionReverseAlphabetical();
+            Collections.sort(listOfTransactions, amountComparator);
+            //for(Transaction t: listOfTransactions) System.out.println(t.getDescription());
+        }
+    }
+
+    /*
+     * Sort by date in order of old/past to new/future.
+     */
+    public void sortTransactionsDateOldToNew(){
+        if(permissionsCheckMember()) {
+            class SortByDateOldToNew implements Comparator<Transaction> {
+                @Override
+                public int compare(Transaction a, Transaction b) {
+                    //was having an issue with null, so I'm making a calendar with 0 as the year and working with that, puts null after everything else
+                    Calendar zero = new GregorianCalendar(0, 0, 0);
+                    if (a.getDateOfTransaction() == null)
+                        return (-1) * zero.compareTo(b.getDateOfTransaction());
+                    if (b.getDateOfTransaction() == null)
+                        return (-1) * a.getDateOfTransaction().compareTo(zero);
+                    return a.getDateOfTransaction().compareTo(b.getDateOfTransaction());
+                }
+            }
+            SortByDateOldToNew amountComparator = new SortByDateOldToNew();
+            Collections.sort(listOfTransactions, amountComparator);
+        }
+    }
+
+    /*
+     * Sort by date in order of new/future to old/past.
+     */
+    public void sortTransactionsDateNewToOld(){
+        if(permissionsCheckMember()) {
+            class SortByDateNewToOld implements Comparator<Transaction> {
+                @Override
+                public int compare(Transaction a, Transaction b) {
+                    //same as above, year 0 gives null after everything else (assuming we have no transactions from 0)
+                    Calendar zero = new GregorianCalendar(0, 0, 0);
+                    if (a.getDateOfTransaction() == null)
+                        return b.getDateOfTransaction().compareTo(zero);
+                    if (b.getDateOfTransaction() == null)
+                        return zero.compareTo(a.getDateOfTransaction());
+                    return b.getDateOfTransaction().compareTo(a.getDateOfTransaction());
+                }
+            }
+            SortByDateNewToOld amountComparator = new SortByDateNewToOld();
+            Collections.sort(listOfTransactions, amountComparator);
+        }
+    }
+
+
+    /*
+     * Find all transactions between 2 dates, where either or both of them may be null or missing info.
+     * Used in the breakdown functions below.
+     *
+     * @param startDate optional parameter. If not null, we'll only look at transactions from or after this date
+     * @param endDate optional parameter. If not null, we'll only look at transactions from or after this date
+     * @return an ArrayList of transactions between the startDate and endDate if neither are null, after the
+     *      startDate if endDate is null, before the endDate if the startDate is null, or just all transactions
+     *      if both are null.
+     */
+    public ArrayList<Transaction> getTransactionsList(Calendar startDate, Calendar endDate){
+        if(permissionsCheckMember()) {
+            if(startDate != null && endDate != null){//we want to search transactions in a time frame
+                return eventsBetween(startDate, endDate);
+            }else if(startDate != null){//search all after startDate
+                return eventsAfter(startDate);
+            }else if(endDate != null){//search all before endDate
+                return eventsBefore(endDate);
+            }else {//dates not set, search all
+                return this.listOfTransactions;
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    /*
+     * A function we can use to display a pie chart . Returns a PieChart of string, double PieEntries,
+     * where the string is the category, and the double is the percentage of transactions in that category. We can also
+     * provide dates as parameters. Might add another function for different searches.
+     *
+     * @param startDate optional parameter. If not null, we'll only look at transactions from or after this date
+     * @param endDate optional parameter. If not null, we'll only look at transactions from or after this date
+     * @return a PieChart with category name, percentage of transactions in that category
+     */
+    public PieData pieChartByCategory(Calendar startDate, Calendar endDate){
+
+        PieData data = new PieData();
+        if(permissionsCheckMember()) {
+            List<PieEntry> entries = new ArrayList<>();
+
+            ArrayList<Transaction> currentTransactionsList = getTransactionsList(startDate, endDate);
+
+            double currCategoryEntries = 0;
+            //System.out.println(currentTransactionsList.size());
+            for (String c : getCategoriesInUse()) {
+                currCategoryEntries = 0;
+                for (Transaction t : currentTransactionsList) {
+                    if (t.getCategory() != null && t.getCategory() == c) currCategoryEntries++;
+                }
+                //System.out.println(currCategoryEntries/currentTransactionsList.size());
+                entries.add(new PieEntry((float) (currCategoryEntries / currentTransactionsList.size()), c));
+            }
+            PieDataSet set = new PieDataSet(entries, "");//don't think this label does anything
+
+            //but I can do colors here - will have to see how many entries we have first
+            set.setColors(Color.rgb(0, 0, 255), Color.rgb(0, 255, 0), Color.rgb(255, 0, 0), Color.rgb(255, 255, 0), Color.rgb(255, 0, 255));
+
+            set.setValueTextSize(16f);
+
+            data = new PieData(set);
+            data.setValueTextSize(16f);
+
+            //unfortunately there's a few things that need to be done on front end:
+            /*
+            com.github.mikephil.charting.charts.PieChart pieChart = findViewById(R.id.chart);//get from XML
+            pieChart.setData(data);//populate XML with this data
+            pieChart.setUsePercentValues(true);//use percentages
+            pieChart.setCenterText("Percent of Y-Values in Predefined Ranges");//set text - this does nothing when in the DataSet
+            pieChart.getDescription().setEnabled(false);//remove description from corner of screen
+             */
+        }
+        return data;
+
+
+    }
+
+    /*
+     * Another function for a pie chart, but done by cost. Will return PieChart with percentage of transactions less
+     * than or equal to each value in the provided array (and greater than the last chunk we looked at). If no array is
+     * provided, we'll do $10, $50, $100, $500, $1000 and >$1000 (i.e, 0-10, 10.01-50, ....).
+     *
+     * @param startDate optional parameter. If not null, we'll only look at transactions from or after this date
+     * @param endDate optional parameter. If not null, we'll only look at transactions from or after this date
+     * @param values optional parameter. An array of length n. Each element is a double, for a numerical value.
+     *      Function uses the array as the values to split the pie chart into. For elements 0 - n, we find all
+     *      transactions less than or equal to the value. Our return map will have n+1 entries, as we'll also return
+     *      the percentage of values greater than the last value.
+     * @return a PieChart with percentage of transactions within each range provided in values parameter
+     */
+    public PieData pieChartByCost(Calendar startDate, Calendar endDate, ArrayList<Double> values){
+        PieData data = new PieData();
+
+        if(permissionsCheckMember()) {
+
+            Map<String, Double> ret = new HashMap<>();
+
+            List<PieEntry> entries = new ArrayList<>();
+
+            ArrayList<Transaction> currentTransactionsList = getTransactionsList(startDate, endDate);
+            if (values == null) {
+                values = new ArrayList<>();
+                values.add(10.00);
+                values.add(50.00);
+                values.add(100.00);
+                values.add(500.00);
+                values.add(1000.00);
+            }
+            Collections.sort(values);
+            double currCategoryEntries = 0;
+            double prevValue = 0;
+            //System.out.println(currentTransactionsList.size());
+            for (Double currValue : values) {
+                currCategoryEntries = 0;
+                for (Transaction t : currentTransactionsList) {
+                    //System.out.println("prev: " + prevValue);
+                    //System.out.println("curr: " + currValue);
+                    if (t.getAmount() <= currValue && t.getAmount() > prevValue)
+                        currCategoryEntries++;
+                }
+                prevValue = currValue;
+                //System.out.println(currCategoryEntries/currentTransactionsList.size());
+                //ret.put("<= " + currValue.toString(), (double) (currCategoryEntries/currentTransactionsList.size()) );
+                entries.add(new PieEntry((float) (currCategoryEntries / currentTransactionsList.size()), "<= " + currValue.toString()));
+            }
+            //then the last value
+            currCategoryEntries = 0;
+            for (Transaction t : currentTransactionsList) {
+                //System.out.println(prevValue);
+                if (t.getAmount() > prevValue) currCategoryEntries++;
+            }
+            //System.out.println(currCategoryEntries/currentTransactionsList.size());
+            //ret.put("> "+prevValue, (double) (currCategoryEntries/currentTransactionsList.size()) );
+            entries.add(new PieEntry((float) (currCategoryEntries / currentTransactionsList.size()), "> " + prevValue));
+
+            PieDataSet set = new PieDataSet(entries, "");//don't think this label does anything
+
+            //but I can do colors here - will have to see how many entries we have first
+            set.setColors(Color.rgb(0, 0, 255), Color.rgb(0, 255, 0), Color.rgb(255, 0, 0), Color.rgb(255, 255, 0), Color.rgb(255, 0, 255));
+
+            set.setValueTextSize(16f);
+
+            data = new PieData(set);
+            data.setValueTextSize(16f);
+
+            //unfortunately there's a few things that need to be done on front end:
+            /*
+            com.github.mikephil.charting.charts.PieChart pieChart = findViewById(R.id.chart);//get from XML
+            pieChart.setData(data);//populate XML with this data
+            pieChart.setUsePercentValues(true);//use percentages
+            pieChart.setCenterText("Percent of Y-Values in Predefined Ranges");//set text - this does nothing when in the DataSet
+            pieChart.getDescription().setEnabled(false);//remove description from corner of screen
+             */
+
+        }
+        return data;
+    }
+
+    //Pending members cannot call any Budget functions (except for the static ones below)
+    //Users not in the group cannot call any Budget functions (except for the static ones below)
+    //these are 3 static helper functions that technically anyone can call
 
     /*
      * Providing intersection and union of 2 arraylists of transactions in case we need it (name X and amt y)
@@ -386,10 +894,10 @@ public class Budget {
      * @param list2 the second arraylist of transactions
      * @return intersection of list1 and list2 (all elements in both lists)
      */
-    public ArrayList<Transaction> transactionsIntersection(ArrayList<Transaction> list1, ArrayList<Transaction> list2){
+    public static ArrayList<Transaction> transactionsIntersection(ArrayList<Transaction> list1, ArrayList<Transaction> list2){
         ArrayList<Transaction> retList = new ArrayList<>();
-        for(Transaction t: list1){
-            if(list2.contains(t)) retList.add(t);
+        for (Transaction t : list1) {
+            if (list2.contains(t)) retList.add(t);
         }
         return retList;
     }
@@ -401,7 +909,7 @@ public class Budget {
      * @param list2 the second arraylist of transactions
      * @return union of list1 and list2 (elements in list1 or list2)
      */
-    public ArrayList<Transaction> transactionsUnion(ArrayList<Transaction> list1, ArrayList<Transaction> list2){
+    public static ArrayList<Transaction> transactionsUnion(ArrayList<Transaction> list1, ArrayList<Transaction> list2){
         ArrayList<Transaction> retList = new ArrayList<>();
         retList.addAll(list1);
         for(Transaction t: list2){
@@ -420,7 +928,7 @@ public class Budget {
      @param date the date to check for month and day
      @return date, with Dec 31st as the month and day if it was not previously set
      */
-    Calendar defineCalendar(Calendar date){
+    public static Calendar defineCalendar(Calendar date){
         //if day not defined, assume user wants month inclusive, set as 31st
         if(date.get(Calendar.DATE) == 0) date.set(Calendar.DATE, 31);
         //if month not defined, assume user wants year inclusive, set as December
@@ -429,398 +937,7 @@ public class Budget {
     }
 
 
-    /*
-     * First attempt to provide some sort of filtering rather than searching - all transactions from a time period/range
-     * I'd like to reuse the findTransaction functions, but ranges are somewhat different.
-     *
-     * Here, we take in a startDate and endDate, and return all transactions that took place on and between these dates.
-     * This uses the before and after methods provided by the calendar class.
-     *
-     * @param startDate date on which to start search
-     * @param endDate date on which to end search
-     * @return arraylist of all transactions that occurred on or between these dates
-     */
-    public ArrayList<Transaction> eventsBetween(Calendar startDate, Calendar endDate){
-        startDate = defineCalendar(startDate);
-        endDate = defineCalendar(endDate);
-        ArrayList<Transaction> ret = new ArrayList<>();
-        for(Transaction t: listOfTransactions){
-            if(t.getDateOfTransaction()!=null && ((t.getDateOfTransaction().equals(endDate))||(t.getDateOfTransaction().equals(startDate)) || (t.getDateOfTransaction().after(startDate) && t.getDateOfTransaction().before(endDate)))) {
-                ret.add(t);
-                //System.out.println(t.getDateOfTransaction());
-            }
-        }
-        return ret;
-    }
 
-    /*
-     * Like eventsBetween, but just all events after startDate.
-     *
-     * @param startDate date on which to start search
-     * @return arraylist of all transactions that occurred on or after startDate
-     */
-    public ArrayList<Transaction> eventsAfter(Calendar startDate){
-        startDate = defineCalendar(startDate);
-        ArrayList<Transaction> ret = new ArrayList<>();
-        for(Transaction t: listOfTransactions){
-            if(t.getDateOfTransaction()!=null && (t.getDateOfTransaction().equals(startDate) || t.getDateOfTransaction().after(startDate))) {
-                ret.add(t);
-                //System.out.println(t.getDateOfTransaction());
-            }
-        }
-        return ret;
-    }
-
-    /*
-     * Like eventsBetween, but just all events before endDate.
-     *
-     * @param endDate date on which to end search
-     * @return arraylist of all transactions that occurred on or before endDate
-     */
-    public ArrayList<Transaction> eventsBefore(Calendar endDate){
-        endDate = defineCalendar(endDate);
-        ArrayList<Transaction> ret = new ArrayList<>();
-        for(Transaction t: listOfTransactions){
-            if(t.getDateOfTransaction()!=null && (t.getDateOfTransaction().equals(endDate) || t.getDateOfTransaction().before(endDate))) {
-                ret.add(t);
-                //System.out.println(t.getDateOfTransaction());
-            }
-        }
-        return ret;
-    }
-
-    /*
-     * Another feature we can support is planned/future transactions. I was going to make a whole new system
-     * for this, but we can support by just adding normally, but with a date in the future. Then, getting
-     * future transactions is just calling eventsAfter(Today).
-     *
-     * @return all transactions in listOfTransactions that have a date after the current date.
-     */
-    public ArrayList<Transaction> getPlannedTransactions(){
-        return eventsAfter(Calendar.getInstance());
-    }
-
-    /*
-     * Use fundsSpentOverTime to get amount spent, could add extra stuff like X% in this category, etc. - probably will add next
-     * Can also do stuff with amountbefore and amountafter in each transaction, etc - will think about what's useful first
-     *
-     * Also need to figure out if making parameters Calendar class works for front end easily of if converting a string to a
-     * Calendar object would be easier
-     *
-     * Also works with just year provided - we set undefined month as December and undefined day to 31st, allowing inclusive search
-     *
-     * @param startDate date on which to start search
-     * @param endDate date on which to end search
-     * @return amount spent between these dates
-     */
-    public double fundsSpentOverTime(Calendar startDate, Calendar endDate){
-        ArrayList<Transaction> allTransactions;
-        allTransactions = eventsBetween(startDate, endDate);
-        double runningTotal = 0;
-        for(Transaction t: allTransactions) runningTotal+=t.getAmount();
-        return runningTotal;
-    }
-
-
-
-    /*
-     * Methods for sorting arraylist by different fields. Each works pretty much the same:
-     *  -declare a nested class that implements a Comparator for Transactions
-     *  -override compare function to compare what field we want
-     *  -call Collections.sort with arraylist and comparator we made
-     */
-
-
-    /*
-     * Sort by amount of transaction, low to high.
-     */
-    public void sortTransactionsLowToHigh(){
-        class SortByAmountLowToHigh implements Comparator<Transaction>{
-            @Override
-            public int compare(Transaction a, Transaction b){
-                //Integer.compare(((int) a.getAmount()), (int) b.getAmount()); //Requires API level 19
-                return Integer.valueOf((int)a.getAmount()).compareTo(Integer.valueOf((int) b.getAmount()));
-
-            }
-        }
-        SortByAmountLowToHigh amountComparator = new SortByAmountLowToHigh();
-        Collections.sort(listOfTransactions, amountComparator);
-    }
-
-    /*
-     * Sort by amount of transaction, high to low.
-     */
-    public void sortTransactionsHighToLow(){
-        class SortByAmountHighToLow implements Comparator<Transaction>{
-            @Override
-            public int compare(Transaction a, Transaction b){
-                //Integer.compare(((int) b.getAmount()), (int) a.getAmount()); //Requires API level 19
-                return Integer.valueOf((int)b.getAmount()).compareTo(Integer.valueOf((int) a.getAmount()));
-            }
-        }
-        SortByAmountHighToLow amountComparator = new SortByAmountHighToLow();
-        Collections.sort(listOfTransactions, amountComparator);
-    }
-
-    /*
-     * Sort by name of transaction, in alphabetical order.
-     */
-    public void sortTransactionsNameAlphabetical(){
-        class SortByNameAlphabetical implements Comparator<Transaction>{
-            @Override
-            public int compare(Transaction a, Transaction b){
-                return a.getName().compareTo(b.getName());
-            }
-        }
-        SortByNameAlphabetical amountComparator = new SortByNameAlphabetical();
-        Collections.sort(listOfTransactions, amountComparator);
-    }
-
-    /*
-     * Sort by name of transaction, in reverse alphabetical order.
-     */
-    public void sortTransactionsNameReverseAlphabetical(){
-        class SortByNameReverseAlphabetical implements Comparator<Transaction>{
-            @Override
-            public int compare(Transaction a, Transaction b){
-                return b.getName().compareTo(a.getName());
-            }
-        }
-        SortByNameReverseAlphabetical amountComparator = new SortByNameReverseAlphabetical();
-        Collections.sort(listOfTransactions, amountComparator);
-    }
-
-    /* Now some optional ones - requires checking null
-     * I will treat null as undefined/empty, so it will always come last (after the sorted/valid stuff)
-     * For example in alphabetical order: A, B, null, null
-     * In reverse alphabetical order: B, A, null
-     * Although in both of those example the user will probably see a blank space/empty string rather than the word null.
-     * I tested most of these but want to double check null always comes after.
-     *
-     * I'm also thinking about comparing by a required field when we have 2 nulls, but I haven't done that yet.
-     */
-
-    /*
-     * Sort by description in alphabetical order.
-     */
-    public void sortTransactionsDescriptionAlphabetical(){
-        //for(Transaction t: listOfTransactions) System.out.println(t.getDescription());
-        class SortByDescriptionAlphabetical implements Comparator<Transaction>{
-            @Override
-            public int compare(Transaction a, Transaction b){
-                //what worked for me so far is to compare by the empty string multiply by -1 to get all nulls after all sorted values
-                if(a.getDescription() == null) return -1 * "".compareTo(b.getDescription());
-                if(b.getDescription() == null) return -1 * a.getDescription().compareTo("");
-                return a.getDescription().compareTo(b.getDescription());
-            }
-        }
-        SortByDescriptionAlphabetical amountComparator = new SortByDescriptionAlphabetical();
-        Collections.sort(listOfTransactions, amountComparator);
-        //for(Transaction t: listOfTransactions) System.out.println(t.getDescription());
-    }
-
-    /*
-     * Sort by description in reverse alphabetical order.
-     */
-    public void sortTransactionsDescriptionReverseAlphabetical(){
-        //for(Transaction t: listOfTransactions) System.out.println(t.getDescription());
-        class SortByDescriptionReverseAlphabetical implements Comparator<Transaction>{
-            @Override
-            public int compare(Transaction a, Transaction b){
-                //same here, comparing with empty string will put nulls after everything else
-                if(a.getDescription() == null) return b.getDescription().compareTo("");
-                if(b.getDescription() == null) return "".compareTo(a.getDescription());
-                return b.getDescription().compareTo(a.getDescription());
-            }
-        }
-        SortByDescriptionReverseAlphabetical amountComparator = new SortByDescriptionReverseAlphabetical();
-        Collections.sort(listOfTransactions, amountComparator);
-        //for(Transaction t: listOfTransactions) System.out.println(t.getDescription());
-    }
-
-    /*
-     * Sort by date in order of old/past to new/future.
-     */
-    public void sortTransactionsDateOldToNew(){
-        class SortByDateOldToNew implements Comparator<Transaction>{
-            @Override
-            public int compare(Transaction a, Transaction b){
-                //was having an issue with null, so I'm making a calendar with 0 as the year and working with that, puts null after everything else
-                Calendar zero = new GregorianCalendar(0, 0, 0);
-                if(a.getDateOfTransaction() == null) return (-1) * zero.compareTo(b.getDateOfTransaction());
-                if(b.getDateOfTransaction() == null) return (-1) * a.getDateOfTransaction().compareTo(zero);
-                return a.getDateOfTransaction().compareTo(b.getDateOfTransaction());
-            }
-        }
-        SortByDateOldToNew amountComparator = new SortByDateOldToNew();
-        Collections.sort(listOfTransactions, amountComparator);
-    }
-
-    /*
-     * Sort by date in order of new/future to old/past.
-     */
-    public void sortTransactionsDateNewToOld(){
-        class SortByDateNewToOld implements Comparator<Transaction>{
-            @Override
-            public int compare(Transaction a, Transaction b){
-                //same as above, year 0 gives null after everything else (assuming we have no transactions from 0)
-                Calendar zero = new GregorianCalendar(0, 0, 0);
-                if(a.getDateOfTransaction() == null) return b.getDateOfTransaction().compareTo(zero);
-                if(b.getDateOfTransaction() == null) return zero.compareTo(a.getDateOfTransaction());
-                return b.getDateOfTransaction().compareTo(a.getDateOfTransaction());
-            }
-        }
-        SortByDateNewToOld amountComparator = new SortByDateNewToOld();
-        Collections.sort(listOfTransactions, amountComparator);
-    }
-
-
-    /*
-     * Find all transactions between 2 dates, where either or both of them may be null or missing info.
-     * Used in the breakdown functions below.
-     *
-     * @param startDate optional parameter. If not null, we'll only look at transactions from or after this date
-     * @param endDate optional parameter. If not null, we'll only look at transactions from or after this date
-     * @return an ArrayList of transactions between the startDate and endDate if neither are null, after the
-     *      startDate if endDate is null, before the endDate if the startDate is null, or just all transactions
-     *      if both are null.
-     */
-    public ArrayList<Transaction> getTransactionsList(Calendar startDate, Calendar endDate){
-        if(startDate != null && endDate != null){//we want to search transactions in a time frame
-            return eventsBetween(startDate, endDate);
-        }else if(startDate != null){//search all after startDate
-            return eventsAfter(startDate);
-        }else if(endDate != null){//search all before endDate
-            return eventsBefore(endDate);
-        }else{//dates not set, search all
-            return this.listOfTransactions;
-        }
-    }
-
-    /*
-     * A function we can use to display a pie chart . Returns a PieChart of string, double PieEntries,
-     * where the string is the category, and the double is the percentage of transactions in that category. We can also
-     * provide dates as parameters. Might add another function for different searches.
-     *
-     * @param startDate optional parameter. If not null, we'll only look at transactions from or after this date
-     * @param endDate optional parameter. If not null, we'll only look at transactions from or after this date
-     * @return a PieChart with category name, percentage of transactions in that category
-     */
-    public PieData pieChartByCategory(Calendar startDate, Calendar endDate){
-        List<PieEntry> entries = new ArrayList<>();
-
-        ArrayList<Transaction> currentTransactionsList = getTransactionsList(startDate, endDate);
-
-        double currCategoryEntries=0;
-        //System.out.println(currentTransactionsList.size());
-        for(String c: getCategoriesInUse()){
-            currCategoryEntries = 0;
-            for(Transaction t: currentTransactionsList){
-                if(t.getCategory() != null && t.getCategory() == c) currCategoryEntries++;
-            }
-            //System.out.println(currCategoryEntries/currentTransactionsList.size());
-            entries.add(new PieEntry((float) (currCategoryEntries/currentTransactionsList.size()), c));
-        }
-        PieDataSet set = new PieDataSet(entries, "");//don't think this label does anything
-
-        //but I can do colors here - will have to see how many entries we have first
-        set.setColors(Color.rgb(0,0,255), Color.rgb(0,255,0), Color.rgb(255,0,0), Color.rgb(255,255,0), Color.rgb(255,0,255));
-
-        set.setValueTextSize(16f);
-
-        PieData data = new PieData(set);
-        data.setValueTextSize(16f);
-
-        //unfortunately there's a few things that need to be done on front end:
-        /*
-        com.github.mikephil.charting.charts.PieChart pieChart = findViewById(R.id.chart);//get from XML
-        pieChart.setData(data);//populate XML with this data
-        pieChart.setUsePercentValues(true);//use percentages
-        pieChart.setCenterText("Percent of Y-Values in Predefined Ranges");//set text - this does nothing when in the DataSet
-        pieChart.getDescription().setEnabled(false);//remove description from corner of screen
-         */
-
-        return data;
-    }
-
-    /*
-     * Another function for a pie chart, but done by cost. Will return PieChart with percentage of transactions less
-     * than or equal to each value in the provided array (and greater than the last chunk we looked at). If no array is
-     * provided, we'll do $10, $50, $100, $500, $1000 and >$1000 (i.e, 0-10, 10.01-50, ....).
-     *
-     * @param startDate optional parameter. If not null, we'll only look at transactions from or after this date
-     * @param endDate optional parameter. If not null, we'll only look at transactions from or after this date
-     * @param values optional parameter. An array of length n. Each element is a double, for a numerical value.
-     *      Function uses the array as the values to split the pie chart into. For elements 0 - n, we find all
-     *      transactions less than or equal to the value. Our return map will have n+1 entries, as we'll also return
-     *      the percentage of values greater than the last value.
-     * @return a PieChart with percentage of transactions within each range provided in values parameter
-     */
-    public PieData pieChartByCost(Calendar startDate, Calendar endDate, ArrayList<Double> values){
-        Map<String, Double> ret = new HashMap<>();
-
-        List<PieEntry> entries = new ArrayList<>();
-
-        ArrayList<Transaction> currentTransactionsList = getTransactionsList(startDate, endDate);
-        if(values == null){
-            values = new ArrayList<>();
-            values.add(10.00);
-            values.add(50.00);
-            values.add(100.00);
-            values.add(500.00);
-            values.add(1000.00);
-        }
-        Collections.sort(values);
-        double currCategoryEntries=0;
-        double prevValue = 0;
-        //System.out.println(currentTransactionsList.size());
-        for(Double currValue : values){
-            currCategoryEntries = 0;
-            for(Transaction t: currentTransactionsList) {
-                //System.out.println("prev: " + prevValue);
-                //System.out.println("curr: " + currValue);
-                if (t.getAmount() <= currValue && t.getAmount() > prevValue) currCategoryEntries++;
-            }
-            prevValue = currValue;
-            //System.out.println(currCategoryEntries/currentTransactionsList.size());
-            //ret.put("<= " + currValue.toString(), (double) (currCategoryEntries/currentTransactionsList.size()) );
-            entries.add(new PieEntry((float) (currCategoryEntries/currentTransactionsList.size()), "<= " + currValue.toString()));
-        }
-        //then the last value
-        currCategoryEntries = 0;
-        for(Transaction t: currentTransactionsList) {
-            //System.out.println(prevValue);
-            if (t.getAmount() > prevValue) currCategoryEntries++;
-        }
-        //System.out.println(currCategoryEntries/currentTransactionsList.size());
-        //ret.put("> "+prevValue, (double) (currCategoryEntries/currentTransactionsList.size()) );
-        entries.add(new PieEntry((float) (currCategoryEntries/currentTransactionsList.size()), "> "+prevValue));
-
-        PieDataSet set = new PieDataSet(entries, "");//don't think this label does anything
-
-        //but I can do colors here - will have to see how many entries we have first
-        set.setColors(Color.rgb(0,0,255), Color.rgb(0,255,0), Color.rgb(255,0,0), Color.rgb(255,255,0), Color.rgb(255,0,255));
-
-        set.setValueTextSize(16f);
-
-        PieData data = new PieData(set);
-        data.setValueTextSize(16f);
-
-        //unfortunately there's a few things that need to be done on front end:
-        /*
-        com.github.mikephil.charting.charts.PieChart pieChart = findViewById(R.id.chart);//get from XML
-        pieChart.setData(data);//populate XML with this data
-        pieChart.setUsePercentValues(true);//use percentages
-        pieChart.setCenterText("Percent of Y-Values in Predefined Ranges");//set text - this does nothing when in the DataSet
-        pieChart.getDescription().setEnabled(false);//remove description from corner of screen
-         */
-
-
-        return data;
-    }
-
-    //Pending members cannot call any Budget functions
-    //Users not in the group cannot call any Budget functions
 
 
 }
