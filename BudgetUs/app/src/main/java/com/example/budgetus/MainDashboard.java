@@ -21,6 +21,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Map;
 
 public class MainDashboard extends AppCompatActivity {
@@ -146,7 +147,7 @@ public class MainDashboard extends AppCompatActivity {
 
         final ArrayList<Group> groups = new ArrayList<>();//temporary, should store in User object
 
-        for (Map.Entry<String, Role> entry : groupsAndRoles.entrySet()) {
+        for (final Map.Entry<String, Role> entry : groupsAndRoles.entrySet()) {
             database.child(entry.getKey()).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
 
                 @Override
@@ -154,9 +155,16 @@ public class MainDashboard extends AppCompatActivity {
                     if (!task.isSuccessful()) {
                         Log.e("firebase", "Error getting data", task.getException());
                     } else {
-                        Group group = task.getResult().getValue(Group.class);
-                        groups.add(group);
+                        Group group = task.getResult().getValue(Group.class);//load the group and all its info (including Budget)
                         //so now we need an actual Groups field in User, or somewhere to store this
+                        //using this arraylist for now
+                        groups.add(group);
+                        group.getGroupBudget().setContext(MainDashboard.this);//used for toasts
+                        group.getGroupBudget().setRole(entry.getValue()); //set the role, maybe come up with something better
+                        //loading a group automatically loads the budget info, so I don't really need the constructor anymore, which is why I'm using this setter
+                        //little test:
+                        System.out.println(group.getGroupBudget().getListOfTransactions().get(0).toString());//this is allowed, I'm a member
+                        group.getGroupBudget().addTransaction(1000, "invalid test", null, "testing role permissions", Calendar.getInstance(), null);//this is not allowed, toast pops up and nothing happens
                         if(currentEntry[0] == size-1){//once we're done loading
                             setGroups(groups);//we can call the function to display group info
                             //by calling here, we ensure we don't get a null pointer exception by trying to work with group data before its been loaded

@@ -44,19 +44,11 @@ public class Budget {
     private Role callingUserRole;
     Context c;
 
-
-    //I'm still testing these
-    //I don't know who could call them
-    public void saveToDB(){
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("matt budget test/budget1");
-        for(Transaction t: getListOfTransactions()){
-            t.setDateOfTransaction(null);
-            String id = databaseReference.push().getKey();
-            databaseReference.child(id).setValue(t);
-        }
-    }
-
+    //this is code for loading a Budget from anywhere
+    //took some thinking because the call is async
+    //so it uses this listener, and there's an example below
+    //however, loading a group loads a budget, and we do that once signing in, and only use data once loaded
+    //so we probably don't need this
 
     //https://stackoverflow.com/questions/30659569/wait-until-firebase-retrieves-data
     //answer by rusty1996
@@ -65,16 +57,6 @@ public class Budget {
         void onSuccess(Budget budget);
     }
 
-
-    //have to figure out where this would be called
-    //probably
-    // -sign in, pull list of groups from user
-    // -pull all group data for every group, make local object (need for real names to display)
-    // -click on group
-    // -call this function to return a fully functioning Budget object for the current group
-    //or loading all groups will automatically load their budgets
-    //i.e. look at what I'm doing here - I work with the group, budget info automatically pulled
-    //as long as I save all info we need in DB, load shouldn't need extra code
 
     /* example of how to use this right now:
 
@@ -89,21 +71,7 @@ public class Budget {
 
         //System.out.println(b[0].findTransaction(100).get(0).toString()); // this causes a null pointer exception - i.e. back to where we started
 
-        //so we kinda need this all the way up
-        //user logs in
-        //we call method to load their info
-        //as well as all of their groups and those group's budgets
-        //then we have all of it ready to go, onSuccess redisplay home screen post-login
-        //or we can do it later, at a group-by-group basis
-        //but this requires the front-end to work a bit differently
-        //--on create, make budget/group, call load
-        //--on load success, call rest of functions to set up display and values and whatnot
-        //I will decide/think of pros and cons, but this interface or something like it is the way to go
-
-
      */
-
-
 
     public static void loadFromDB(String groupID, final OnGetDataListener listener){
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
@@ -128,11 +96,29 @@ public class Budget {
 
 
 
-    //The following functions can be called by the Admin/Owner (same as e-board)
-    //The following functions can be called by the E-Board/Members with permissions
+    //The following functions can be called by the Admin and Owners
     //mostly adding/modifying transactions, making a new budget, etc.
 
 
+    /*
+     * This will save data to the DB. Only admin/owner can call. Will be called from front-end, where we'll have all
+     * of the user's groups and their IDs to pass to this function.
+     */
+    public void saveToDB(String groupID){
+        if(permissionsCheckAdminOwner()) {
+            DatabaseReference database = FirebaseDatabase.getInstance().getReference("groups");
+            //will find a better way for this - problem is that this writes a ton of data we don't need, so I null it out and just write MM/DD/YYYY in a different var
+            //then use that var to restore
+            for (Transaction t : getListOfTransactions()) {
+                t.setDateOfTransaction(null);
+            }
+            database.child(groupID + "/groupBudget").setValue(this);//save current budget object to DB (overwrites what was there)
+        }
+    }
+
+
+    //this constructor may be unnecessary, as loading a group implicitly creates a Budget with the default constructor. Currently, I just set the role and context after.
+    //however, we'll still want one with startingFunds as a parameter for when the group actually makes a Budget (or use another setter)
     /*
      *  Constructor requires startingFunds as well as a context (needed for a bitmap function in Transaction, so it gets passed there)
      */
@@ -146,10 +132,20 @@ public class Budget {
         }
     }
 
+    public void setRole(Role r){
+        this.callingUserRole = r;
+    }
+
+    public void setContext(Context c) {
+        this.c = c;
+    }
+
+
     public boolean permissionsCheckAdminOwner(){
         if(callingUserRole == Role.ADMIN || callingUserRole == Role.OWNER) {
             return true;
         }else{
+            System.out.println("false");
             Toast.makeText(this.c, "invalid permissions", Toast.LENGTH_LONG).show();
             return false;
         }
